@@ -53,8 +53,13 @@ function validate(body) {
   if (!['ath_movil','credit_card'].includes(body.payment_method)) {
     return 'Invalid payment_method. Must be ath_movil or credit_card.';
   }
-  if (![14900, 17900].includes(Number(body.total_amount))) {
-    return 'Invalid total_amount. Must be 14900 or 17900 (cents).';
+  if (![17500, 20000].includes(Number(body.total_amount))) {
+    return 'Invalid total_amount. Must be 17500 or 20000 (cents).';
+  }
+  if (body.payment_method === 'credit_card') {
+    if (!body.stripe_customer_id || !body.stripe_payment_method_id) {
+      return 'Missing Stripe IDs for credit_card payment.';
+    }
   }
   return null;
 }
@@ -145,11 +150,13 @@ exports.handler = async (event) => {
       task_2:              body.task_2,
       booking_date:        body.booking_date,
       booking_time:        body.booking_time,
-      payment_method:      body.payment_method,
-      materials_requested: body.materials_requested || false,
-      materials_detail:    body.materials_detail    || null,
-      total_amount:        Number(body.total_amount),
-      notes:               body.notes               || null,
+      payment_method:           body.payment_method,
+      materials_requested:      body.materials_requested || false,
+      materials_detail:         body.materials_detail    || null,
+      total_amount:             Number(body.total_amount),
+      notes:                    body.notes               || null,
+      stripe_customer_id:       body.stripe_customer_id       || null,
+      stripe_payment_method_id: body.stripe_payment_method_id || null,
     });
   if (dbError) {
     console.error('Supabase insert error:', dbError);

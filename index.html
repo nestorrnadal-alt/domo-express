@@ -368,6 +368,27 @@
     .pay-option.selected { border-color: var(--blue); background: var(--bluelt); }
     .pay-option.selected .pay-name { color: var(--blue); }
 
+    /* ── Stripe card element ── */
+    .card-wrap { margin-top: 14px; }
+    .card-wrap .card-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .stripe-element {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: var(--white);
+      transition: border-color .15s;
+    }
+    .stripe-element.StripeElement--focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(54,82,165,.1); }
+    .stripe-element.StripeElement--invalid { border-color: var(--red); }
+    .card-hint  { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    .card-error { font-size: 12px; color: var(--red); margin-top: 6px; min-height: 16px; }
+
     /* ── Materials toggle ── */
     .materials-row {
       border: 1.5px solid var(--border);
@@ -740,6 +761,14 @@
         </div>
       </div>
 
+      <!-- Stripe card collection (shown only when 'Tarjeta' is selected) -->
+      <div class="card-wrap" id="cardWrap" style="display:none;">
+        <label class="card-label">Datos de la tarjeta</label>
+        <div id="cardElement" class="stripe-element"></div>
+        <div class="card-hint">Guardamos tu tarjeta de forma segura con Stripe. Se cobra después del servicio.</div>
+        <div class="card-error" id="cardError"></div>
+      </div>
+
       <!-- Materials -->
       <div class="materials-row" id="materialsRow" onclick="toggleMaterials()">
         <div class="materials-toggle">
@@ -848,9 +877,17 @@
 
 </div><!-- /page -->
 
+<script src="https://js.stripe.com/v3/"></script>
 <script>
 // ── Configuration ──────────────────────────────────────────────
-const API_URL = '/api/book';   // Netlify function endpoint
+const API_URL          = '/api/book';
+const CONFIG_URL       = '/api/config';
+const SETUP_INTENT_URL = '/api/setup-intent';
+
+// Lazily-initialized Stripe state
+let stripeInstance = null;
+let cardElement    = null;
+let stripeReady    = false;
 
 // ── Task menu (per Product Brief, Section 4) ──────────────────
 const TASK_CATEGORIES = [
@@ -1070,6 +1107,45 @@ function selectPay(el) {
   document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   state.paymentMethod = el.dataset.pay;
+
+  const wantsCard = state.paymentMethod === 'credit_card';
+  document.getElementById('cardWrap').style.display = wantsCard ? 'block' : 'none';
+  if (wantsCard) {
+    initStripeIfNeeded().catch(err => {
+      console.error('Stripe init failed', err);
+      document.getElementById('cardError').textContent =
+        'No pudimos cargar el formulario de tarjeta. Intenta de nuevo o elige ATH Móvil.';
+    });
+  }
+}
+
+async function initStripeIfNeeded() {
+  if (stripeReady) return;
+  if (typeof Stripe === 'undefined') throw new Error('Stripe.js not loaded');
+
+  const res = await fetch(CONFIG_URL);
+  if (!res.ok) throw new Error('Could not fetch config');
+  const cfg = await res.json();
+  if (!cfg.stripePublishableKey) throw new Error('Stripe is not configured');
+
+  stripeInstance = Stripe(cfg.stripePublishableKey);
+  const elements = stripeInstance.elements();
+  cardElement = elements.create('card', {
+    style: {
+      base: {
+        fontSize: '15px',
+        color: '#142543',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        '::placeholder': { color: '#B0BACE' },
+      },
+      invalid: { color: '#C0392B' },
+    },
+  });
+  cardElement.mount('#cardElement');
+  cardElement.on('change', e => {
+    document.getElementById('cardError').textContent = e.error ? e.error.message : '';
+  });
+  stripeReady = true;
 }
 
 function toggleMaterials() {
@@ -1232,6 +1308,43 @@ async function submitBooking() {
   };
 
   try {
+    if (state.paymentMethod === 'credit_card') {
+      if (!stripeReady || !cardElement) {
+        throw new Error('El formulario de tarjeta no está listo. Vuelve al paso anterior e intenta de nuevo.');
+      }
+
+      const intentRes = await fetch(SETUP_INTENT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name:  state.customerName,
+          customer_phone: state.customerPhone,
+          customer_email: state.customerEmail,
+        }),
+      });
+      const intentData = await intentRes.json();
+      if (!intentRes.ok) {
+        throw new Error(intentData.error || `Error ${intentRes.status}`);
+      }
+
+      const setupResult = await stripeInstance.confirmCardSetup(intentData.client_secret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: {
+            name:  state.customerName,
+            email: state.customerEmail,
+            phone: state.customerPhone,
+          },
+        },
+      });
+      if (setupResult.error) {
+        throw new Error(setupResult.error.message || 'No pudimos guardar la tarjeta.');
+      }
+
+      payload.stripe_customer_id       = intentData.customer_id;
+      payload.stripe_payment_method_id = setupResult.setupIntent.payment_method;
+    }
+
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1253,8 +1366,7 @@ async function submitBooking() {
   } catch (err) {
     document.getElementById('loadingOverlay').classList.remove('visible');
     document.getElementById('btnSubmit').disabled = false;
-    showErr(4, `No pudimos procesar tu reservación: ${err.message}. Por favor intenta de nuevo o llama al (787) 419-0300.`);
-    document.getElementById('err4').classList.add('visible');
+    showErr(5, `No pudimos procesar tu reservación: ${err.message}. Por favor intenta de nuevo o llama al (787) 419-0300.`);
   }
 }
 
@@ -1284,6 +1396,9 @@ function resetForm() {
   document.getElementById('matToggle').textContent = '';
   document.getElementById('materialsDetailWrap').style.display = 'none';
   document.getElementById('prMatRow').style.display = 'none';
+  document.getElementById('cardWrap').style.display = 'none';
+  document.getElementById('cardError').textContent = '';
+  if (cardElement) cardElement.clear();
   updatePrice();
 }
 </script>
