@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domo Express â Reserva tu handyman</title>
+  <meta name="description" content="Reserva 2 tareas de handyman en menos de 2 minutos. $149 tarifa fija. Sin sorpresas.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:  #142543;
+      --blue:  #3652A5;
+      --teal:  #8BD7D7;
+      --lime:  #D6E264;
+      --periwinkle: #80A2F9;
+      --bluelt: #EEF1FA;
+      --border: #D4DAF0;
+      --text:  #142543;
+      --muted: #6B7A99;
+      --bg:    #F4F6FC;
+      --white: #FFFFFF;
+      --red:   #C0392B;
+      --green: #1A7A4A;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ââ Layout ââ */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px 48px;
+    }
+
+    /* ââ Header ââ */
+    .site-header {
+      width: 100%;
+      background: var(--navy);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .site-header .logo-mark {
+      width: 32px; height: 32px;
+      background: var(--periwinkle);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 16px; color: var(--white);
+    }
+    .site-header .brand { color: var(--white); font-weight: 700; font-size: 18px; }
+    .site-header .badge {
+      margin-left: 4px;
+      background: var(--periwinkle);
+      color: var(--white);
+      font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px;
+      letter-spacing: .06em; text-transform: uppercase;
+    }
+
+    /* ââ Card ââ */
+    .card {
+      width: 100%; max-width: 540px;
+      background: var(--white);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(20,37,67,.08);
+    }
+
+    /* ââ Progress bar ââ */
+    .progress-wrap {
+      background: var(--navy);
+      padding: 20px 28px 0;
+    }
+    .progress-label {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px;
+    }
+    .progress-label .step-title { color: var(--white); font-weight: 600; font-size: 15px; }
+    .progress-label .step-count { color: var(--periwinkle); font-size: 12px; font-weight: 600; }
+    .progress-track {
+      height: 4px; background: rgba(255,255,255,.2); border-radius: 2px;
+    }
+    .progress-fill {
+      height: 4px; background: var(--periwinkle); border-radius: 2px;
+      transition: width .35s ease;
+    }
+    .progress-steps {
+      display: flex; gap: 0;
+      margin-top: 12px;
+    }
+    .progress-step {
+      flex: 1; text-align: center;
+      padding: 10px 4px;
+      font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,.45);
+      cursor: pointer;
+      transition: color .2s;
+      position: relative;
+    }
+    .progress-step::after {
+      content: '';
+      position: absolute; bottom: 0; left: 10%; right: 10%;
+      height: 2px; background: transparent;
+      transition: background .2s;
+    }
+    .progress-step.active { color: var(--white); }
+    .progress-step.active::after { background: var(--periwinkle); }
+    .progress-step.done { color: rgba(255,255,255,.7); }
+
+    /* ââ Step panels ââ */
+    .step-panel { display: none; padding: 28px 28px 24px; }
+    .step-panel.visible { display: block; }
+
+    .step-intro {
+      margin-bottom: 22px;
+    }
+    .step-intro h2 { font-size: 20px; font-weight: 700; color: var(--navy); line-height: 1.3; }
+    .step-intro p { margin-top: 6px; font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+    /* ââ Task grid ââ */
+    .task-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .task-chip {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px; font-weight: 500;
+      color: var(--navy);
+      background: var(--white);
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+      line-height: 1.3;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .task-chip .chip-icon { font-size: 18px; flex-shrink: 0; }
+    .task-chip:hover { border-color: var(--blue); background: var(--bluelt); }
+    .task-chip.selected {
+      border-color: var(--blue);
+      background: var(--bluelt);
+      font-weight: 600;
+      color: var(--blue);
+    }
+    .task-chip.selected .chip-icon::after { content: ' â'; font-size: 12px; }
+    .task-chip.disabled { opacity: .45; cursor: not-allowed; }
+    .task-chip.disabled:hover { border-color: var(--border); background: var(--white); }
+
+    .task-other {
+      grid-column: 1 / -1;
+    }
+
+    .selection-note {
+      margin-top: 12px;
+      font-size: 12px; color: var(--muted);
+      text-align: center;
+    }
+    .selection-note span { color: var(--blue); font-weight: 600; }
+
+    /* ââ Date picker ââ */
+    .date-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .date-chip {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+    }
+    .date-chip .day-name { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .date-chip .day-num  { font-size: 18px; font-weight: 700; color: var(--navy); margin-top: 2px; }
+    .date-chip .day-mo   { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    .date-chip:hover { border-color: var(--blue); background: var(--bluelt); }
+    .date-chip.selected { border-color: var(--blue); background: var(--bluelt); }
+    .date-chip.selected .day-num { color: var(--blue); }
+
+    /* ââ Time grid ââ */
+    .time-section-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 16px 0 8px; }
+    .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
+    .time-chip {
+      border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 10px;
+      text-align: center; font-size: 13px; font-weight: 600;
+      color: var(--navy); cursor: pointer;
+      transition: all .15s;
+    }
+    .time-chip:hover { border-color: var(--blue); background: var(--bluelt); }
+    .time-chip.selected { border-color: var(--blue); background: var(--bluelt); color: var(--blue); }
+
+    /* ââ Form fields ââ */
+    .field-group { margin-bottom: 16px; }
+    .field-group label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+    .field-group input, .field-group textarea, .field-group select {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: var(--navy);
+      background: var(--white);
+      outline: none;
+      transition: border-color .15s;
+      font-family: inherit;
+    }
+    .field-group input:focus, .field-group textarea:focus, .field-group select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(54,82,165,.1);
+    }
+    .field-group input::placeholder, .field-group textarea::placeholder { color: #B0BACE; }
+    .field-group textarea { resize: vertical; min-height: 70px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ââ Payment method ââ */
+    .pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pay-option {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all .15s;
+      text-align: center;
+    }
+    .pay-option .pay-icon { font-size: 28px; margin-bottom: 6px; }
+    .pay-option .pay-name { font-size: 13px; font-weight: 700; color: var(--navy); }
+    .pay-option .pay-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .pay-option:hover { border-color: var(--blue); background: var(--bluelt); }
+    .pay-option.selected { border-color: var(--blue); background: var(--bluelt); }
+    .pay-option.selected .pay-name { color: var(--blue); }
+
+    /* ââ Materials toggle ââ */
+    .materials-row {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: all .15s;
+      margin-top: 16px;
+    }
+    .materials-row:hover { border-color: var(--blue); background: var(--bluelt); }
+    .materials-row.selected { border-color: var(--blue); background: var(--bluelt); }
+    .materials-toggle { flex-shrink: 0; }
+    .toggle-box {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+    }
+    .materials-row.selected .toggle-box { background: var(--blue); border-color: var(--blue); color: white; font-size: 13px; }
+    .materials-info .mat-title { font-size: 13px; font-weight: 700; color: var(--navy); }
+    .materials-info .mat-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* ââ Pricing summary ââ */
+    .price-box {
+      background: var(--bluelt);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    .price-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 13px; }
+    .price-row .pr-label { color: var(--muted); }
+    .price-row .pr-val { font-weight: 600; color: var(--navy); }
+    .price-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+    .price-total { display: flex; justify-content: space-between; align-items: center; padding-top: 4px; }
+    .price-total .pt-label { font-weight: 700; color: var(--navy); font-size: 14px; }
+    .price-total .pt-val   { font-weight: 800; color: var(--blue); font-size: 20px; }
+    .price-note { font-size: 11px; color: var(--muted); margin-top: 8px; text-align: center; line-height: 1.5; }
+
+    /* ââ Review summary ââ */
+    .review-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .review-table td { padding: 9px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .review-table td:first-child { color: var(--muted); width: 38%; padding-right: 12px; }
+    .review-table td:last-child { font-weight: 600; color: var(--navy); }
+    .review-table tr:last-child td { border-bottom: none; }
+
+    .review-price {
+      margin-top: 16px;
+      background: var(--navy);
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .review-price .rp-label { color: rgba(255,255,255,.7); font-size: 13px; }
+    .review-price .rp-val   { color: var(--white); font-size: 22px; font-weight: 800; }
+
+    .review-note {
+      margin-top: 12px;
+      background: #FFF9E6;
+      border: 1px solid #F0D060;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px; color: #5A4500; line-height: 1.6;
+    }
+
+    /* ââ Buttons ââ */
+    .btn-row { display: flex; gap: 10px; margin-top: 24px; }
+    .btn-back {
+      flex: 0 0 auto;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 14px; font-weight: 600; color: var(--muted);
+      cursor: pointer; transition: all .15s;
+    }
+    .btn-back:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-next {
+      flex: 1;
+      background: var(--blue);
+      border: none;
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-size: 15px; font-weight: 700; color: var(--white);
+      cursor: pointer; transition: background .15s;
+    }
+    .btn-next:hover { background: var(--navy); }
+    .btn-next:disabled { background: #B0BACE; cursor: not-allowed; }
+
+    /* ââ Error ââ */
+    .field-error { font-size: 12px; color: var(--red); margin-top: 4px; }
+    .step-error  { background: #FEF0EE; border: 1px solid #F8B4AC; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--red); margin-bottom: 16px; display: none; }
+    .step-error.visible { display: block; }
+
+    /* ââ Loading overlay ââ */
+    .loading-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(20,37,67,.6);
+      z-index: 100;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+    }
+    .loading-overlay.visible { display: flex; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid rgba(255,255,255,.3);
+      border-top-color: var(--white);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    .loading-text { color: var(--white); font-size: 15px; font-weight: 600; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ââ Confirmation screen ââ */
+    #step-confirmation { display: none; }
+    #step-confirmation.visible { display: block; }
+
+    .confirm-header {
+      background: var(--navy);
+      padding: 28px;
+      text-align: center;
+    }
+    .confirm-check {
+      width: 56px; height: 56px;
+      background: var(--teal);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+      font-size: 26px;
+    }
+    .confirm-header h2 { color: var(--white); font-size: 22px; font-weight: 700; }
+    .confirm-header p  { color: rgba(255,255,255,.7); font-size: 14px; margin-top: 4px; }
+
+    .confirm-id-box {
+      background: var(--bluelt);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+    }
+    .confirm-id-box .cid-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+    .confirm-id-box .cid-value { font-size: 28px; font-weight: 800; color: var(--blue); margin-top: 2px; }
+
+    .confirm-body { padding: 24px 28px; }
+    .confirm-body p { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+
+    .confirm-steps {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .confirm-step {
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .cs-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--blue); color: var(--white);
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .cs-text { font-size: 13px; color: var(--navy); line-height: 1.5; }
+    .cs-text strong { font-weight: 700; }
+
+    .confirm-note {
+      margin-top: 20px;
+      background: #FFF9E6;
+      border: 1px solid #F0D060;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px; color: #5A4500; line-height: 1.6;
+    }
+
+    .btn-new {
+      display: block; width: 100%;
+      margin-top: 20px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 14px; font-weight: 600; color: var(--muted);
+      cursor: pointer; text-align: center;
+      transition: all .15s;
+    }
+    .btn-new:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* ââ Footer ââ */
+    .site-footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 12px; color: var(--muted);
+      line-height: 1.8;
+    }
+    .site-footer a { color: var(--blue); text-decoration: none; }
+
+    /* ââ Mobile ââ */
+    @media (max-width: 480px) {
+      .progress-step { font-size: 9px; }
+      .task-grid { grid-template-columns: 1fr 1fr; }
+      .date-grid { grid-template-columns: repeat(4, 1fr); }
+      .field-row { grid-template-columns: 1fr; }
+      .step-panel { padding: 20px 18px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Procesando tu reservaciÃ³nâ¦</div>
+</div>
+
+<div class="page">
+
+  <!-- Header -->
+  <header class="site-header" style="max-width:540px;border-radius:0 0 0 0;margin-bottom:24px;width:100%;">
+    <div class="logo-mark">D</div>
+    <span class="brand">Domo</span>
+    <span class="badge">Express</span>
+  </header>
+
+  <!-- Booking wizard card -->
+  <div class="card" id="bookingCard">
+
+    <!-- Progress -->
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span class="step-title" id="progressTitle">Elige tus tareas</span>
+        <span class="step-count" id="progressCount">Paso 1 de 4</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
+      <div class="progress-steps">
+        <div class="progress-step active" id="pstep1" onclick="goToStep(1)">Tareas</div>
+        <div class="progress-step" id="pstep2" onclick="goToStep(2)">Fecha y hora</div>
+        <div class="progress-step" id="pstep3" onclick="goToStep(3)">Tus datos</div>
+        <div class="progress-step" id="pstep4" onclick="goToStep(4)">Confirmar</div>
+      </div>
+    </div>
+
+    <!-- Step 1: Task selection -->
+    <div class="step-panel visible" id="step1">
+      <div class="step-intro">
+        <h2>Â¿QuÃ© necesitas resolver?</h2>
+        <p>Selecciona exactamente <strong>2 tareas</strong>. Tarifa fija â sin sorpresas.</p>
+      </div>
+      <div class="step-error" id="err1">Por favor selecciona 2 tareas para continuar.</div>
+
+      <div class="task-grid" id="taskGrid">
+        <!-- populated by JS -->
+      </div>
+
+      <p class="selection-note" id="selNote">Seleccionadas: <span id="selCount">0</span> de 2</p>
+
+      <div class="btn-row">
+        <button class="btn-next" onclick="nextStep(1)" id="btnNext1">Siguiente â</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Date & Time -->
+    <div class="step-panel" id="step2">
+      <div class="step-intro">
+        <h2>Â¿CuÃ¡ndo te viene bien?</h2>
+        <p>Disponibilidad para los prÃ³ximos 7 dÃ­as, sujeto a confirmaciÃ³n.</p>
+      </div>
+      <div class="step-error" id="err2">Por favor selecciona fecha y hora.</div>
+
+      <div class="date-grid" id="dateGrid"><!-- populated by JS --></div>
+
+      <div class="time-section-label">Hora preferida</div>
+      <div class="time-grid">
+        <div class="time-chip" data-time="8:00 AM" onclick="selectTime(this)">8:00 AM</div>
+        <div class="time-chip" data-time="9:00 AM" onclick="selectTime(this)">9:00 AM</div>
+        <div class="time-chip" data-time="10:00 AM" onclick="selectTime(this)">10:00 AM</div>
+        <div class="time-chip" data-time="11:00 AM" onclick="selectTime(this)">11:00 AM</div>
+        <div class="time-chip" data-time="1:00 PM" onclick="selectTime(this)">1:00 PM</div>
+        <div class="time-chip" data-time="2:00 PM" onclick="selectTime(this)">2:00 PM</div>
+        <div class="time-chip" data-time="3:00 PM" onclick="selectTime(this)">3:00 PM</div>
+        <div class="time-chip" data-time="4:00 PM" onclick="selectTime(this)">4:00 PM</div>
+        <div class="time-chip" data-time="Flexible" onclick="selectTime(this)">Flexible</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep(2)">â AtrÃ¡s</button>
+        <button class="btn-next" onclick="nextStep(2)">Siguiente â</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Customer info -->
+    <div class="step-panel" id="step3">
+      <div class="step-intro">
+        <h2>Tus datos de contacto</h2>
+        <p>Para confirmarte la reservaciÃ³n y coordinar la llegada del handyman.</p>
+      </div>
+      <div class="step-error" id="err3" id="err3"></div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label>Nombre</label>
+          <input type="text" id="fName" placeholder="MarÃ­a GarcÃ­a" autocomplete="given-name">
+        </div>
+        <div class="field-group">
+          <label>Apellido</label>
+          <input type="text" id="fLastName" placeholder="GarcÃ­a" autocomplete="family-name">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>TelÃ©fono</label>
+        <input type="tel" id="fPhone" placeholder="787-000-0000" autocomplete="tel">
+      </div>
+
+      <div class="field-group">
+        <label>Correo electrÃ³nico</label>
+        <input type="email" id="fEmail" placeholder="tu@correo.com" autocomplete="email">
+      </div>
+
+      <div class="field-group">
+        <label>DirecciÃ³n del servicio</label>
+        <input type="text" id="fAddress" placeholder="Calle, nÃºmero, urb. â Condado / Miramar / Santurce" autocomplete="street-address">
+      </div>
+
+      <div class="field-group">
+        <label>Pago</label>
+        <div class="pay-options">
+          <div class="pay-option" data-pay="ath_movil" onclick="selectPay(this)">
+            <div class="pay-icon">ð±</div>
+            <div class="pay-name">ATH MÃ³vil</div>
+            <div class="pay-sub">DespuÃ©s del servicio</div>
+          </div>
+          <div class="pay-option" data-pay="credit_card" onclick="selectPay(this)">
+            <div class="pay-icon">ð³</div>
+            <div class="pay-name">Tarjeta</div>
+            <div class="pay-sub">DespuÃ©s del servicio</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Materials -->
+      <div class="materials-row" id="materialsRow" onclick="toggleMaterials()">
+        <div class="materials-toggle">
+          <div class="toggle-box" id="matToggle"></div>
+        </div>
+        <div class="materials-info">
+          <div class="mat-title">Domo consigue los materiales (+$30)</div>
+          <div class="mat-sub">Materiales reembolsados al costo + tarifa de $30 por gestiÃ³n</div>
+        </div>
+      </div>
+
+      <div id="materialsDetailWrap" style="display:none;margin-top:10px;">
+        <div class="field-group" style="margin-bottom:0">
+          <label>Â¿QuÃ© materiales necesitas? (opcional)</label>
+          <textarea id="fMaterialsDetail" placeholder="Ej: tubo de cobre Â½&quot;, 2 galletas de paint Sherwin Williams blancoâ¦"></textarea>
+        </div>
+      </div>
+
+      <!-- Price box -->
+      <div class="price-box">
+        <div class="price-row"><span class="pr-label">Servicio Express (2 tareas)</span><span class="pr-val" id="prBase">$149</span></div>
+        <div id="prMatRow" class="price-row" style="display:none"><span class="pr-label">GestiÃ³n de materiales</span><span class="pr-val">$30</span></div>
+        <hr class="price-divider">
+        <div class="price-total">
+          <span class="pt-label">Total</span>
+          <span class="pt-val" id="prTotal">$149</span>
+        </div>
+        <div class="price-note" id="prNote">MÃ¡s materiales al costo si aplica. Se cobra despuÃ©s del servicio.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep(3)">â AtrÃ¡s</button>
+        <button class="btn-next" onclick="nextStep(3)">Revisar reservaciÃ³n â</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Review & confirm -->
+    <div class="step-panel" id="step4">
+      <div class="step-intro">
+        <h2>Revisa y confirma</h2>
+        <p>Verifica los detalles antes de enviar tu reservaciÃ³n.</p>
+      </div>
+      <div class="step-error" id="err4"></div>
+
+      <table class="review-table" id="reviewTable">
+        <!-- populated by JS -->
+      </table>
+
+      <div class="review-price">
+        <span class="rp-label">Total a pagar despuÃ©s del servicio</span>
+        <span class="rp-val" id="reviewTotal">$149</span>
+      </div>
+
+      <div class="review-note">
+        <strong>Recuerda:</strong> Si necesitas cancelar, hazlo con al menos 24 horas de anticipaciÃ³n. Cancela respondiendo tu email de confirmaciÃ³n o llamando al <strong>(787) 419-0300</strong>.
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep(4)">â Editar</button>
+        <button class="btn-next" onclick="submitBooking()" id="btnSubmit">Confirmar reservaciÃ³n â</button>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+
+  <!-- Confirmation screen (replaces card) -->
+  <div class="card" id="confirmCard" style="display:none;">
+    <div class="confirm-header">
+      <div class="confirm-check">â</div>
+      <h2>Â¡ReservaciÃ³n recibida!</h2>
+      <p>RecibirÃ¡s confirmaciÃ³n por correo electrÃ³nico</p>
+    </div>
+    <div class="confirm-id-box">
+      <div class="cid-label">NÃºmero de reservaciÃ³n</div>
+      <div class="cid-value" id="confirmId">EXP-XXXX</div>
+    </div>
+    <div class="confirm-body">
+      <p>Tu reservaciÃ³n estÃ¡ siendo procesada. El equipo de Domo la estÃ¡ revisando y recibirÃ¡s confirmaciÃ³n del handyman asignado y la hora exacta pronto.</p>
+      <div class="confirm-steps">
+        <div class="confirm-step">
+          <div class="cs-num">1</div>
+          <div class="cs-text"><strong>Email de confirmaciÃ³n</strong> enviado a tu correo con todos los detalles.</div>
+        </div>
+        <div class="confirm-step">
+          <div class="cs-num">2</div>
+          <div class="cs-text"><strong>El equipo de Domo confirma</strong> la disponibilidad y te asigna un handyman.</div>
+        </div>
+        <div class="confirm-step">
+          <div class="cs-num">3</div>
+          <div class="cs-text"><strong>El dÃ­a del servicio</strong>, el handyman llega y completa tus tareas.</div>
+        </div>
+        <div class="confirm-step">
+          <div class="cs-num">4</div>
+          <div class="cs-text"><strong>Pagas despuÃ©s del servicio</strong> â ATH MÃ³vil o tarjeta.</div>
+        </div>
+      </div>
+      <div class="confirm-note">
+        Â¿Preguntas? Llama al <strong>(787) 419-0300</strong> o escrÃ­benos a <strong>info@domoyourhome.com</strong>
+      </div>
+      <button class="btn-new" onclick="resetForm()">Hacer otra reservaciÃ³n</button>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div>Domo Â· San Juan, Puerto Rico</div>
+    <div><a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a> Â· <a href="tel:7874190300">(787) 419-0300</a></div>
+  </footer>
+
+</div><!-- /page -->
+
+<script>
+// ââ Configuration ââââââââââââââââââââââââââââââââââââââââââââââ
+const API_URL = '/api/book';   // Netlify function endpoint
+
+// ââ Task menu âââââââââââââââââââââââââââââââââââââââââââââââââ
+const TASKS = [
+  { id: 't1',  icon: 'ðº', label: 'Montaje de TV' },
+  { id: 't2',  icon: 'ð¡', label: 'InstalaciÃ³n de abanico de techo' },
+  { id: 't3',  icon: 'ð', label: 'InstalaciÃ³n de lÃ¡mpara o accesorio de luz' },
+  { id: 't4',  icon: 'ð¿', label: 'Cambio de pluma (cocina o baÃ±o)' },
+  { id: 't5',  icon: 'ðª', label: 'InstalaciÃ³n de cortina, persiana o shade' },
+  { id: 't6',  icon: 'ðï¸', label: 'Ensamblaje de mueble' },
+  { id: 't7',  icon: 'ðª', label: 'ReparaciÃ³n de puerta o cerradura' },
+  { id: 't8',  icon: 'ð¡', label: 'InstalaciÃ³n de ring / cÃ¡mara / timbre' },
+  { id: 't9',  icon: 'ð', label: 'Cambio de toma corriente o switch' },
+  { id: 't10', icon: 'ð¨', label: 'Touch-up de pintura (hasta 2 paredes)' },
+  { id: 't11', icon: 'ð¼ï¸', label: 'Anclaje de espejo, cuadro o repisa' },
+  { id: 't12', icon: 'ð½', label: 'InstalaciÃ³n de inodoro (fixture)' },
+  { id: 'tOther', icon: 'âï¸', label: 'Otra tarea (especifica abajo)', isOther: true },
+];
+
+// ââ State âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+const state = {
+  step: 1,
+  selectedTasks: [],     // array of task labels
+  otherTask: '',
+  selectedDate: null,    // { label, iso }
+  selectedTime: null,
+  customerName: '',
+  customerPhone: '',
+  customerEmail: '',
+  address: '',
+  paymentMethod: null,   // 'ath_movil' | 'credit_card'
+  materialsRequested: false,
+  materialsDetail: '',
+};
+
+// ââ Step config âââââââââââââââââââââââââââââââââââââââââââââââ
+const STEP_TITLES  = ['', 'Elige tus tareas', 'Fecha y hora', 'Tus datos', 'Confirmar'];
+const STEP_PERCENTS= [0,  25, 50, 75, 100];
+
+// ââ Init ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+(function init() {
+  renderTaskGrid();
+  renderDateGrid();
+})();
+
+function renderTaskGrid() {
+  const grid = document.getElementById('taskGrid');
+  grid.innerHTML = '';
+  TASKS.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'task-chip' + (t.isOther ? ' task-other' : '');
+    div.dataset.id = t.id;
+    div.innerHTML = `<span class="chip-icon">${t.icon}</span><span>${t.label}</span>`;
+    div.onclick = () => toggleTask(div, t);
+    grid.appendChild(div);
+
+    if (t.isOther) {
+      const inp = document.createElement('input');
+      inp.type = 'text'; inp.id = 'otherInput';
+      inp.placeholder = 'Describe la tarea adicionalâ¦';
+      inp.style.cssText = 'display:none;width:100%;margin-top:8px;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;font-family:inherit;outline:none;';
+      inp.oninput = () => { state.otherTask = inp.value; };
+      inp.onfocus = () => inp.style.borderColor = 'var(--blue)';
+      inp.onblur  = () => inp.style.borderColor = 'var(--border)';
+      grid.appendChild(inp);
+    }
+  });
+}
+
+function renderDateGrid() {
+  const grid = document.getElementById('dateGrid');
+  grid.innerHTML = '';
+  const dayNames = ['Dom','Lun','Mar','MiÃ©','Jue','Vie','SÃ¡b'];
+  const monthNames = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const longMonths = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const longDays   = ['domingo','lunes','martes','miÃ©rcoles','jueves','viernes','sÃ¡bado'];
+
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    const dayName  = dayNames[d.getDay()];
+    const dayNum   = d.getDate();
+    const monthShort = monthNames[d.getMonth()];
+    const label    = `${longDays[d.getDay()]}, ${dayNum} de ${longMonths[d.getMonth()]}`;
+    const iso      = d.toISOString().split('T')[0];
+
+    const div = document.createElement('div');
+    div.className = 'date-chip';
+    div.dataset.label = label;
+    div.dataset.iso   = iso;
+    div.innerHTML = `<div class="day-name">${dayName}</div><div class="day-num">${dayNum}</div><div class="day-mo">${monthShort}</div>`;
+    div.onclick = () => selectDate(div);
+    grid.appendChild(div);
+  }
+}
+
+// ââ Task toggle âââââââââââââââââââââââââââââââââââââââââââââââ
+function toggleTask(el, task) {
+  if (task.isOther) {
+    const isSelected = el.classList.contains('selected');
+    const inp = document.getElementById('otherInput');
+    if (isSelected) {
+      el.classList.remove('selected');
+      inp.style.display = 'none';
+      state.selectedTasks = state.selectedTasks.filter(t => t !== '__other__');
+    } else {
+      if (state.selectedTasks.length >= 2) return;
+      el.classList.add('selected');
+      inp.style.display = 'block';
+      inp.focus();
+      state.selectedTasks.push('__other__');
+    }
+    updateSelCount();
+    return;
+  }
+
+  if (el.classList.contains('selected')) {
+    el.classList.remove('selected');
+    state.selectedTasks = state.selectedTasks.filter(t => t !== task.label);
+  } else {
+    if (state.selectedTasks.filter(t => t !== '__other__').length >= 2 ||
+        (state.selectedTasks.length >= 2 && !state.selectedTasks.includes('__other__'))) {
+      // check combined
+      if (state.selectedTasks.length >= 2) return;
+    }
+    if (state.selectedTasks.length >= 2) return;
+    el.classList.add('selected');
+    state.selectedTasks.push(task.label);
+  }
+
+  // disable unchosen when 2 selected
+  document.querySelectorAll('.task-chip').forEach(c => {
+    if (!c.classList.contains('selected')) {
+      c.classList.toggle('disabled', state.selectedTasks.length >= 2);
+    }
+  });
+  updateSelCount();
+}
+
+function updateSelCount() {
+  document.getElementById('selCount').textContent = state.selectedTasks.length;
+}
+
+// ââ Date / time âââââââââââââââââââââââââââââââââââââââââââââââ
+function selectDate(el) {
+  document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.selectedDate = { label: el.dataset.label, iso: el.dataset.iso };
+}
+
+function selectTime(el) {
+  document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.selectedTime = el.dataset.time;
+}
+
+// ââ Payment & materials âââââââââââââââââââââââââââââââââââââââ
+function selectPay(el) {
+  document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  state.paymentMethod = el.dataset.pay;
+}
+
+function toggleMaterials() {
+  state.materialsRequested = !state.materialsRequested;
+  const row   = document.getElementById('materialsRow');
+  const tog   = document.getElementById('matToggle');
+  const detWr = document.getElementById('materialsDetailWrap');
+  const prMat = document.getElementById('prMatRow');
+
+  row.classList.toggle('selected', state.materialsRequested);
+  tog.textContent  = state.materialsRequested ? 'â' : '';
+  detWr.style.display = state.materialsRequested ? 'block' : 'none';
+  prMat.style.display = state.materialsRequested ? 'flex' : 'none';
+
+  updatePrice();
+}
+
+function updatePrice() {
+  const base  = 149;
+  const matFee = state.materialsRequested ? 30 : 0;
+  const total = base + matFee;
+  document.getElementById('prTotal').textContent = `$${total}`;
+  document.getElementById('reviewTotal').textContent = `$${total}`;
+}
+
+// ââ Navigation ââââââââââââââââââââââââââââââââââââââââââââââââ
+function goToStep(n) {
+  if (n > state.step) return; // can't skip forward
+  showStep(n);
+}
+
+function nextStep(from) {
+  if (!validateStep(from)) return;
+  showStep(from + 1);
+}
+
+function prevStep(from) {
+  showStep(from - 1);
+}
+
+function showStep(n) {
+  state.step = n;
+
+  // panels
+  document.querySelectorAll('.step-panel').forEach((p, i) => {
+    p.classList.toggle('visible', i + 1 === n);
+  });
+
+  // progress
+  document.getElementById('progressTitle').textContent = STEP_TITLES[n];
+  document.getElementById('progressCount').textContent = `Paso ${n} de 4`;
+  document.getElementById('progressFill').style.width = STEP_PERCENTS[n] + '%';
+
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`pstep${i}`);
+    el.classList.toggle('active', i === n);
+    el.classList.toggle('done', i < n);
+  }
+
+  if (n === 4) buildReview();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ââ Validation ââââââââââââââââââââââââââââââââââââââââââââââââ
+function validateStep(n) {
+  hideErr(n);
+  if (n === 1) {
+    if (state.selectedTasks.length < 2) { showErr(1, 'Por favor selecciona 2 tareas para continuar.'); return false; }
+    if (state.selectedTasks.includes('__other__') && !document.getElementById('otherInput').value.trim()) {
+      showErr(1, 'Por favor describe la tarea adicional.'); return false;
+    }
+    // save other
+    if (state.selectedTasks.includes('__other__')) {
+      const idx = state.selectedTasks.indexOf('__other__');
+      state.selectedTasks[idx] = document.getElementById('otherInput').value.trim();
+    }
+  }
+  if (n === 2) {
+    if (!state.selectedDate) { showErr(2, 'Por favor selecciona una fecha.'); return false; }
+    if (!state.selectedTime) { showErr(2, 'Por favor selecciona una hora.'); return false; }
+  }
+  if (n === 3) {
+    const name  = document.getElementById('fName').value.trim();
+    const last  = document.getElementById('fLastName').value.trim();
+    const phone = document.getElementById('fPhone').value.trim();
+    const email = document.getElementById('fEmail').value.trim();
+    const addr  = document.getElementById('fAddress').value.trim();
+    const pay   = state.paymentMethod;
+
+    if (!name)  { showErr(3, 'Por favor ingresa tu nombre.'); return false; }
+    if (!phone) { showErr(3, 'Por favor ingresa tu telÃ©fono.'); return false; }
+    if (!email || !email.includes('@')) { showErr(3, 'Por favor ingresa un correo electrÃ³nico vÃ¡lido.'); return false; }
+    if (!addr)  { showErr(3, 'Por favor ingresa la direcciÃ³n del servicio.'); return false; }
+    if (!pay)   { showErr(3, 'Por favor selecciona un mÃ©todo de pago.'); return false; }
+
+    state.customerName  = `${name} ${last}`.trim();
+    state.customerPhone = phone;
+    state.customerEmail = email;
+    state.address       = addr;
+    state.materialsDetail = document.getElementById('fMaterialsDetail')?.value?.trim() || '';
+  }
+  return true;
+}
+
+function showErr(n, msg) {
+  const el = document.getElementById(`err${n}`);
+  if (el) { el.textContent = msg; el.classList.add('visible'); }
+}
+function hideErr(n) {
+  const el = document.getElementById(`err${n}`);
+  if (el) el.classList.remove('visible');
+}
+
+// ââ Review table ââââââââââââââââââââââââââââââââââââââââââââââ
+function buildReview() {
+  const payLabel = state.paymentMethod === 'ath_movil' ? 'ATH MÃ³vil' : 'Tarjeta de crÃ©dito';
+  const matLabel = state.materialsRequested
+    ? `SÃ­ â Domo las consigue${state.materialsDetail ? ': ' + state.materialsDetail : ''}`
+    : 'No';
+
+  const rows = [
+    ['Tareas', `${state.selectedTasks[0]}<br>${state.selectedTasks[1]}`],
+    ['Fecha',  state.selectedDate?.label || ''],
+    ['Hora',   state.selectedTime || ''],
+    ['DirecciÃ³n', state.address],
+    ['Contacto', `${state.customerName}<br>${state.customerPhone}<br>${state.customerEmail}`],
+    ['Pago',   payLabel + ' â despuÃ©s del servicio'],
+    ['Materiales', matLabel],
+  ];
+
+  const tbody = document.getElementById('reviewTable');
+  tbody.innerHTML = rows.map(([l, v]) =>
+    `<tr><td>${l}</td><td>${v}</td></tr>`
+  ).join('');
+
+  updatePrice();
+}
+
+// ââ Submit ââââââââââââââââââââââââââââââââââââââââââââââââââââ
+async function submitBooking() {
+  document.getElementById('loadingOverlay').classList.add('visible');
+  document.getElementById('btnSubmit').disabled = true;
+
+  const base  = 14900;
+  const total = state.materialsRequested ? base + 3000 : base;
+
+  const payload = {
+    customer_name:       state.customerName,
+    customer_phone:      state.customerPhone,
+    customer_email:      state.customerEmail,
+    address:             state.address,
+    task_1:              state.selectedTasks[0],
+    task_2:              state.selectedTasks[1],
+    booking_date:        state.selectedDate?.label,
+    booking_time:        state.selectedTime,
+    payment_method:      state.paymentMethod,
+    materials_requested: state.materialsRequested,
+    materials_detail:    state.materialsDetail || null,
+    total_amount:        total,
+  };
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || `Error ${res.status}`);
+    }
+
+    // Success
+    document.getElementById('loadingOverlay').classList.remove('visible');
+    document.getElementById('bookingCard').style.display  = 'none';
+    document.getElementById('confirmCard').style.display  = 'block';
+    document.getElementById('confirmId').textContent = data.booking_id;
+
+  } catch (err) {
+    document.getElementById('loadingOverlay').classList.remove('visible');
+    document.getElementById('btnSubmit').disabled = false;
+    showErr(4, `No pudimos procesar tu reservaciÃ³n: ${err.message}. Por favor intenta de nuevo o llama al (787) 419-0300.`);
+    document.getElementById('err4').classList.add('visible');
+  }
+}
+
+// ââ Reset âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+function resetForm() {
+  Object.assign(state, {
+    step: 1, selectedTasks: [], otherTask: '',
+    selectedDate: null, selectedTime: null,
+    customerName: '', customerPhone: '', customerEmail: '',
+    address: '', paymentMethod: null,
+    materialsRequested: false, materialsDetail: '',
+  });
+  document.getElementById('confirmCard').style.display = 'none';
+  document.getElementById('bookingCard').style.display = 'block';
+  renderTaskGrid();
+  renderDateGrid();
+  showStep(1);
+  // clear form inputs
+  ['fName','fLastName','fPhone','fEmail','fAddress'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('fMaterialsDetail').value = '';
+  document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('materialsRow').classList.remove('selected');
+  document.getElementById('matToggle').textContent = '';
+  document.getElementById('materialsDetailWrap').style.display = 'none';
+  document.getElementById('prMatRow').style.display = 'none';
+  updatePrice();
+}
+</script>
+</body>
+</html>
