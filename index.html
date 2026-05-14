@@ -78,41 +78,60 @@
       box-shadow: 0 4px 24px rgba(20,37,67,.08);
     }
 
-    /* ── Progress bar ── */
-    .progress-wrap {
+    /* ── Step header (navy bar) ── */
+    .step-header {
       background: var(--navy);
-      padding: 20px 28px 0;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
-    .progress-label {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 10px;
+    .step-back {
+      background: transparent;
+      border: none;
+      color: var(--periwinkle);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 4px 4px 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
     }
-    .progress-label .step-title { color: var(--white); font-weight: 600; font-size: 15px; }
-    .progress-label .step-count { color: var(--periwinkle); font-size: 12px; font-weight: 600; }
-    .progress-track {
-      height: 4px; background: rgba(255,255,255,.2); border-radius: 2px;
+    .step-back:hover { color: var(--white); }
+    .step-back.hidden { visibility: hidden; }
+    .step-title-bar {
+      color: var(--white);
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.2;
     }
-    .progress-fill {
-      height: 4px; background: var(--periwinkle); border-radius: 2px;
-      transition: width .35s ease;
+
+    /* ── Dot indicator (white strip below header) ── */
+    .progress-dots-row {
+      display: flex;
+      justify-content: center;
+      padding: 14px 0 4px;
+      background: var(--white);
     }
     .progress-dots {
-      display: flex; justify-content: center; gap: 8px;
-      padding: 14px 0 18px;
+      display: flex;
+      gap: 8px;
     }
     .progress-dot {
       width: 8px; height: 8px;
       border-radius: 50%;
-      background: rgba(255,255,255,.25);
+      background: var(--border);
       cursor: pointer;
       transition: all .25s;
     }
     .progress-dot.active {
-      background: var(--periwinkle);
+      background: var(--blue);
       width: 24px;
       border-radius: 4px;
     }
-    .progress-dot.done { background: rgba(255,255,255,.55); }
+    .progress-dot.done { background: var(--periwinkle); }
 
     /* ── Step panels ── */
     .step-panel { display: none; padding: 28px 28px 24px; }
@@ -190,26 +209,51 @@
     .step-intro h2 { font-size: 20px; font-weight: 700; color: var(--navy); line-height: 1.3; }
     .step-intro p { margin-top: 6px; font-size: 14px; color: var(--muted); line-height: 1.5; }
 
-    /* ── Task grid ── */
-    .task-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+    /* ── Task counter bar ── */
+    .task-count-bar {
+      background: var(--bluelt);
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: var(--navy);
+      margin-bottom: 22px;
+    }
+    .task-count-bar .task-count-num {
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    /* ── Task categories ── */
+    .task-category { margin-bottom: 22px; }
+    .task-cat-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0 0 10px;
+    }
+    .task-cat-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
     .task-chip {
+      display: inline-flex;
+      align-items: center;
       border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 13px; font-weight: 500;
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-weight: 500;
       color: var(--navy);
       background: var(--white);
       cursor: pointer;
       transition: all .15s;
       user-select: none;
-      line-height: 1.3;
-      display: flex; align-items: center; gap: 8px;
+      line-height: 1.2;
     }
-    .task-chip .chip-icon { font-size: 18px; flex-shrink: 0; }
     .task-chip:hover { border-color: var(--blue); background: var(--bluelt); }
     .task-chip.selected {
       border-color: var(--blue);
@@ -217,20 +261,36 @@
       font-weight: 600;
       color: var(--blue);
     }
-    .task-chip.selected .chip-icon::after { content: ' ✓'; font-size: 12px; }
     .task-chip.disabled { opacity: .45; cursor: not-allowed; }
     .task-chip.disabled:hover { border-color: var(--border); background: var(--white); }
 
-    .task-other {
-      grid-column: 1 / -1;
+    .other-input-wrap {
+      margin-top: 14px;
+      padding: 14px;
+      background: var(--bluelt);
+      border-radius: 10px;
     }
-
-    .selection-note {
-      margin-top: 12px;
-      font-size: 12px; color: var(--muted);
-      text-align: center;
+    .other-input-wrap label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 6px;
     }
-    .selection-note span { color: var(--blue); font-weight: 600; }
+    .other-input-wrap input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: var(--navy);
+      background: var(--white);
+      outline: none;
+      font-family: inherit;
+    }
+    .other-input-wrap input:focus { border-color: var(--blue); }
 
     /* ── Date picker ── */
     .date-grid {
@@ -506,11 +566,11 @@
 
     /* ── Mobile ── */
     @media (max-width: 480px) {
-      .progress-step { font-size: 9px; }
-      .task-grid { grid-template-columns: 1fr 1fr; }
       .date-grid { grid-template-columns: repeat(4, 1fr); }
       .field-row { grid-template-columns: 1fr; }
       .step-panel { padding: 20px 18px 18px; }
+      .step-header { padding: 16px 18px; }
+      .intro-pricing-amount { font-size: 42px; }
     }
   </style>
 </head>
@@ -533,13 +593,14 @@
   <!-- Booking wizard card -->
   <div class="card" id="bookingCard">
 
-    <!-- Progress -->
-    <div class="progress-wrap">
-      <div class="progress-label">
-        <span class="step-title" id="progressTitle">Domo Express</span>
-        <span class="step-count" id="progressCount">Paso 1 de 5</span>
-      </div>
-      <div class="progress-track" style="display:none"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+    <!-- Step header (back btn + title) -->
+    <div class="step-header">
+      <button class="step-back hidden" id="stepBackBtn" onclick="prevStep(state.step)" type="button">&larr; Atr&aacute;s</button>
+      <h2 class="step-title-bar" id="progressTitle">Domo Express</h2>
+    </div>
+
+    <!-- Step indicator dots -->
+    <div class="progress-dots-row">
       <div class="progress-dots">
         <span class="progress-dot active" id="pstep1" onclick="goToStep(1)"></span>
         <span class="progress-dot" id="pstep2" onclick="goToStep(2)"></span>
@@ -582,20 +643,22 @@
     </div>
 
     <div class="step-panel" id="step2">
-      <div class="step-intro">
-        <h2>¿Qué necesitas resolver?</h2>
-        <p>Selecciona exactamente <strong>2 tareas</strong>. Tarifa fija — sin sorpresas.</p>
-      </div>
       <div class="step-error" id="err2">Por favor selecciona 2 tareas para continuar.</div>
 
-      <div class="task-grid" id="taskGrid">
-        <!-- populated by JS -->
+      <div class="task-count-bar">
+        <span>Tareas seleccionadas</span>
+        <span class="task-count-num"><span id="selCount">0</span> / 2</span>
       </div>
 
-      <p class="selection-note" id="selNote">Seleccionadas: <span id="selCount">0</span> de 2</p>
+      <div id="taskGrid"><!-- populated by JS as categorized chips --></div>
+
+      <div class="other-input-wrap" id="otherInputWrap" style="display:none;">
+        <label for="otherInput">Describe la tarea adicional</label>
+        <input type="text" id="otherInput" placeholder="Ej: instalar repisa flotante de 1.5 m">
+      </div>
 
       <div class="btn-row">
-        <button class="btn-next" onclick="nextStep(2)" id="btnNext2">Siguiente →</button>
+        <button class="btn-next" onclick="nextStep(2)" id="btnNext2">Siguiente &rarr;</button>
       </div>
     </div>
 
@@ -623,7 +686,6 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="prevStep(3)">← Atrás</button>
         <button class="btn-next" onclick="nextStep(3)">Siguiente →</button>
       </div>
     </div>
@@ -709,7 +771,6 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="prevStep(4)">← Atrás</button>
         <button class="btn-next" onclick="nextStep(4)">Revisar reservación →</button>
       </div>
     </div>
@@ -736,7 +797,6 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="prevStep(5)">← Editar</button>
         <button class="btn-next" onclick="submitBooking()" id="btnSubmit">Confirmar reservación ✓</button>
       </div>
     </div>
@@ -792,22 +852,64 @@
 // ── Configuration ──────────────────────────────────────────────
 const API_URL = '/api/book';   // Netlify function endpoint
 
-// ── Task menu ─────────────────────────────────────────────────
-const TASKS = [
-  { id: 't1',  icon: '📺', label: 'Montaje de TV' },
-  { id: 't2',  icon: '💡', label: 'Instalación de abanico de techo' },
-  { id: 't3',  icon: '🔆', label: 'Instalación de lámpara o accesorio de luz' },
-  { id: 't4',  icon: '🚿', label: 'Cambio de pluma (cocina o baño)' },
-  { id: 't5',  icon: '🪟', label: 'Instalación de cortina, persiana o shade' },
-  { id: 't6',  icon: '🛋️', label: 'Ensamblaje de mueble' },
-  { id: 't7',  icon: '🚪', label: 'Reparación de puerta o cerradura' },
-  { id: 't8',  icon: '📡', label: 'Instalación de ring / cámara / timbre' },
-  { id: 't9',  icon: '🔌', label: 'Cambio de toma corriente o switch' },
-  { id: 't10', icon: '🎨', label: 'Touch-up de pintura (hasta 2 paredes)' },
-  { id: 't11', icon: '🖼️', label: 'Anclaje de espejo, cuadro o repisa' },
-  { id: 't12', icon: '🚽', label: 'Instalación de inodoro (fixture)' },
-  { id: 'tOther', icon: '✏️', label: 'Otra tarea (especifica abajo)', isOther: true },
+// ── Task menu (per Product Brief, Section 4) ──────────────────
+const TASK_CATEGORIES = [
+  {
+    name: 'Montaje y colgado',
+    items: [
+      'Montaje de TV',
+      'Instalar tablillas (hasta 2)',
+      'Colgar espejos o cuadros (hasta 3)',
+      'Instalar barra de cortinas (1 ventana)',
+      'Accesorios de baño: toallero, gancho (hasta 3)',
+    ],
+  },
+  {
+    name: 'Plomería menor',
+    items: [
+      'Cambio de pluma (cocina o baño)',
+      'Cambio de cabezal de ducha',
+      'Reparar válvula de inodoro',
+      'Cambio de asiento de inodoro',
+      'Reparar fuga bajo el fregadero',
+    ],
+  },
+  {
+    name: 'Eléctrico menor (sin panel)',
+    items: [
+      'Reemplazar toma o interruptor (hasta 3)',
+      'Cambio de luminaria (caja existente)',
+      'Instalar abanico de techo',
+      'Instalar dimmer (hasta 2)',
+    ],
+  },
+  {
+    name: 'Puertas y ventanas',
+    items: [
+      'Ajuste de bisagra o alineación de puerta',
+      'Cambio de cerradura, pomo o manilla',
+      'Instalar cerrojo',
+      'Instalar burlete o door sweep',
+    ],
+  },
+  {
+    name: 'Ensamblaje de muebles',
+    items: [
+      'Armar mueble flat-pack',
+      'Desarmar mueble flat-pack',
+    ],
+  },
+  {
+    name: 'Reparaciones menores',
+    items: [
+      'Parchar hoyo en pared (hasta 3)',
+      'Caulking / sellado (1 área)',
+      'Ajustar bisagra de gabinete (hasta 4)',
+      'Instalar barra de apoyo (1–2)',
+    ],
+  },
 ];
+const OTHER_TOKEN = '__other__';
 
 // ── State ─────────────────────────────────────────────────────
 const state = {
@@ -826,8 +928,7 @@ const state = {
 };
 
 // ── Step config ───────────────────────────────────────────────
-const STEP_TITLES  = ['', 'Domo Express', 'Elige tus tareas', 'Fecha y hora', 'Tus datos', 'Confirmar'];
-const STEP_PERCENTS= [0,  20, 40, 60, 80, 100];
+const STEP_TITLES = ['', 'Domo Express', 'Escoge 2 tareas', 'Elige fecha y hora', 'Tus datos', 'Revisa y confirma'];
 
 // ── Init ──────────────────────────────────────────────────────
 (function init() {
@@ -838,24 +939,37 @@ const STEP_PERCENTS= [0,  20, 40, 60, 80, 100];
 function renderTaskGrid() {
   const grid = document.getElementById('taskGrid');
   grid.innerHTML = '';
-  TASKS.forEach(t => {
-    const div = document.createElement('div');
-    div.className = 'task-chip' + (t.isOther ? ' task-other' : '');
-    div.dataset.id = t.id;
-    div.innerHTML = `<span class="chip-icon">${t.icon}</span><span>${t.label}</span>`;
-    div.onclick = () => toggleTask(div, t);
-    grid.appendChild(div);
+  TASK_CATEGORIES.forEach(cat => {
+    const section = document.createElement('div');
+    section.className = 'task-category';
 
-    if (t.isOther) {
-      const inp = document.createElement('input');
-      inp.type = 'text'; inp.id = 'otherInput';
-      inp.placeholder = 'Describe la tarea adicional…';
-      inp.style.cssText = 'display:none;width:100%;margin-top:8px;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;font-family:inherit;outline:none;';
-      inp.oninput = () => { state.otherTask = inp.value; };
-      inp.onfocus = () => inp.style.borderColor = 'var(--blue)';
-      inp.onblur  = () => inp.style.borderColor = 'var(--border)';
-      grid.appendChild(inp);
-    }
+    const title = document.createElement('h3');
+    title.className = 'task-cat-title';
+    title.textContent = cat.name;
+    section.appendChild(title);
+
+    const chips = document.createElement('div');
+    chips.className = 'task-cat-chips';
+
+    cat.items.forEach(label => {
+      const chip = document.createElement('div');
+      chip.className = 'task-chip';
+      chip.dataset.task = label;
+      chip.textContent = label;
+      chip.onclick = () => toggleTask(chip, label);
+      chips.appendChild(chip);
+    });
+
+    // One "Otro..." chip per category, all sharing the same OTHER_TOKEN
+    const other = document.createElement('div');
+    other.className = 'task-chip task-other-chip';
+    other.dataset.task = OTHER_TOKEN;
+    other.textContent = 'Otro…';
+    other.onclick = () => toggleTask(other, OTHER_TOKEN);
+    chips.appendChild(other);
+
+    section.appendChild(chips);
+    grid.appendChild(section);
   });
 }
 
@@ -887,44 +1001,49 @@ function renderDateGrid() {
 }
 
 // ── Task toggle ───────────────────────────────────────────────
-function toggleTask(el, task) {
-  if (task.isOther) {
-    const isSelected = el.classList.contains('selected');
-    const inp = document.getElementById('otherInput');
-    if (isSelected) {
-      el.classList.remove('selected');
-      inp.style.display = 'none';
-      state.selectedTasks = state.selectedTasks.filter(t => t !== '__other__');
-    } else {
-      if (state.selectedTasks.length >= 2) return;
-      el.classList.add('selected');
-      inp.style.display = 'block';
-      inp.focus();
-      state.selectedTasks.push('__other__');
-    }
-    updateSelCount();
-    return;
-  }
+// "Otro…" chips appear in each category but all share the OTHER_TOKEN.
+// Selecting any "Otro…" toggles the singleton other-task slot and reveals
+// the shared description input.
+function toggleTask(el, taskLabel) {
+  const isOther = taskLabel === OTHER_TOKEN;
+  const isSelected = el.classList.contains('selected');
+  const otherWrap = document.getElementById('otherInputWrap');
+  const otherInput = document.getElementById('otherInput');
 
-  if (el.classList.contains('selected')) {
+  if (isSelected) {
     el.classList.remove('selected');
-    state.selectedTasks = state.selectedTasks.filter(t => t !== task.label);
-  } else {
-    if (state.selectedTasks.filter(t => t !== '__other__').length >= 2 ||
-        (state.selectedTasks.length >= 2 && !state.selectedTasks.includes('__other__'))) {
-      // check combined
-      if (state.selectedTasks.length >= 2) return;
+    if (isOther) {
+      // Deselect every "Otro…" chip across all categories
+      document.querySelectorAll('.task-other-chip').forEach(c => c.classList.remove('selected'));
+      state.selectedTasks = state.selectedTasks.filter(t => t !== OTHER_TOKEN);
+      otherWrap.style.display = 'none';
+    } else {
+      state.selectedTasks = state.selectedTasks.filter(t => t !== taskLabel);
     }
+  } else {
     if (state.selectedTasks.length >= 2) return;
-    el.classList.add('selected');
-    state.selectedTasks.push(task.label);
+    if (isOther) {
+      // Mark this Otro selected; remove any previously selected Otro chip
+      document.querySelectorAll('.task-other-chip.selected').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      if (!state.selectedTasks.includes(OTHER_TOKEN)) state.selectedTasks.push(OTHER_TOKEN);
+      otherWrap.style.display = 'block';
+      otherInput.focus();
+    } else {
+      el.classList.add('selected');
+      state.selectedTasks.push(taskLabel);
+    }
   }
 
-  // disable unchosen when 2 selected
+  // Disable unchosen chips when 2 are selected
+  const max = state.selectedTasks.length >= 2;
   document.querySelectorAll('.task-chip').forEach(c => {
-    if (!c.classList.contains('selected')) {
-      c.classList.toggle('disabled', state.selectedTasks.length >= 2);
-    }
+    const isThisOther = c.classList.contains('task-other-chip');
+    const otherSelected = state.selectedTasks.includes(OTHER_TOKEN);
+    const isThisSelected = c.classList.contains('selected');
+    // An "Otro…" chip stays clickable if any Otro is selected (so user can switch which category)
+    const stillEnabled = isThisSelected || (isThisOther && otherSelected) || !max;
+    c.classList.toggle('disabled', !stillEnabled);
   });
   updateSelCount();
 }
@@ -994,15 +1113,12 @@ function prevStep(from) {
 function showStep(n) {
   state.step = n;
 
-  // panels
   document.querySelectorAll('.step-panel').forEach((p, i) => {
     p.classList.toggle('visible', i + 1 === n);
   });
 
-  // progress
   document.getElementById('progressTitle').textContent = STEP_TITLES[n];
-  document.getElementById('progressCount').textContent = `Paso ${n} de 5`;
-  document.getElementById('progressFill').style.width = STEP_PERCENTS[n] + '%';
+  document.getElementById('stepBackBtn').classList.toggle('hidden', n === 1);
 
   for (let i = 1; i <= 5; i++) {
     const el = document.getElementById(`pstep${i}`);
@@ -1023,11 +1139,11 @@ function validateStep(n) {
   }
   if (n === 2) {
     if (state.selectedTasks.length < 2) { showErr(2, 'Por favor selecciona 2 tareas para continuar.'); return false; }
-    if (state.selectedTasks.includes('__other__') && !document.getElementById('otherInput').value.trim()) {
+    if (state.selectedTasks.includes(OTHER_TOKEN) && !document.getElementById('otherInput').value.trim()) {
       showErr(2, 'Por favor describe la tarea adicional.'); return false;
     }
-    if (state.selectedTasks.includes('__other__')) {
-      const idx = state.selectedTasks.indexOf('__other__');
+    if (state.selectedTasks.includes(OTHER_TOKEN)) {
+      const idx = state.selectedTasks.indexOf(OTHER_TOKEN);
       state.selectedTasks[idx] = document.getElementById('otherInput').value.trim();
     }
   }
@@ -1161,6 +1277,8 @@ function resetForm() {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('fMaterialsDetail').value = '';
+  document.getElementById('otherInput').value = '';
+  document.getElementById('otherInputWrap').style.display = 'none';
   document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
   document.getElementById('materialsRow').classList.remove('selected');
   document.getElementById('matToggle').textContent = '';
