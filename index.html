@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Domo Express â Reserva tu handyman</title>
-  <meta name="description" content="Reserva 2 tareas de handyman en menos de 2 minutos. $149 tarifa fija. Sin sorpresas.">
+  <title>Domo Express — Reserva tu handyman</title>
+  <meta name="description" content="Reserva 2 tareas de handyman en menos de 2 minutos. $175 tarifa fija. Sin sorpresas.">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -32,7 +32,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ââ Layout ââ */
+    /* ── Layout ── */
     .page {
       min-height: 100vh;
       display: flex;
@@ -41,7 +41,7 @@
       padding: 0 16px 48px;
     }
 
-    /* ââ Header ââ */
+    /* ── Header ── */
     .site-header {
       width: 100%;
       background: var(--navy);
@@ -68,7 +68,7 @@
       letter-spacing: .06em; text-transform: uppercase;
     }
 
-    /* ââ Card ââ */
+    /* ── Card ── */
     .card {
       width: 100%; max-width: 540px;
       background: var(--white);
@@ -78,50 +78,130 @@
       box-shadow: 0 4px 24px rgba(20,37,67,.08);
     }
 
-    /* ââ Progress bar ââ */
-    .progress-wrap {
+    /* ── Step header (navy bar) ── */
+    .step-header {
       background: var(--navy);
-      padding: 20px 28px 0;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
-    .progress-label {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 10px;
-    }
-    .progress-label .step-title { color: var(--white); font-weight: 600; font-size: 15px; }
-    .progress-label .step-count { color: var(--periwinkle); font-size: 12px; font-weight: 600; }
-    .progress-track {
-      height: 4px; background: rgba(255,255,255,.2); border-radius: 2px;
-    }
-    .progress-fill {
-      height: 4px; background: var(--periwinkle); border-radius: 2px;
-      transition: width .35s ease;
-    }
-    .progress-steps {
-      display: flex; gap: 0;
-      margin-top: 12px;
-    }
-    .progress-step {
-      flex: 1; text-align: center;
-      padding: 10px 4px;
-      font-size: 11px; font-weight: 600;
-      color: rgba(255,255,255,.45);
+    .step-back {
+      background: transparent;
+      border: none;
+      color: var(--periwinkle);
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
-      transition: color .2s;
-      position: relative;
+      padding: 4px 4px 4px 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
     }
-    .progress-step::after {
-      content: '';
-      position: absolute; bottom: 0; left: 10%; right: 10%;
-      height: 2px; background: transparent;
-      transition: background .2s;
+    .step-back:hover { color: var(--white); }
+    .step-back.hidden { visibility: hidden; }
+    .step-title-bar {
+      color: var(--white);
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.2;
     }
-    .progress-step.active { color: var(--white); }
-    .progress-step.active::after { background: var(--periwinkle); }
-    .progress-step.done { color: rgba(255,255,255,.7); }
 
-    /* ââ Step panels ââ */
+    /* ── Dot indicator (white strip below header) ── */
+    .progress-dots-row {
+      display: flex;
+      justify-content: center;
+      padding: 14px 0 4px;
+      background: var(--white);
+    }
+    .progress-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .progress-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: all .25s;
+    }
+    .progress-dot.active {
+      background: var(--blue);
+      width: 24px;
+      border-radius: 4px;
+    }
+    .progress-dot.done { background: var(--periwinkle); }
+
+    /* ── Step panels ── */
     .step-panel { display: none; padding: 28px 28px 24px; }
     .step-panel.visible { display: block; }
+
+    /* Intro / pricing step */
+    .intro-pricing-card {
+      background: var(--bluelt);
+      border-radius: 14px;
+      padding: 22px 22px 20px;
+      margin-bottom: 16px;
+    }
+    .intro-pricing-eyebrow {
+      font-size: 12px; font-weight: 700;
+      color: var(--blue);
+      letter-spacing: .1em;
+    }
+    .intro-pricing-amount {
+      font-size: 48px; font-weight: 800;
+      color: var(--blue);
+      line-height: 1.05;
+      margin-top: 6px;
+    }
+    .intro-pricing-tagline {
+      font-size: 17px; color: var(--navy);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+    .intro-pricing-tags {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-top: 16px;
+    }
+    .intro-tag {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 13px; color: var(--navy);
+      font-weight: 500;
+    }
+    .intro-bullets {
+      background: var(--bluelt);
+      border-radius: 12px;
+      padding: 18px 22px;
+    }
+    .intro-bullets ul { list-style: none; padding: 0; margin: 0; }
+    .intro-bullets li {
+      position: relative;
+      padding-left: 28px;
+      margin: 10px 0;
+      font-size: 14px;
+      color: var(--navy);
+      line-height: 1.5;
+    }
+    .intro-bullets li::before {
+      content: '\2713';
+      position: absolute;
+      left: 0; top: 0;
+      color: var(--blue);
+      font-weight: 700;
+    }
+    .intro-secondary {
+      text-align: center;
+      margin-top: 14px;
+    }
+    .day-completo-link {
+      font-size: 13px;
+      color: var(--blue);
+      text-decoration: underline;
+    }
 
     .step-intro {
       margin-bottom: 22px;
@@ -129,26 +209,51 @@
     .step-intro h2 { font-size: 20px; font-weight: 700; color: var(--navy); line-height: 1.3; }
     .step-intro p { margin-top: 6px; font-size: 14px; color: var(--muted); line-height: 1.5; }
 
-    /* ââ Task grid ââ */
-    .task-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+    /* ── Task counter bar ── */
+    .task-count-bar {
+      background: var(--bluelt);
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: var(--navy);
+      margin-bottom: 22px;
+    }
+    .task-count-bar .task-count-num {
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    /* ── Task categories ── */
+    .task-category { margin-bottom: 22px; }
+    .task-cat-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0 0 10px;
+    }
+    .task-cat-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
     .task-chip {
+      display: inline-flex;
+      align-items: center;
       border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 13px; font-weight: 500;
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-weight: 500;
       color: var(--navy);
       background: var(--white);
       cursor: pointer;
       transition: all .15s;
       user-select: none;
-      line-height: 1.3;
-      display: flex; align-items: center; gap: 8px;
+      line-height: 1.2;
     }
-    .task-chip .chip-icon { font-size: 18px; flex-shrink: 0; }
     .task-chip:hover { border-color: var(--blue); background: var(--bluelt); }
     .task-chip.selected {
       border-color: var(--blue);
@@ -156,22 +261,38 @@
       font-weight: 600;
       color: var(--blue);
     }
-    .task-chip.selected .chip-icon::after { content: ' â'; font-size: 12px; }
     .task-chip.disabled { opacity: .45; cursor: not-allowed; }
     .task-chip.disabled:hover { border-color: var(--border); background: var(--white); }
 
-    .task-other {
-      grid-column: 1 / -1;
+    .other-input-wrap {
+      margin-top: 14px;
+      padding: 14px;
+      background: var(--bluelt);
+      border-radius: 10px;
     }
-
-    .selection-note {
-      margin-top: 12px;
-      font-size: 12px; color: var(--muted);
-      text-align: center;
+    .other-input-wrap label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 6px;
     }
-    .selection-note span { color: var(--blue); font-weight: 600; }
+    .other-input-wrap input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: var(--navy);
+      background: var(--white);
+      outline: none;
+      font-family: inherit;
+    }
+    .other-input-wrap input:focus { border-color: var(--blue); }
 
-    /* ââ Date picker ââ */
+    /* ── Date picker ── */
     .date-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -194,7 +315,7 @@
     .date-chip.selected { border-color: var(--blue); background: var(--bluelt); }
     .date-chip.selected .day-num { color: var(--blue); }
 
-    /* ââ Time grid ââ */
+    /* ── Time grid ── */
     .time-section-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 16px 0 8px; }
     .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
     .time-chip {
@@ -207,7 +328,7 @@
     .time-chip:hover { border-color: var(--blue); background: var(--bluelt); }
     .time-chip.selected { border-color: var(--blue); background: var(--bluelt); color: var(--blue); }
 
-    /* ââ Form fields ââ */
+    /* ── Form fields ── */
     .field-group { margin-bottom: 16px; }
     .field-group label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
     .field-group input, .field-group textarea, .field-group select {
@@ -230,7 +351,7 @@
     .field-group textarea { resize: vertical; min-height: 70px; }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-    /* ââ Payment method ââ */
+    /* ── Payment method ── */
     .pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .pay-option {
       border: 1.5px solid var(--border);
@@ -247,7 +368,7 @@
     .pay-option.selected { border-color: var(--blue); background: var(--bluelt); }
     .pay-option.selected .pay-name { color: var(--blue); }
 
-    /* ââ Materials toggle ââ */
+    /* ── Materials toggle ── */
     .materials-row {
       border: 1.5px solid var(--border);
       border-radius: 10px;
@@ -273,7 +394,7 @@
     .materials-info .mat-title { font-size: 13px; font-weight: 700; color: var(--navy); }
     .materials-info .mat-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-    /* ââ Pricing summary ââ */
+    /* ── Pricing summary ── */
     .price-box {
       background: var(--bluelt);
       border: 1px solid var(--border);
@@ -290,7 +411,7 @@
     .price-total .pt-val   { font-weight: 800; color: var(--blue); font-size: 20px; }
     .price-note { font-size: 11px; color: var(--muted); margin-top: 8px; text-align: center; line-height: 1.5; }
 
-    /* ââ Review summary ââ */
+    /* ── Review summary ── */
     .review-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .review-table td { padding: 9px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
     .review-table td:first-child { color: var(--muted); width: 38%; padding-right: 12px; }
@@ -316,7 +437,7 @@
       font-size: 12px; color: #5A4500; line-height: 1.6;
     }
 
-    /* ââ Buttons ââ */
+    /* ── Buttons ── */
     .btn-row { display: flex; gap: 10px; margin-top: 24px; }
     .btn-back {
       flex: 0 0 auto;
@@ -340,12 +461,12 @@
     .btn-next:hover { background: var(--navy); }
     .btn-next:disabled { background: #B0BACE; cursor: not-allowed; }
 
-    /* ââ Error ââ */
+    /* ── Error ── */
     .field-error { font-size: 12px; color: var(--red); margin-top: 4px; }
     .step-error  { background: #FEF0EE; border: 1px solid #F8B4AC; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--red); margin-bottom: 16px; display: none; }
     .step-error.visible { display: block; }
 
-    /* ââ Loading overlay ââ */
+    /* ── Loading overlay ── */
     .loading-overlay {
       display: none;
       position: fixed; inset: 0;
@@ -365,7 +486,7 @@
     .loading-text { color: var(--white); font-size: 15px; font-weight: 600; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ââ Confirmation screen ââ */
+    /* ── Confirmation screen ── */
     #step-confirmation { display: none; }
     #step-confirmation.visible { display: block; }
 
@@ -434,7 +555,7 @@
     }
     .btn-new:hover { border-color: var(--blue); color: var(--blue); }
 
-    /* ââ Footer ââ */
+    /* ── Footer ── */
     .site-footer {
       margin-top: 24px;
       text-align: center;
@@ -443,13 +564,13 @@
     }
     .site-footer a { color: var(--blue); text-decoration: none; }
 
-    /* ââ Mobile ââ */
+    /* ── Mobile ── */
     @media (max-width: 480px) {
-      .progress-step { font-size: 9px; }
-      .task-grid { grid-template-columns: 1fr 1fr; }
       .date-grid { grid-template-columns: repeat(4, 1fr); }
       .field-row { grid-template-columns: 1fr; }
       .step-panel { padding: 20px 18px 18px; }
+      .step-header { padding: 16px 18px; }
+      .intro-pricing-amount { font-size: 42px; }
     }
   </style>
 </head>
@@ -457,7 +578,7 @@
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
-  <div class="loading-text">Procesando tu reservaciÃ³nâ¦</div>
+  <div class="loading-text">Procesando tu reservación…</div>
 </div>
 
 <div class="page">
@@ -472,47 +593,82 @@
   <!-- Booking wizard card -->
   <div class="card" id="bookingCard">
 
-    <!-- Progress -->
-    <div class="progress-wrap">
-      <div class="progress-label">
-        <span class="step-title" id="progressTitle">Elige tus tareas</span>
-        <span class="step-count" id="progressCount">Paso 1 de 4</span>
-      </div>
-      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
-      <div class="progress-steps">
-        <div class="progress-step active" id="pstep1" onclick="goToStep(1)">Tareas</div>
-        <div class="progress-step" id="pstep2" onclick="goToStep(2)">Fecha y hora</div>
-        <div class="progress-step" id="pstep3" onclick="goToStep(3)">Tus datos</div>
-        <div class="progress-step" id="pstep4" onclick="goToStep(4)">Confirmar</div>
+    <!-- Step header (back btn + title) -->
+    <div class="step-header">
+      <button class="step-back hidden" id="stepBackBtn" onclick="prevStep(state.step)" type="button">&larr; Atr&aacute;s</button>
+      <h2 class="step-title-bar" id="progressTitle">Domo Express</h2>
+    </div>
+
+    <!-- Step indicator dots -->
+    <div class="progress-dots-row">
+      <div class="progress-dots">
+        <span class="progress-dot active" id="pstep1" onclick="goToStep(1)"></span>
+        <span class="progress-dot" id="pstep2" onclick="goToStep(2)"></span>
+        <span class="progress-dot" id="pstep3" onclick="goToStep(3)"></span>
+        <span class="progress-dot" id="pstep4" onclick="goToStep(4)"></span>
+        <span class="progress-dot" id="pstep5" onclick="goToStep(5)"></span>
       </div>
     </div>
 
-    <!-- Step 1: Task selection -->
+    <!-- Step 1: Intro / pricing -->
     <div class="step-panel visible" id="step1">
-      <div class="step-intro">
-        <h2>Â¿QuÃ© necesitas resolver?</h2>
-        <p>Selecciona exactamente <strong>2 tareas</strong>. Tarifa fija â sin sorpresas.</p>
+      <div class="intro-pricing-card">
+        <div class="intro-pricing-eyebrow">DOMO EXPRESS</div>
+        <div class="intro-pricing-amount">$175</div>
+        <div class="intro-pricing-tagline">Dos tareas. Dos horas. Listo.</div>
+        <div class="intro-pricing-tags">
+          <span class="intro-tag">2 tareas</span>
+          <span class="intro-tag">~2 horas</span>
+          <span class="intro-tag">24h anticipo</span>
+          <span class="intro-tag">SJ metro</span>
+        </div>
       </div>
-      <div class="step-error" id="err1">Por favor selecciona 2 tareas para continuar.</div>
 
-      <div class="task-grid" id="taskGrid">
-        <!-- populated by JS -->
+      <div class="intro-bullets">
+        <ul>
+          <li>Materiales por ti &mdash; o te los buscamos (+$25)</li>
+          <li>Se cobra despu&eacute;s del servicio</li>
+          <li>ATH M&oacute;vil o tarjeta de cr&eacute;dito</li>
+          <li>Cancelaci&oacute;n gratis con 24h de anticipo</li>
+        </ul>
       </div>
-
-      <p class="selection-note" id="selNote">Seleccionadas: <span id="selCount">0</span> de 2</p>
 
       <div class="btn-row">
-        <button class="btn-next" onclick="nextStep(1)" id="btnNext1">Siguiente â</button>
+        <button class="btn-next" onclick="nextStep(1)">Reservar ahora &rarr;</button>
+      </div>
+
+      <div class="intro-secondary">
+        <a href="https://domoyourhome.com/booknow/handyman-new-flow" class="day-completo-link">&iquest;Tienes m&aacute;s de 2 tareas? Ver d&iacute;a completo &rarr;</a>
       </div>
     </div>
 
-    <!-- Step 2: Date & Time -->
     <div class="step-panel" id="step2">
-      <div class="step-intro">
-        <h2>Â¿CuÃ¡ndo te viene bien?</h2>
-        <p>Disponibilidad para los prÃ³ximos 7 dÃ­as, sujeto a confirmaciÃ³n.</p>
+      <div class="step-error" id="err2">Por favor selecciona 2 tareas para continuar.</div>
+
+      <div class="task-count-bar">
+        <span>Tareas seleccionadas</span>
+        <span class="task-count-num"><span id="selCount">0</span> / 2</span>
       </div>
-      <div class="step-error" id="err2">Por favor selecciona fecha y hora.</div>
+
+      <div id="taskGrid"><!-- populated by JS as categorized chips --></div>
+
+      <div class="other-input-wrap" id="otherInputWrap" style="display:none;">
+        <label for="otherInput">Describe la tarea adicional</label>
+        <input type="text" id="otherInput" placeholder="Ej: instalar repisa flotante de 1.5 m">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-next" onclick="nextStep(2)" id="btnNext2">Siguiente &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Date & Time -->
+    <div class="step-panel" id="step3">
+      <div class="step-intro">
+        <h2>¿Cuándo te viene bien?</h2>
+        <p>Disponibilidad para los próximos 7 días, sujeto a confirmación.</p>
+      </div>
+      <div class="step-error" id="err3">Por favor selecciona fecha y hora.</div>
 
       <div class="date-grid" id="dateGrid"><!-- populated by JS --></div>
 
@@ -530,57 +686,56 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="prevStep(2)">â AtrÃ¡s</button>
-        <button class="btn-next" onclick="nextStep(2)">Siguiente â</button>
+        <button class="btn-next" onclick="nextStep(3)">Siguiente →</button>
       </div>
     </div>
 
-    <!-- Step 3: Customer info -->
-    <div class="step-panel" id="step3">
+    <!-- Step 4: Customer info -->
+    <div class="step-panel" id="step4">
       <div class="step-intro">
         <h2>Tus datos de contacto</h2>
-        <p>Para confirmarte la reservaciÃ³n y coordinar la llegada del handyman.</p>
+        <p>Para confirmarte la reservación y coordinar la llegada del handyman.</p>
       </div>
-      <div class="step-error" id="err3" id="err3"></div>
+      <div class="step-error" id="err4"></div>
 
       <div class="field-row">
         <div class="field-group">
           <label>Nombre</label>
-          <input type="text" id="fName" placeholder="MarÃ­a GarcÃ­a" autocomplete="given-name">
+          <input type="text" id="fName" placeholder="María García" autocomplete="given-name">
         </div>
         <div class="field-group">
           <label>Apellido</label>
-          <input type="text" id="fLastName" placeholder="GarcÃ­a" autocomplete="family-name">
+          <input type="text" id="fLastName" placeholder="García" autocomplete="family-name">
         </div>
       </div>
 
       <div class="field-group">
-        <label>TelÃ©fono</label>
+        <label>Teléfono</label>
         <input type="tel" id="fPhone" placeholder="787-000-0000" autocomplete="tel">
       </div>
 
       <div class="field-group">
-        <label>Correo electrÃ³nico</label>
+        <label>Correo electrónico</label>
         <input type="email" id="fEmail" placeholder="tu@correo.com" autocomplete="email">
       </div>
 
       <div class="field-group">
-        <label>DirecciÃ³n del servicio</label>
-        <input type="text" id="fAddress" placeholder="Calle, nÃºmero, urb. â Condado / Miramar / Santurce" autocomplete="street-address">
+        <label>Dirección del servicio</label>
+        <input type="text" id="fAddress" placeholder="Calle, número, urb. — Condado / Miramar / Santurce" autocomplete="street-address">
       </div>
 
       <div class="field-group">
         <label>Pago</label>
         <div class="pay-options">
           <div class="pay-option" data-pay="ath_movil" onclick="selectPay(this)">
-            <div class="pay-icon">ð±</div>
-            <div class="pay-name">ATH MÃ³vil</div>
-            <div class="pay-sub">DespuÃ©s del servicio</div>
+            <div class="pay-icon">📱</div>
+            <div class="pay-name">ATH Móvil</div>
+            <div class="pay-sub">Después del servicio</div>
           </div>
           <div class="pay-option" data-pay="credit_card" onclick="selectPay(this)">
-            <div class="pay-icon">ð³</div>
+            <div class="pay-icon">💳</div>
             <div class="pay-name">Tarjeta</div>
-            <div class="pay-sub">DespuÃ©s del servicio</div>
+            <div class="pay-sub">Después del servicio</div>
           </div>
         </div>
       </div>
@@ -591,60 +746,58 @@
           <div class="toggle-box" id="matToggle"></div>
         </div>
         <div class="materials-info">
-          <div class="mat-title">Domo consigue los materiales (+$30)</div>
-          <div class="mat-sub">Materiales reembolsados al costo + tarifa de $30 por gestiÃ³n</div>
+          <div class="mat-title">Domo consigue los materiales (+$25)</div>
+          <div class="mat-sub">Materiales reembolsados al costo + tarifa de $25 por gestión</div>
         </div>
       </div>
 
       <div id="materialsDetailWrap" style="display:none;margin-top:10px;">
         <div class="field-group" style="margin-bottom:0">
-          <label>Â¿QuÃ© materiales necesitas? (opcional)</label>
-          <textarea id="fMaterialsDetail" placeholder="Ej: tubo de cobre Â½&quot;, 2 galletas de paint Sherwin Williams blancoâ¦"></textarea>
+          <label>¿Qué materiales necesitas? (opcional)</label>
+          <textarea id="fMaterialsDetail" placeholder="Ej: tubo de cobre ½&quot;, 2 galletas de paint Sherwin Williams blanco…"></textarea>
         </div>
       </div>
 
       <!-- Price box -->
       <div class="price-box">
-        <div class="price-row"><span class="pr-label">Servicio Express (2 tareas)</span><span class="pr-val" id="prBase">$149</span></div>
-        <div id="prMatRow" class="price-row" style="display:none"><span class="pr-label">GestiÃ³n de materiales</span><span class="pr-val">$30</span></div>
+        <div class="price-row"><span class="pr-label">Servicio Express (2 tareas)</span><span class="pr-val" id="prBase">$175</span></div>
+        <div id="prMatRow" class="price-row" style="display:none"><span class="pr-label">Gestión de materiales</span><span class="pr-val">$25</span></div>
         <hr class="price-divider">
         <div class="price-total">
           <span class="pt-label">Total</span>
-          <span class="pt-val" id="prTotal">$149</span>
+          <span class="pt-val" id="prTotal">$175</span>
         </div>
-        <div class="price-note" id="prNote">MÃ¡s materiales al costo si aplica. Se cobra despuÃ©s del servicio.</div>
+        <div class="price-note" id="prNote">Más materiales al costo si aplica. Se cobra después del servicio.</div>
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="prevStep(3)">â AtrÃ¡s</button>
-        <button class="btn-next" onclick="nextStep(3)">Revisar reservaciÃ³n â</button>
+        <button class="btn-next" onclick="nextStep(4)">Revisar reservación →</button>
       </div>
     </div>
 
-    <!-- Step 4: Review & confirm -->
-    <div class="step-panel" id="step4">
+    <!-- Step 5: Review & confirm -->
+    <div class="step-panel" id="step5">
       <div class="step-intro">
         <h2>Revisa y confirma</h2>
-        <p>Verifica los detalles antes de enviar tu reservaciÃ³n.</p>
+        <p>Verifica los detalles antes de enviar tu reservación.</p>
       </div>
-      <div class="step-error" id="err4"></div>
+      <div class="step-error" id="err5"></div>
 
       <table class="review-table" id="reviewTable">
         <!-- populated by JS -->
       </table>
 
       <div class="review-price">
-        <span class="rp-label">Total a pagar despuÃ©s del servicio</span>
-        <span class="rp-val" id="reviewTotal">$149</span>
+        <span class="rp-label">Total a pagar después del servicio</span>
+        <span class="rp-val" id="reviewTotal">$175</span>
       </div>
 
       <div class="review-note">
-        <strong>Recuerda:</strong> Si necesitas cancelar, hazlo con al menos 24 horas de anticipaciÃ³n. Cancela respondiendo tu email de confirmaciÃ³n o llamando al <strong>(787) 419-0300</strong>.
+        <strong>Recuerda:</strong> Si necesitas cancelar, hazlo con al menos 24 horas de anticipación. Cancela respondiendo tu email de confirmación o llamando al <strong>(787) 419-0300</strong>.
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="prevStep(4)">â Editar</button>
-        <button class="btn-next" onclick="submitBooking()" id="btnSubmit">Confirmar reservaciÃ³n â</button>
+        <button class="btn-next" onclick="submitBooking()" id="btnSubmit">Confirmar reservación ✓</button>
       </div>
     </div>
 
@@ -653,20 +806,20 @@
   <!-- Confirmation screen (replaces card) -->
   <div class="card" id="confirmCard" style="display:none;">
     <div class="confirm-header">
-      <div class="confirm-check">â</div>
-      <h2>Â¡ReservaciÃ³n recibida!</h2>
-      <p>RecibirÃ¡s confirmaciÃ³n por correo electrÃ³nico</p>
+      <div class="confirm-check">✓</div>
+      <h2>¡Reservación recibida!</h2>
+      <p>Recibirás confirmación por correo electrónico</p>
     </div>
     <div class="confirm-id-box">
-      <div class="cid-label">NÃºmero de reservaciÃ³n</div>
+      <div class="cid-label">Número de reservación</div>
       <div class="cid-value" id="confirmId">EXP-XXXX</div>
     </div>
     <div class="confirm-body">
-      <p>Tu reservaciÃ³n estÃ¡ siendo procesada. El equipo de Domo la estÃ¡ revisando y recibirÃ¡s confirmaciÃ³n del handyman asignado y la hora exacta pronto.</p>
+      <p>Tu reservación está siendo procesada. El equipo de Domo la está revisando y recibirás confirmación del handyman asignado y la hora exacta pronto.</p>
       <div class="confirm-steps">
         <div class="confirm-step">
           <div class="cs-num">1</div>
-          <div class="cs-text"><strong>Email de confirmaciÃ³n</strong> enviado a tu correo con todos los detalles.</div>
+          <div class="cs-text"><strong>Email de confirmación</strong> enviado a tu correo con todos los detalles.</div>
         </div>
         <div class="confirm-step">
           <div class="cs-num">2</div>
@@ -674,49 +827,91 @@
         </div>
         <div class="confirm-step">
           <div class="cs-num">3</div>
-          <div class="cs-text"><strong>El dÃ­a del servicio</strong>, el handyman llega y completa tus tareas.</div>
+          <div class="cs-text"><strong>El día del servicio</strong>, el handyman llega y completa tus tareas.</div>
         </div>
         <div class="confirm-step">
           <div class="cs-num">4</div>
-          <div class="cs-text"><strong>Pagas despuÃ©s del servicio</strong> â ATH MÃ³vil o tarjeta.</div>
+          <div class="cs-text"><strong>Pagas después del servicio</strong> — ATH Móvil o tarjeta.</div>
         </div>
       </div>
       <div class="confirm-note">
-        Â¿Preguntas? Llama al <strong>(787) 419-0300</strong> o escrÃ­benos a <strong>info@domoyourhome.com</strong>
+        ¿Preguntas? Llama al <strong>(787) 419-0300</strong> o escríbenos a <strong>info@domoyourhome.com</strong>
       </div>
-      <button class="btn-new" onclick="resetForm()">Hacer otra reservaciÃ³n</button>
+      <button class="btn-new" onclick="resetForm()">Hacer otra reservación</button>
     </div>
   </div>
 
   <footer class="site-footer">
-    <div>Domo Â· San Juan, Puerto Rico</div>
-    <div><a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a> Â· <a href="tel:7874190300">(787) 419-0300</a></div>
+    <div>Domo · San Juan, Puerto Rico</div>
+    <div><a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a> · <a href="tel:7874190300">(787) 419-0300</a></div>
   </footer>
 
 </div><!-- /page -->
 
 <script>
-// ââ Configuration ââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Configuration ──────────────────────────────────────────────
 const API_URL = '/api/book';   // Netlify function endpoint
 
-// ââ Task menu âââââââââââââââââââââââââââââââââââââââââââââââââ
-const TASKS = [
-  { id: 't1',  icon: 'ðº', label: 'Montaje de TV' },
-  { id: 't2',  icon: 'ð¡', label: 'InstalaciÃ³n de abanico de techo' },
-  { id: 't3',  icon: 'ð', label: 'InstalaciÃ³n de lÃ¡mpara o accesorio de luz' },
-  { id: 't4',  icon: 'ð¿', label: 'Cambio de pluma (cocina o baÃ±o)' },
-  { id: 't5',  icon: 'ðª', label: 'InstalaciÃ³n de cortina, persiana o shade' },
-  { id: 't6',  icon: 'ðï¸', label: 'Ensamblaje de mueble' },
-  { id: 't7',  icon: 'ðª', label: 'ReparaciÃ³n de puerta o cerradura' },
-  { id: 't8',  icon: 'ð¡', label: 'InstalaciÃ³n de ring / cÃ¡mara / timbre' },
-  { id: 't9',  icon: 'ð', label: 'Cambio de toma corriente o switch' },
-  { id: 't10', icon: 'ð¨', label: 'Touch-up de pintura (hasta 2 paredes)' },
-  { id: 't11', icon: 'ð¼ï¸', label: 'Anclaje de espejo, cuadro o repisa' },
-  { id: 't12', icon: 'ð½', label: 'InstalaciÃ³n de inodoro (fixture)' },
-  { id: 'tOther', icon: 'âï¸', label: 'Otra tarea (especifica abajo)', isOther: true },
+// ── Task menu (per Product Brief, Section 4) ──────────────────
+const TASK_CATEGORIES = [
+  {
+    name: 'Montaje y colgado',
+    items: [
+      'Montaje de TV',
+      'Instalar tablillas (hasta 2)',
+      'Colgar espejos o cuadros (hasta 3)',
+      'Instalar barra de cortinas (1 ventana)',
+      'Accesorios de baño: toallero, gancho (hasta 3)',
+    ],
+  },
+  {
+    name: 'Plomería menor',
+    items: [
+      'Cambio de pluma (cocina o baño)',
+      'Cambio de cabezal de ducha',
+      'Reparar válvula de inodoro',
+      'Cambio de asiento de inodoro',
+      'Reparar fuga bajo el fregadero',
+    ],
+  },
+  {
+    name: 'Eléctrico menor (sin panel)',
+    items: [
+      'Reemplazar toma o interruptor (hasta 3)',
+      'Cambio de luminaria (caja existente)',
+      'Instalar abanico de techo',
+      'Instalar dimmer (hasta 2)',
+    ],
+  },
+  {
+    name: 'Puertas y ventanas',
+    items: [
+      'Ajuste de bisagra o alineación de puerta',
+      'Cambio de cerradura, pomo o manilla',
+      'Instalar cerrojo',
+      'Instalar burlete o door sweep',
+    ],
+  },
+  {
+    name: 'Ensamblaje de muebles',
+    items: [
+      'Armar mueble flat-pack',
+      'Desarmar mueble flat-pack',
+    ],
+  },
+  {
+    name: 'Reparaciones menores',
+    items: [
+      'Parchar hoyo en pared (hasta 3)',
+      'Caulking / sellado (1 área)',
+      'Ajustar bisagra de gabinete (hasta 4)',
+      'Instalar barra de apoyo (1–2)',
+    ],
+  },
 ];
+const OTHER_TOKEN = '__other__';
 
-// ââ State âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── State ─────────────────────────────────────────────────────
 const state = {
   step: 1,
   selectedTasks: [],     // array of task labels
@@ -732,11 +927,10 @@ const state = {
   materialsDetail: '',
 };
 
-// ââ Step config âââââââââââââââââââââââââââââââââââââââââââââââ
-const STEP_TITLES  = ['', 'Elige tus tareas', 'Fecha y hora', 'Tus datos', 'Confirmar'];
-const STEP_PERCENTS= [0,  25, 50, 75, 100];
+// ── Step config ───────────────────────────────────────────────
+const STEP_TITLES = ['', 'Domo Express', 'Escoge 2 tareas', 'Elige fecha y hora', 'Tus datos', 'Revisa y confirma'];
 
-// ââ Init ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Init ──────────────────────────────────────────────────────
 (function init() {
   renderTaskGrid();
   renderDateGrid();
@@ -745,34 +939,47 @@ const STEP_PERCENTS= [0,  25, 50, 75, 100];
 function renderTaskGrid() {
   const grid = document.getElementById('taskGrid');
   grid.innerHTML = '';
-  TASKS.forEach(t => {
-    const div = document.createElement('div');
-    div.className = 'task-chip' + (t.isOther ? ' task-other' : '');
-    div.dataset.id = t.id;
-    div.innerHTML = `<span class="chip-icon">${t.icon}</span><span>${t.label}</span>`;
-    div.onclick = () => toggleTask(div, t);
-    grid.appendChild(div);
+  TASK_CATEGORIES.forEach(cat => {
+    const section = document.createElement('div');
+    section.className = 'task-category';
 
-    if (t.isOther) {
-      const inp = document.createElement('input');
-      inp.type = 'text'; inp.id = 'otherInput';
-      inp.placeholder = 'Describe la tarea adicionalâ¦';
-      inp.style.cssText = 'display:none;width:100%;margin-top:8px;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;font-family:inherit;outline:none;';
-      inp.oninput = () => { state.otherTask = inp.value; };
-      inp.onfocus = () => inp.style.borderColor = 'var(--blue)';
-      inp.onblur  = () => inp.style.borderColor = 'var(--border)';
-      grid.appendChild(inp);
-    }
+    const title = document.createElement('h3');
+    title.className = 'task-cat-title';
+    title.textContent = cat.name;
+    section.appendChild(title);
+
+    const chips = document.createElement('div');
+    chips.className = 'task-cat-chips';
+
+    cat.items.forEach(label => {
+      const chip = document.createElement('div');
+      chip.className = 'task-chip';
+      chip.dataset.task = label;
+      chip.textContent = label;
+      chip.onclick = () => toggleTask(chip, label);
+      chips.appendChild(chip);
+    });
+
+    // One "Otro..." chip per category, all sharing the same OTHER_TOKEN
+    const other = document.createElement('div');
+    other.className = 'task-chip task-other-chip';
+    other.dataset.task = OTHER_TOKEN;
+    other.textContent = 'Otro…';
+    other.onclick = () => toggleTask(other, OTHER_TOKEN);
+    chips.appendChild(other);
+
+    section.appendChild(chips);
+    grid.appendChild(section);
   });
 }
 
 function renderDateGrid() {
   const grid = document.getElementById('dateGrid');
   grid.innerHTML = '';
-  const dayNames = ['Dom','Lun','Mar','MiÃ©','Jue','Vie','SÃ¡b'];
+  const dayNames = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const monthNames = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   const longMonths = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const longDays   = ['domingo','lunes','martes','miÃ©rcoles','jueves','viernes','sÃ¡bado'];
+  const longDays   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 
   for (let i = 1; i <= 7; i++) {
     const d = new Date();
@@ -793,45 +1000,50 @@ function renderDateGrid() {
   }
 }
 
-// ââ Task toggle âââââââââââââââââââââââââââââââââââââââââââââââ
-function toggleTask(el, task) {
-  if (task.isOther) {
-    const isSelected = el.classList.contains('selected');
-    const inp = document.getElementById('otherInput');
-    if (isSelected) {
-      el.classList.remove('selected');
-      inp.style.display = 'none';
-      state.selectedTasks = state.selectedTasks.filter(t => t !== '__other__');
-    } else {
-      if (state.selectedTasks.length >= 2) return;
-      el.classList.add('selected');
-      inp.style.display = 'block';
-      inp.focus();
-      state.selectedTasks.push('__other__');
-    }
-    updateSelCount();
-    return;
-  }
+// ── Task toggle ───────────────────────────────────────────────
+// "Otro…" chips appear in each category but all share the OTHER_TOKEN.
+// Selecting any "Otro…" toggles the singleton other-task slot and reveals
+// the shared description input.
+function toggleTask(el, taskLabel) {
+  const isOther = taskLabel === OTHER_TOKEN;
+  const isSelected = el.classList.contains('selected');
+  const otherWrap = document.getElementById('otherInputWrap');
+  const otherInput = document.getElementById('otherInput');
 
-  if (el.classList.contains('selected')) {
+  if (isSelected) {
     el.classList.remove('selected');
-    state.selectedTasks = state.selectedTasks.filter(t => t !== task.label);
-  } else {
-    if (state.selectedTasks.filter(t => t !== '__other__').length >= 2 ||
-        (state.selectedTasks.length >= 2 && !state.selectedTasks.includes('__other__'))) {
-      // check combined
-      if (state.selectedTasks.length >= 2) return;
+    if (isOther) {
+      // Deselect every "Otro…" chip across all categories
+      document.querySelectorAll('.task-other-chip').forEach(c => c.classList.remove('selected'));
+      state.selectedTasks = state.selectedTasks.filter(t => t !== OTHER_TOKEN);
+      otherWrap.style.display = 'none';
+    } else {
+      state.selectedTasks = state.selectedTasks.filter(t => t !== taskLabel);
     }
+  } else {
     if (state.selectedTasks.length >= 2) return;
-    el.classList.add('selected');
-    state.selectedTasks.push(task.label);
+    if (isOther) {
+      // Mark this Otro selected; remove any previously selected Otro chip
+      document.querySelectorAll('.task-other-chip.selected').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      if (!state.selectedTasks.includes(OTHER_TOKEN)) state.selectedTasks.push(OTHER_TOKEN);
+      otherWrap.style.display = 'block';
+      otherInput.focus();
+    } else {
+      el.classList.add('selected');
+      state.selectedTasks.push(taskLabel);
+    }
   }
 
-  // disable unchosen when 2 selected
+  // Disable unchosen chips when 2 are selected
+  const max = state.selectedTasks.length >= 2;
   document.querySelectorAll('.task-chip').forEach(c => {
-    if (!c.classList.contains('selected')) {
-      c.classList.toggle('disabled', state.selectedTasks.length >= 2);
-    }
+    const isThisOther = c.classList.contains('task-other-chip');
+    const otherSelected = state.selectedTasks.includes(OTHER_TOKEN);
+    const isThisSelected = c.classList.contains('selected');
+    // An "Otro…" chip stays clickable if any Otro is selected (so user can switch which category)
+    const stillEnabled = isThisSelected || (isThisOther && otherSelected) || !max;
+    c.classList.toggle('disabled', !stillEnabled);
   });
   updateSelCount();
 }
@@ -840,7 +1052,7 @@ function updateSelCount() {
   document.getElementById('selCount').textContent = state.selectedTasks.length;
 }
 
-// ââ Date / time âââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Date / time ───────────────────────────────────────────────
 function selectDate(el) {
   document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
@@ -853,7 +1065,7 @@ function selectTime(el) {
   state.selectedTime = el.dataset.time;
 }
 
-// ââ Payment & materials âââââââââââââââââââââââââââââââââââââââ
+// ── Payment & materials ───────────────────────────────────────
 function selectPay(el) {
   document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
@@ -868,7 +1080,7 @@ function toggleMaterials() {
   const prMat = document.getElementById('prMatRow');
 
   row.classList.toggle('selected', state.materialsRequested);
-  tog.textContent  = state.materialsRequested ? 'â' : '';
+  tog.textContent  = state.materialsRequested ? '✓' : '';
   detWr.style.display = state.materialsRequested ? 'block' : 'none';
   prMat.style.display = state.materialsRequested ? 'flex' : 'none';
 
@@ -876,14 +1088,14 @@ function toggleMaterials() {
 }
 
 function updatePrice() {
-  const base  = 149;
-  const matFee = state.materialsRequested ? 30 : 0;
+  const base  = 175;
+  const matFee = state.materialsRequested ? 25 : 0;
   const total = base + matFee;
   document.getElementById('prTotal').textContent = `$${total}`;
   document.getElementById('reviewTotal').textContent = `$${total}`;
 }
 
-// ââ Navigation ââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Navigation ────────────────────────────────────────────────
 function goToStep(n) {
   if (n > state.step) return; // can't skip forward
   showStep(n);
@@ -901,46 +1113,45 @@ function prevStep(from) {
 function showStep(n) {
   state.step = n;
 
-  // panels
   document.querySelectorAll('.step-panel').forEach((p, i) => {
     p.classList.toggle('visible', i + 1 === n);
   });
 
-  // progress
   document.getElementById('progressTitle').textContent = STEP_TITLES[n];
-  document.getElementById('progressCount').textContent = `Paso ${n} de 4`;
-  document.getElementById('progressFill').style.width = STEP_PERCENTS[n] + '%';
+  document.getElementById('stepBackBtn').classList.toggle('hidden', n === 1);
 
-  for (let i = 1; i <= 4; i++) {
+  for (let i = 1; i <= 5; i++) {
     const el = document.getElementById(`pstep${i}`);
     el.classList.toggle('active', i === n);
     el.classList.toggle('done', i < n);
   }
 
-  if (n === 4) buildReview();
+  if (n === 5) buildReview();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ââ Validation ââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Validation ────────────────────────────────────────────────
 function validateStep(n) {
   hideErr(n);
   if (n === 1) {
-    if (state.selectedTasks.length < 2) { showErr(1, 'Por favor selecciona 2 tareas para continuar.'); return false; }
-    if (state.selectedTasks.includes('__other__') && !document.getElementById('otherInput').value.trim()) {
-      showErr(1, 'Por favor describe la tarea adicional.'); return false;
+    return true; // intro / pricing - nothing to validate
+  }
+  if (n === 2) {
+    if (state.selectedTasks.length < 2) { showErr(2, 'Por favor selecciona 2 tareas para continuar.'); return false; }
+    if (state.selectedTasks.includes(OTHER_TOKEN) && !document.getElementById('otherInput').value.trim()) {
+      showErr(2, 'Por favor describe la tarea adicional.'); return false;
     }
-    // save other
-    if (state.selectedTasks.includes('__other__')) {
-      const idx = state.selectedTasks.indexOf('__other__');
+    if (state.selectedTasks.includes(OTHER_TOKEN)) {
+      const idx = state.selectedTasks.indexOf(OTHER_TOKEN);
       state.selectedTasks[idx] = document.getElementById('otherInput').value.trim();
     }
   }
-  if (n === 2) {
-    if (!state.selectedDate) { showErr(2, 'Por favor selecciona una fecha.'); return false; }
-    if (!state.selectedTime) { showErr(2, 'Por favor selecciona una hora.'); return false; }
-  }
   if (n === 3) {
+    if (!state.selectedDate) { showErr(3, 'Por favor selecciona una fecha.'); return false; }
+    if (!state.selectedTime) { showErr(3, 'Por favor selecciona una hora.'); return false; }
+  }
+  if (n === 4) {
     const name  = document.getElementById('fName').value.trim();
     const last  = document.getElementById('fLastName').value.trim();
     const phone = document.getElementById('fPhone').value.trim();
@@ -948,11 +1159,11 @@ function validateStep(n) {
     const addr  = document.getElementById('fAddress').value.trim();
     const pay   = state.paymentMethod;
 
-    if (!name)  { showErr(3, 'Por favor ingresa tu nombre.'); return false; }
-    if (!phone) { showErr(3, 'Por favor ingresa tu telÃ©fono.'); return false; }
-    if (!email || !email.includes('@')) { showErr(3, 'Por favor ingresa un correo electrÃ³nico vÃ¡lido.'); return false; }
-    if (!addr)  { showErr(3, 'Por favor ingresa la direcciÃ³n del servicio.'); return false; }
-    if (!pay)   { showErr(3, 'Por favor selecciona un mÃ©todo de pago.'); return false; }
+    if (!name)  { showErr(4, 'Por favor ingresa tu nombre.'); return false; }
+    if (!phone) { showErr(4, 'Por favor ingresa tu teléfono.'); return false; }
+    if (!email || !email.includes('@')) { showErr(4, 'Por favor ingresa un correo electrónico válido.'); return false; }
+    if (!addr)  { showErr(4, 'Por favor ingresa la dirección del servicio.'); return false; }
+    if (!pay)   { showErr(4, 'Por favor selecciona un método de pago.'); return false; }
 
     state.customerName  = `${name} ${last}`.trim();
     state.customerPhone = phone;
@@ -972,20 +1183,20 @@ function hideErr(n) {
   if (el) el.classList.remove('visible');
 }
 
-// ââ Review table ââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Review table ──────────────────────────────────────────────
 function buildReview() {
-  const payLabel = state.paymentMethod === 'ath_movil' ? 'ATH MÃ³vil' : 'Tarjeta de crÃ©dito';
+  const payLabel = state.paymentMethod === 'ath_movil' ? 'ATH Móvil' : 'Tarjeta de crédito';
   const matLabel = state.materialsRequested
-    ? `SÃ­ â Domo las consigue${state.materialsDetail ? ': ' + state.materialsDetail : ''}`
+    ? `Sí — Domo las consigue${state.materialsDetail ? ': ' + state.materialsDetail : ''}`
     : 'No';
 
   const rows = [
     ['Tareas', `${state.selectedTasks[0]}<br>${state.selectedTasks[1]}`],
     ['Fecha',  state.selectedDate?.label || ''],
     ['Hora',   state.selectedTime || ''],
-    ['DirecciÃ³n', state.address],
+    ['Dirección', state.address],
     ['Contacto', `${state.customerName}<br>${state.customerPhone}<br>${state.customerEmail}`],
-    ['Pago',   payLabel + ' â despuÃ©s del servicio'],
+    ['Pago',   payLabel + ' — después del servicio'],
     ['Materiales', matLabel],
   ];
 
@@ -997,13 +1208,13 @@ function buildReview() {
   updatePrice();
 }
 
-// ââ Submit ââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Submit ────────────────────────────────────────────────────
 async function submitBooking() {
   document.getElementById('loadingOverlay').classList.add('visible');
   document.getElementById('btnSubmit').disabled = true;
 
-  const base  = 14900;
-  const total = state.materialsRequested ? base + 3000 : base;
+  const base  = 17500;
+  const total = state.materialsRequested ? base + 2500 : base;
 
   const payload = {
     customer_name:       state.customerName,
@@ -1042,12 +1253,12 @@ async function submitBooking() {
   } catch (err) {
     document.getElementById('loadingOverlay').classList.remove('visible');
     document.getElementById('btnSubmit').disabled = false;
-    showErr(4, `No pudimos procesar tu reservaciÃ³n: ${err.message}. Por favor intenta de nuevo o llama al (787) 419-0300.`);
+    showErr(4, `No pudimos procesar tu reservación: ${err.message}. Por favor intenta de nuevo o llama al (787) 419-0300.`);
     document.getElementById('err4').classList.add('visible');
   }
 }
 
-// ââ Reset âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Reset ─────────────────────────────────────────────────────
 function resetForm() {
   Object.assign(state, {
     step: 1, selectedTasks: [], otherTask: '',
@@ -1066,6 +1277,8 @@ function resetForm() {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('fMaterialsDetail').value = '';
+  document.getElementById('otherInput').value = '';
+  document.getElementById('otherInputWrap').style.display = 'none';
   document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
   document.getElementById('materialsRow').classList.remove('selected');
   document.getElementById('matToggle').textContent = '';
