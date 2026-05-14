@@ -1,1 +1,12 @@
-{"name":"domo-express","private":true}
+{
+  "name": "domo-express",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Domo Express booking site — static HTML with Netlify Functions",
+  "scripts": {
+    "build": "npm install --prefix netlify/functions"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
