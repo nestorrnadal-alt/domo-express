@@ -87,9 +87,6 @@
       transition: color .15s;
     }
     .site-header .header-back:hover { color: var(--white); }
-    @media (max-width: 480px) {
-      .site-header .header-back .header-back-long { display: none; }
-    }
 
     /* ── Card ── */
     .card {
@@ -693,9 +690,7 @@
       <span class="logo-word">domo<span class="logo-dot">.</span></span>
     </a>
     <span class="badge">Express</span>
-    <a class="header-back" href="https://domoyourhome.com">
-      &larr; <span class="header-back-long">Volver a </span>Domo
-    </a>
+    <a class="header-back" href="https://domoyourhome.com">&larr; Home</a>
   </header>
 
   <!-- Booking wizard card -->
@@ -774,7 +769,7 @@
     <div class="step-panel" id="step3">
       <div class="step-intro">
         <h2>¿Cuándo te viene bien?</h2>
-        <p>Disponibilidad real para los próximos 14 días. Reserva con al menos 24h de anticipo.</p>
+        <p>Disponibilidad de lunes a viernes para los próximos 14 días. Reserva con al menos 24h de anticipo.</p>
       </div>
       <div class="step-error" id="err3">Por favor selecciona fecha y hora.</div>
 
@@ -965,7 +960,6 @@
           <li><a href="https://domoyourhome.com">Inicio</a></li>
           <li><a href="https://domoyourhome.com/about/">Sobre nosotros</a></li>
           <li><a href="https://domoyourhome.com/booknow/handyman-new-flow">Día completo</a></li>
-          <li><a href="https://express.domoyourhome.com">Reservar Express</a></li>
         </ul>
       </div>
 
@@ -1551,6 +1545,16 @@ async function submitBooking() {
     });
 
     const data = await res.json();
+
+    if (res.status === 409 && data.code === 'slot_taken') {
+      document.getElementById('loadingOverlay').classList.remove('visible');
+      document.getElementById('btnSubmit').disabled = false;
+      state.selectedTime = null;
+      await loadAvailability();
+      showStep(3);
+      showErr(3, data.error);
+      return;
+    }
 
     if (!res.ok) {
       throw new Error(data.error || `Error ${res.status}`);

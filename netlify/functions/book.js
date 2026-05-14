@@ -161,6 +161,15 @@ exports.handler = async (event) => {
     });
   if (dbError) {
     console.error('Supabase insert error:', dbError);
+    if (dbError.code === '23505') {
+      return {
+        statusCode: 409,
+        body: JSON.stringify({
+          error: 'Ese horario se acaba de reservar. Por favor escoge otra hora.',
+          code:  'slot_taken',
+        }),
+      };
+    }
     return { statusCode: 500, body: JSON.stringify({ error: 'Database error', detail: dbError.message }) };
   }
   const data = { ...body, booking_id };

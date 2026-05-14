@@ -5,7 +5,7 @@
 // Returns the open dates + slots for the next 14 days in Puerto
 // Rico time (UTC-4, no DST). A slot is open if:
 //   1. It's at least 24h from now.
-//   2. The date isn't a Sunday.
+//   2. The date isn't a Saturday or Sunday.
 //   3. There's no full-day or matching-slot row in
 //      express_schedule_blackouts.
 //   4. There's no row in express_bookings for that date + slot.
@@ -67,9 +67,10 @@ function addDaysIso(isoDate, days) {
   return `${yy}-${mm}-${dd}`;
 }
 
-function isSunday(isoDate) {
+function isWeekend(isoDate) {
   const [Y, M, D] = isoDate.split('-').map(Number);
-  return new Date(Date.UTC(Y, M - 1, D)).getUTCDay() === 0;
+  const dow = new Date(Date.UTC(Y, M - 1, D)).getUTCDay();
+  return dow === 0 || dow === 6;
 }
 
 exports.handler = async () => {
@@ -116,7 +117,7 @@ exports.handler = async () => {
   const dates = [];
   for (let i = 1; i <= WINDOW_DAYS; i++) {
     const iso = addDaysIso(today, i);
-    if (isSunday(iso))            continue;
+    if (isWeekend(iso))           continue;
     if (blockedFullDay.has(iso))  continue;
 
     const slots = SLOTS.filter(slot => {
