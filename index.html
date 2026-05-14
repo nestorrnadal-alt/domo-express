@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Domo Express â Reserva tu handyman</title>
-  <meta name="description" content="Reserva 2 tareas de handyman en menos de 2 minutos. $149 tarifa fija. Sin sorpresas.">
+  <meta name="description" content="Reserva 2 tareas de handyman en menos de 2 minutos. $175 tarifa fija. Sin sorpresas.">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -96,32 +96,93 @@
       height: 4px; background: var(--periwinkle); border-radius: 2px;
       transition: width .35s ease;
     }
-    .progress-steps {
-      display: flex; gap: 0;
-      margin-top: 12px;
+    .progress-dots {
+      display: flex; justify-content: center; gap: 8px;
+      padding: 14px 0 18px;
     }
-    .progress-step {
-      flex: 1; text-align: center;
-      padding: 10px 4px;
-      font-size: 11px; font-weight: 600;
-      color: rgba(255,255,255,.45);
+    .progress-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.25);
       cursor: pointer;
-      transition: color .2s;
-      position: relative;
+      transition: all .25s;
     }
-    .progress-step::after {
-      content: '';
-      position: absolute; bottom: 0; left: 10%; right: 10%;
-      height: 2px; background: transparent;
-      transition: background .2s;
+    .progress-dot.active {
+      background: var(--periwinkle);
+      width: 24px;
+      border-radius: 4px;
     }
-    .progress-step.active { color: var(--white); }
-    .progress-step.active::after { background: var(--periwinkle); }
-    .progress-step.done { color: rgba(255,255,255,.7); }
+    .progress-dot.done { background: rgba(255,255,255,.55); }
 
     /* ââ Step panels ââ */
     .step-panel { display: none; padding: 28px 28px 24px; }
     .step-panel.visible { display: block; }
+
+    /* Intro / pricing step */
+    .intro-pricing-card {
+      background: var(--bluelt);
+      border-radius: 14px;
+      padding: 22px 22px 20px;
+      margin-bottom: 16px;
+    }
+    .intro-pricing-eyebrow {
+      font-size: 12px; font-weight: 700;
+      color: var(--blue);
+      letter-spacing: .1em;
+    }
+    .intro-pricing-amount {
+      font-size: 48px; font-weight: 800;
+      color: var(--blue);
+      line-height: 1.05;
+      margin-top: 6px;
+    }
+    .intro-pricing-tagline {
+      font-size: 17px; color: var(--navy);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+    .intro-pricing-tags {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-top: 16px;
+    }
+    .intro-tag {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 13px; color: var(--navy);
+      font-weight: 500;
+    }
+    .intro-bullets {
+      background: var(--bluelt);
+      border-radius: 12px;
+      padding: 18px 22px;
+    }
+    .intro-bullets ul { list-style: none; padding: 0; margin: 0; }
+    .intro-bullets li {
+      position: relative;
+      padding-left: 28px;
+      margin: 10px 0;
+      font-size: 14px;
+      color: var(--navy);
+      line-height: 1.5;
+    }
+    .intro-bullets li::before {
+      content: '\2713';
+      position: absolute;
+      left: 0; top: 0;
+      color: var(--blue);
+      font-weight: 700;
+    }
+    .intro-secondary {
+      text-align: center;
+      margin-top: 14px;
+    }
+    .day-completo-link {
+      font-size: 13px;
+      color: var(--blue);
+      text-decoration: underline;
+    }
 
     .step-intro {
       margin-bottom: 22px;
@@ -475,25 +536,57 @@
     <!-- Progress -->
     <div class="progress-wrap">
       <div class="progress-label">
-        <span class="step-title" id="progressTitle">Elige tus tareas</span>
-        <span class="step-count" id="progressCount">Paso 1 de 4</span>
+        <span class="step-title" id="progressTitle">Domo Express</span>
+        <span class="step-count" id="progressCount">Paso 1 de 5</span>
       </div>
-      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
-      <div class="progress-steps">
-        <div class="progress-step active" id="pstep1" onclick="goToStep(1)">Tareas</div>
-        <div class="progress-step" id="pstep2" onclick="goToStep(2)">Fecha y hora</div>
-        <div class="progress-step" id="pstep3" onclick="goToStep(3)">Tus datos</div>
-        <div class="progress-step" id="pstep4" onclick="goToStep(4)">Confirmar</div>
+      <div class="progress-track" style="display:none"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+      <div class="progress-dots">
+        <span class="progress-dot active" id="pstep1" onclick="goToStep(1)"></span>
+        <span class="progress-dot" id="pstep2" onclick="goToStep(2)"></span>
+        <span class="progress-dot" id="pstep3" onclick="goToStep(3)"></span>
+        <span class="progress-dot" id="pstep4" onclick="goToStep(4)"></span>
+        <span class="progress-dot" id="pstep5" onclick="goToStep(5)"></span>
       </div>
     </div>
 
-    <!-- Step 1: Task selection -->
+    <!-- Step 1: Intro / pricing -->
     <div class="step-panel visible" id="step1">
+      <div class="intro-pricing-card">
+        <div class="intro-pricing-eyebrow">DOMO EXPRESS</div>
+        <div class="intro-pricing-amount">$175</div>
+        <div class="intro-pricing-tagline">Dos tareas. Dos horas. Listo.</div>
+        <div class="intro-pricing-tags">
+          <span class="intro-tag">2 tareas</span>
+          <span class="intro-tag">~2 horas</span>
+          <span class="intro-tag">24h anticipo</span>
+          <span class="intro-tag">SJ metro</span>
+        </div>
+      </div>
+
+      <div class="intro-bullets">
+        <ul>
+          <li>Materiales por ti &mdash; o te los buscamos (+$25)</li>
+          <li>Se cobra despu&eacute;s del servicio</li>
+          <li>ATH M&oacute;vil o tarjeta de cr&eacute;dito</li>
+          <li>Cancelaci&oacute;n gratis con 24h de anticipo</li>
+        </ul>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-next" onclick="nextStep(1)">Reservar ahora &rarr;</button>
+      </div>
+
+      <div class="intro-secondary">
+        <a href="https://domoyourhome.com/booknow/handyman-new-flow" class="day-completo-link">&iquest;Tienes m&aacute;s de 2 tareas? Ver d&iacute;a completo &rarr;</a>
+      </div>
+    </div>
+
+    <div class="step-panel" id="step2">
       <div class="step-intro">
         <h2>Â¿QuÃ© necesitas resolver?</h2>
         <p>Selecciona exactamente <strong>2 tareas</strong>. Tarifa fija â sin sorpresas.</p>
       </div>
-      <div class="step-error" id="err1">Por favor selecciona 2 tareas para continuar.</div>
+      <div class="step-error" id="err2">Por favor selecciona 2 tareas para continuar.</div>
 
       <div class="task-grid" id="taskGrid">
         <!-- populated by JS -->
@@ -502,17 +595,17 @@
       <p class="selection-note" id="selNote">Seleccionadas: <span id="selCount">0</span> de 2</p>
 
       <div class="btn-row">
-        <button class="btn-next" onclick="nextStep(1)" id="btnNext1">Siguiente â</button>
+        <button class="btn-next" onclick="nextStep(2)" id="btnNext2">Siguiente â</button>
       </div>
     </div>
 
-    <!-- Step 2: Date & Time -->
-    <div class="step-panel" id="step2">
+    <!-- Step 3: Date & Time -->
+    <div class="step-panel" id="step3">
       <div class="step-intro">
         <h2>Â¿CuÃ¡ndo te viene bien?</h2>
         <p>Disponibilidad para los prÃ³ximos 7 dÃ­as, sujeto a confirmaciÃ³n.</p>
       </div>
-      <div class="step-error" id="err2">Por favor selecciona fecha y hora.</div>
+      <div class="step-error" id="err3">Por favor selecciona fecha y hora.</div>
 
       <div class="date-grid" id="dateGrid"><!-- populated by JS --></div>
 
@@ -530,18 +623,18 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="prevStep(2)">â AtrÃ¡s</button>
-        <button class="btn-next" onclick="nextStep(2)">Siguiente â</button>
+        <button class="btn-back" onclick="prevStep(3)">â AtrÃ¡s</button>
+        <button class="btn-next" onclick="nextStep(3)">Siguiente â</button>
       </div>
     </div>
 
-    <!-- Step 3: Customer info -->
-    <div class="step-panel" id="step3">
+    <!-- Step 4: Customer info -->
+    <div class="step-panel" id="step4">
       <div class="step-intro">
         <h2>Tus datos de contacto</h2>
         <p>Para confirmarte la reservaciÃ³n y coordinar la llegada del handyman.</p>
       </div>
-      <div class="step-error" id="err3" id="err3"></div>
+      <div class="step-error" id="err4"></div>
 
       <div class="field-row">
         <div class="field-group">
@@ -591,8 +684,8 @@
           <div class="toggle-box" id="matToggle"></div>
         </div>
         <div class="materials-info">
-          <div class="mat-title">Domo consigue los materiales (+$30)</div>
-          <div class="mat-sub">Materiales reembolsados al costo + tarifa de $30 por gestiÃ³n</div>
+          <div class="mat-title">Domo consigue los materiales (+$25)</div>
+          <div class="mat-sub">Materiales reembolsados al costo + tarifa de $25 por gestiÃ³n</div>
         </div>
       </div>
 
@@ -605,29 +698,29 @@
 
       <!-- Price box -->
       <div class="price-box">
-        <div class="price-row"><span class="pr-label">Servicio Express (2 tareas)</span><span class="pr-val" id="prBase">$149</span></div>
-        <div id="prMatRow" class="price-row" style="display:none"><span class="pr-label">GestiÃ³n de materiales</span><span class="pr-val">$30</span></div>
+        <div class="price-row"><span class="pr-label">Servicio Express (2 tareas)</span><span class="pr-val" id="prBase">$175</span></div>
+        <div id="prMatRow" class="price-row" style="display:none"><span class="pr-label">GestiÃ³n de materiales</span><span class="pr-val">$25</span></div>
         <hr class="price-divider">
         <div class="price-total">
           <span class="pt-label">Total</span>
-          <span class="pt-val" id="prTotal">$149</span>
+          <span class="pt-val" id="prTotal">$175</span>
         </div>
         <div class="price-note" id="prNote">MÃ¡s materiales al costo si aplica. Se cobra despuÃ©s del servicio.</div>
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="prevStep(3)">â AtrÃ¡s</button>
-        <button class="btn-next" onclick="nextStep(3)">Revisar reservaciÃ³n â</button>
+        <button class="btn-back" onclick="prevStep(4)">â AtrÃ¡s</button>
+        <button class="btn-next" onclick="nextStep(4)">Revisar reservaciÃ³n â</button>
       </div>
     </div>
 
-    <!-- Step 4: Review & confirm -->
-    <div class="step-panel" id="step4">
+    <!-- Step 5: Review & confirm -->
+    <div class="step-panel" id="step5">
       <div class="step-intro">
         <h2>Revisa y confirma</h2>
         <p>Verifica los detalles antes de enviar tu reservaciÃ³n.</p>
       </div>
-      <div class="step-error" id="err4"></div>
+      <div class="step-error" id="err5"></div>
 
       <table class="review-table" id="reviewTable">
         <!-- populated by JS -->
@@ -635,7 +728,7 @@
 
       <div class="review-price">
         <span class="rp-label">Total a pagar despuÃ©s del servicio</span>
-        <span class="rp-val" id="reviewTotal">$149</span>
+        <span class="rp-val" id="reviewTotal">$175</span>
       </div>
 
       <div class="review-note">
@@ -643,7 +736,7 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="prevStep(4)">â Editar</button>
+        <button class="btn-back" onclick="prevStep(5)">â Editar</button>
         <button class="btn-next" onclick="submitBooking()" id="btnSubmit">Confirmar reservaciÃ³n â</button>
       </div>
     </div>
@@ -733,8 +826,8 @@ const state = {
 };
 
 // ââ Step config âââââââââââââââââââââââââââââââââââââââââââââââ
-const STEP_TITLES  = ['', 'Elige tus tareas', 'Fecha y hora', 'Tus datos', 'Confirmar'];
-const STEP_PERCENTS= [0,  25, 50, 75, 100];
+const STEP_TITLES  = ['', 'Domo Express', 'Elige tus tareas', 'Fecha y hora', 'Tus datos', 'Confirmar'];
+const STEP_PERCENTS= [0,  20, 40, 60, 80, 100];
 
 // ââ Init ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 (function init() {
@@ -876,8 +969,8 @@ function toggleMaterials() {
 }
 
 function updatePrice() {
-  const base  = 149;
-  const matFee = state.materialsRequested ? 30 : 0;
+  const base  = 175;
+  const matFee = state.materialsRequested ? 25 : 0;
   const total = base + matFee;
   document.getElementById('prTotal').textContent = `$${total}`;
   document.getElementById('reviewTotal').textContent = `$${total}`;
@@ -908,16 +1001,16 @@ function showStep(n) {
 
   // progress
   document.getElementById('progressTitle').textContent = STEP_TITLES[n];
-  document.getElementById('progressCount').textContent = `Paso ${n} de 4`;
+  document.getElementById('progressCount').textContent = `Paso ${n} de 5`;
   document.getElementById('progressFill').style.width = STEP_PERCENTS[n] + '%';
 
-  for (let i = 1; i <= 4; i++) {
+  for (let i = 1; i <= 5; i++) {
     const el = document.getElementById(`pstep${i}`);
     el.classList.toggle('active', i === n);
     el.classList.toggle('done', i < n);
   }
 
-  if (n === 4) buildReview();
+  if (n === 5) buildReview();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -926,21 +1019,23 @@ function showStep(n) {
 function validateStep(n) {
   hideErr(n);
   if (n === 1) {
-    if (state.selectedTasks.length < 2) { showErr(1, 'Por favor selecciona 2 tareas para continuar.'); return false; }
+    return true; // intro / pricing — nothing to validate
+  }
+  if (n === 2) {
+    if (state.selectedTasks.length < 2) { showErr(2, 'Por favor selecciona 2 tareas para continuar.'); return false; }
     if (state.selectedTasks.includes('__other__') && !document.getElementById('otherInput').value.trim()) {
-      showErr(1, 'Por favor describe la tarea adicional.'); return false;
+      showErr(2, 'Por favor describe la tarea adicional.'); return false;
     }
-    // save other
     if (state.selectedTasks.includes('__other__')) {
       const idx = state.selectedTasks.indexOf('__other__');
       state.selectedTasks[idx] = document.getElementById('otherInput').value.trim();
     }
   }
-  if (n === 2) {
-    if (!state.selectedDate) { showErr(2, 'Por favor selecciona una fecha.'); return false; }
-    if (!state.selectedTime) { showErr(2, 'Por favor selecciona una hora.'); return false; }
-  }
   if (n === 3) {
+    if (!state.selectedDate) { showErr(3, 'Por favor selecciona una fecha.'); return false; }
+    if (!state.selectedTime) { showErr(3, 'Por favor selecciona una hora.'); return false; }
+  }
+  if (n === 4) {
     const name  = document.getElementById('fName').value.trim();
     const last  = document.getElementById('fLastName').value.trim();
     const phone = document.getElementById('fPhone').value.trim();
@@ -948,11 +1043,11 @@ function validateStep(n) {
     const addr  = document.getElementById('fAddress').value.trim();
     const pay   = state.paymentMethod;
 
-    if (!name)  { showErr(3, 'Por favor ingresa tu nombre.'); return false; }
-    if (!phone) { showErr(3, 'Por favor ingresa tu telÃ©fono.'); return false; }
-    if (!email || !email.includes('@')) { showErr(3, 'Por favor ingresa un correo electrÃ³nico vÃ¡lido.'); return false; }
-    if (!addr)  { showErr(3, 'Por favor ingresa la direcciÃ³n del servicio.'); return false; }
-    if (!pay)   { showErr(3, 'Por favor selecciona un mÃ©todo de pago.'); return false; }
+    if (!name)  { showErr(4, 'Por favor ingresa tu nombre.'); return false; }
+    if (!phone) { showErr(4, 'Por favor ingresa tu telÃ©fono.'); return false; }
+    if (!email || !email.includes('@')) { showErr(4, 'Por favor ingresa un correo electrÃ³nico vÃ¡lido.'); return false; }
+    if (!addr)  { showErr(4, 'Por favor ingresa la direcciÃ³n del servicio.'); return false; }
+    if (!pay)   { showErr(4, 'Por favor selecciona un mÃ©todo de pago.'); return false; }
 
     state.customerName  = `${name} ${last}`.trim();
     state.customerPhone = phone;
@@ -1002,8 +1097,8 @@ async function submitBooking() {
   document.getElementById('loadingOverlay').classList.add('visible');
   document.getElementById('btnSubmit').disabled = true;
 
-  const base  = 14900;
-  const total = state.materialsRequested ? base + 3000 : base;
+  const base  = 17500;
+  const total = state.materialsRequested ? base + 2500 : base;
 
   const payload = {
     customer_name:       state.customerName,
