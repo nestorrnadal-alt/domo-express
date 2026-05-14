@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Domo Express â Reserva tu handyman</title>
+  <title>Domo Express — Reserva tu handyman</title>
   <meta name="description" content="Reserva 2 tareas de handyman en menos de 2 minutos. $175 tarifa fija. Sin sorpresas.">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,7 +32,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ââ Layout ââ */
+    /* ── Layout ── */
     .page {
       min-height: 100vh;
       display: flex;
@@ -41,7 +41,7 @@
       padding: 0 16px 48px;
     }
 
-    /* ââ Header ââ */
+    /* ── Header ── */
     .site-header {
       width: 100%;
       background: var(--navy);
@@ -68,7 +68,7 @@
       letter-spacing: .06em; text-transform: uppercase;
     }
 
-    /* ââ Card ââ */
+    /* ── Card ── */
     .card {
       width: 100%; max-width: 540px;
       background: var(--white);
@@ -78,7 +78,7 @@
       box-shadow: 0 4px 24px rgba(20,37,67,.08);
     }
 
-    /* ââ Progress bar ââ */
+    /* ── Progress bar ── */
     .progress-wrap {
       background: var(--navy);
       padding: 20px 28px 0;
@@ -114,7 +114,7 @@
     }
     .progress-dot.done { background: rgba(255,255,255,.55); }
 
-    /* ââ Step panels ââ */
+    /* ── Step panels ── */
     .step-panel { display: none; padding: 28px 28px 24px; }
     .step-panel.visible { display: block; }
 
@@ -190,7 +190,7 @@
     .step-intro h2 { font-size: 20px; font-weight: 700; color: var(--navy); line-height: 1.3; }
     .step-intro p { margin-top: 6px; font-size: 14px; color: var(--muted); line-height: 1.5; }
 
-    /* ââ Task grid ââ */
+    /* ── Task grid ── */
     .task-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -217,7 +217,7 @@
       font-weight: 600;
       color: var(--blue);
     }
-    .task-chip.selected .chip-icon::after { content: ' â'; font-size: 12px; }
+    .task-chip.selected .chip-icon::after { content: ' ✓'; font-size: 12px; }
     .task-chip.disabled { opacity: .45; cursor: not-allowed; }
     .task-chip.disabled:hover { border-color: var(--border); background: var(--white); }
 
@@ -232,7 +232,7 @@
     }
     .selection-note span { color: var(--blue); font-weight: 600; }
 
-    /* ââ Date picker ââ */
+    /* ── Date picker ── */
     .date-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -255,7 +255,7 @@
     .date-chip.selected { border-color: var(--blue); background: var(--bluelt); }
     .date-chip.selected .day-num { color: var(--blue); }
 
-    /* ââ Time grid ââ */
+    /* ── Time grid ── */
     .time-section-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 16px 0 8px; }
     .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
     .time-chip {
@@ -268,7 +268,7 @@
     .time-chip:hover { border-color: var(--blue); background: var(--bluelt); }
     .time-chip.selected { border-color: var(--blue); background: var(--bluelt); color: var(--blue); }
 
-    /* ââ Form fields ââ */
+    /* ── Form fields ── */
     .field-group { margin-bottom: 16px; }
     .field-group label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
     .field-group input, .field-group textarea, .field-group select {
@@ -291,7 +291,7 @@
     .field-group textarea { resize: vertical; min-height: 70px; }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-    /* ââ Payment method ââ */
+    /* ── Payment method ── */
     .pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .pay-option {
       border: 1.5px solid var(--border);
@@ -308,7 +308,7 @@
     .pay-option.selected { border-color: var(--blue); background: var(--bluelt); }
     .pay-option.selected .pay-name { color: var(--blue); }
 
-    /* ââ Materials toggle ââ */
+    /* ── Materials toggle ── */
     .materials-row {
       border: 1.5px solid var(--border);
       border-radius: 10px;
@@ -334,7 +334,7 @@
     .materials-info .mat-title { font-size: 13px; font-weight: 700; color: var(--navy); }
     .materials-info .mat-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-    /* ââ Pricing summary ââ */
+    /* ── Pricing summary ── */
     .price-box {
       background: var(--bluelt);
       border: 1px solid var(--border);
@@ -351,7 +351,7 @@
     .price-total .pt-val   { font-weight: 800; color: var(--blue); font-size: 20px; }
     .price-note { font-size: 11px; color: var(--muted); margin-top: 8px; text-align: center; line-height: 1.5; }
 
-    /* ââ Review summary ââ */
+    /* ── Review summary ── */
     .review-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .review-table td { padding: 9px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
     .review-table td:first-child { color: var(--muted); width: 38%; padding-right: 12px; }
@@ -377,7 +377,7 @@
       font-size: 12px; color: #5A4500; line-height: 1.6;
     }
 
-    /* ââ Buttons ââ */
+    /* ── Buttons ── */
     .btn-row { display: flex; gap: 10px; margin-top: 24px; }
     .btn-back {
       flex: 0 0 auto;
@@ -401,12 +401,12 @@
     .btn-next:hover { background: var(--navy); }
     .btn-next:disabled { background: #B0BACE; cursor: not-allowed; }
 
-    /* ââ Error ââ */
+    /* ── Error ── */
     .field-error { font-size: 12px; color: var(--red); margin-top: 4px; }
     .step-error  { background: #FEF0EE; border: 1px solid #F8B4AC; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--red); margin-bottom: 16px; display: none; }
     .step-error.visible { display: block; }
 
-    /* ââ Loading overlay ââ */
+    /* ── Loading overlay ── */
     .loading-overlay {
       display: none;
       position: fixed; inset: 0;
@@ -426,7 +426,7 @@
     .loading-text { color: var(--white); font-size: 15px; font-weight: 600; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ââ Confirmation screen ââ */
+    /* ── Confirmation screen ── */
     #step-confirmation { display: none; }
     #step-confirmation.visible { display: block; }
 
@@ -495,7 +495,7 @@
     }
     .btn-new:hover { border-color: var(--blue); color: var(--blue); }
 
-    /* ââ Footer ââ */
+    /* ── Footer ── */
     .site-footer {
       margin-top: 24px;
       text-align: center;
@@ -504,7 +504,7 @@
     }
     .site-footer a { color: var(--blue); text-decoration: none; }
 
-    /* ââ Mobile ââ */
+    /* ── Mobile ── */
     @media (max-width: 480px) {
       .progress-step { font-size: 9px; }
       .task-grid { grid-template-columns: 1fr 1fr; }
@@ -518,7 +518,7 @@
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
-  <div class="loading-text">Procesando tu reservaciÃ³nâ¦</div>
+  <div class="loading-text">Procesando tu reservación…</div>
 </div>
 
 <div class="page">
@@ -583,8 +583,8 @@
 
     <div class="step-panel" id="step2">
       <div class="step-intro">
-        <h2>Â¿QuÃ© necesitas resolver?</h2>
-        <p>Selecciona exactamente <strong>2 tareas</strong>. Tarifa fija â sin sorpresas.</p>
+        <h2>¿Qué necesitas resolver?</h2>
+        <p>Selecciona exactamente <strong>2 tareas</strong>. Tarifa fija — sin sorpresas.</p>
       </div>
       <div class="step-error" id="err2">Por favor selecciona 2 tareas para continuar.</div>
 
@@ -595,15 +595,15 @@
       <p class="selection-note" id="selNote">Seleccionadas: <span id="selCount">0</span> de 2</p>
 
       <div class="btn-row">
-        <button class="btn-next" onclick="nextStep(2)" id="btnNext2">Siguiente â</button>
+        <button class="btn-next" onclick="nextStep(2)" id="btnNext2">Siguiente →</button>
       </div>
     </div>
 
     <!-- Step 3: Date & Time -->
     <div class="step-panel" id="step3">
       <div class="step-intro">
-        <h2>Â¿CuÃ¡ndo te viene bien?</h2>
-        <p>Disponibilidad para los prÃ³ximos 7 dÃ­as, sujeto a confirmaciÃ³n.</p>
+        <h2>¿Cuándo te viene bien?</h2>
+        <p>Disponibilidad para los próximos 7 días, sujeto a confirmación.</p>
       </div>
       <div class="step-error" id="err3">Por favor selecciona fecha y hora.</div>
 
@@ -623,8 +623,8 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="prevStep(3)">â AtrÃ¡s</button>
-        <button class="btn-next" onclick="nextStep(3)">Siguiente â</button>
+        <button class="btn-back" onclick="prevStep(3)">← Atrás</button>
+        <button class="btn-next" onclick="nextStep(3)">Siguiente →</button>
       </div>
     </div>
 
@@ -632,48 +632,48 @@
     <div class="step-panel" id="step4">
       <div class="step-intro">
         <h2>Tus datos de contacto</h2>
-        <p>Para confirmarte la reservaciÃ³n y coordinar la llegada del handyman.</p>
+        <p>Para confirmarte la reservación y coordinar la llegada del handyman.</p>
       </div>
       <div class="step-error" id="err4"></div>
 
       <div class="field-row">
         <div class="field-group">
           <label>Nombre</label>
-          <input type="text" id="fName" placeholder="MarÃ­a GarcÃ­a" autocomplete="given-name">
+          <input type="text" id="fName" placeholder="María García" autocomplete="given-name">
         </div>
         <div class="field-group">
           <label>Apellido</label>
-          <input type="text" id="fLastName" placeholder="GarcÃ­a" autocomplete="family-name">
+          <input type="text" id="fLastName" placeholder="García" autocomplete="family-name">
         </div>
       </div>
 
       <div class="field-group">
-        <label>TelÃ©fono</label>
+        <label>Teléfono</label>
         <input type="tel" id="fPhone" placeholder="787-000-0000" autocomplete="tel">
       </div>
 
       <div class="field-group">
-        <label>Correo electrÃ³nico</label>
+        <label>Correo electrónico</label>
         <input type="email" id="fEmail" placeholder="tu@correo.com" autocomplete="email">
       </div>
 
       <div class="field-group">
-        <label>DirecciÃ³n del servicio</label>
-        <input type="text" id="fAddress" placeholder="Calle, nÃºmero, urb. â Condado / Miramar / Santurce" autocomplete="street-address">
+        <label>Dirección del servicio</label>
+        <input type="text" id="fAddress" placeholder="Calle, número, urb. — Condado / Miramar / Santurce" autocomplete="street-address">
       </div>
 
       <div class="field-group">
         <label>Pago</label>
         <div class="pay-options">
           <div class="pay-option" data-pay="ath_movil" onclick="selectPay(this)">
-            <div class="pay-icon">ð±</div>
-            <div class="pay-name">ATH MÃ³vil</div>
-            <div class="pay-sub">DespuÃ©s del servicio</div>
+            <div class="pay-icon">📱</div>
+            <div class="pay-name">ATH Móvil</div>
+            <div class="pay-sub">Después del servicio</div>
           </div>
           <div class="pay-option" data-pay="credit_card" onclick="selectPay(this)">
-            <div class="pay-icon">ð³</div>
+            <div class="pay-icon">💳</div>
             <div class="pay-name">Tarjeta</div>
-            <div class="pay-sub">DespuÃ©s del servicio</div>
+            <div class="pay-sub">Después del servicio</div>
           </div>
         </div>
       </div>
@@ -685,32 +685,32 @@
         </div>
         <div class="materials-info">
           <div class="mat-title">Domo consigue los materiales (+$25)</div>
-          <div class="mat-sub">Materiales reembolsados al costo + tarifa de $25 por gestiÃ³n</div>
+          <div class="mat-sub">Materiales reembolsados al costo + tarifa de $25 por gestión</div>
         </div>
       </div>
 
       <div id="materialsDetailWrap" style="display:none;margin-top:10px;">
         <div class="field-group" style="margin-bottom:0">
-          <label>Â¿QuÃ© materiales necesitas? (opcional)</label>
-          <textarea id="fMaterialsDetail" placeholder="Ej: tubo de cobre Â½&quot;, 2 galletas de paint Sherwin Williams blancoâ¦"></textarea>
+          <label>¿Qué materiales necesitas? (opcional)</label>
+          <textarea id="fMaterialsDetail" placeholder="Ej: tubo de cobre ½&quot;, 2 galletas de paint Sherwin Williams blanco…"></textarea>
         </div>
       </div>
 
       <!-- Price box -->
       <div class="price-box">
         <div class="price-row"><span class="pr-label">Servicio Express (2 tareas)</span><span class="pr-val" id="prBase">$175</span></div>
-        <div id="prMatRow" class="price-row" style="display:none"><span class="pr-label">GestiÃ³n de materiales</span><span class="pr-val">$25</span></div>
+        <div id="prMatRow" class="price-row" style="display:none"><span class="pr-label">Gestión de materiales</span><span class="pr-val">$25</span></div>
         <hr class="price-divider">
         <div class="price-total">
           <span class="pt-label">Total</span>
           <span class="pt-val" id="prTotal">$175</span>
         </div>
-        <div class="price-note" id="prNote">MÃ¡s materiales al costo si aplica. Se cobra despuÃ©s del servicio.</div>
+        <div class="price-note" id="prNote">Más materiales al costo si aplica. Se cobra después del servicio.</div>
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="prevStep(4)">â AtrÃ¡s</button>
-        <button class="btn-next" onclick="nextStep(4)">Revisar reservaciÃ³n â</button>
+        <button class="btn-back" onclick="prevStep(4)">← Atrás</button>
+        <button class="btn-next" onclick="nextStep(4)">Revisar reservación →</button>
       </div>
     </div>
 
@@ -718,7 +718,7 @@
     <div class="step-panel" id="step5">
       <div class="step-intro">
         <h2>Revisa y confirma</h2>
-        <p>Verifica los detalles antes de enviar tu reservaciÃ³n.</p>
+        <p>Verifica los detalles antes de enviar tu reservación.</p>
       </div>
       <div class="step-error" id="err5"></div>
 
@@ -727,17 +727,17 @@
       </table>
 
       <div class="review-price">
-        <span class="rp-label">Total a pagar despuÃ©s del servicio</span>
+        <span class="rp-label">Total a pagar después del servicio</span>
         <span class="rp-val" id="reviewTotal">$175</span>
       </div>
 
       <div class="review-note">
-        <strong>Recuerda:</strong> Si necesitas cancelar, hazlo con al menos 24 horas de anticipaciÃ³n. Cancela respondiendo tu email de confirmaciÃ³n o llamando al <strong>(787) 419-0300</strong>.
+        <strong>Recuerda:</strong> Si necesitas cancelar, hazlo con al menos 24 horas de anticipación. Cancela respondiendo tu email de confirmación o llamando al <strong>(787) 419-0300</strong>.
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="prevStep(5)">â Editar</button>
-        <button class="btn-next" onclick="submitBooking()" id="btnSubmit">Confirmar reservaciÃ³n â</button>
+        <button class="btn-back" onclick="prevStep(5)">← Editar</button>
+        <button class="btn-next" onclick="submitBooking()" id="btnSubmit">Confirmar reservación ✓</button>
       </div>
     </div>
 
@@ -746,20 +746,20 @@
   <!-- Confirmation screen (replaces card) -->
   <div class="card" id="confirmCard" style="display:none;">
     <div class="confirm-header">
-      <div class="confirm-check">â</div>
-      <h2>Â¡ReservaciÃ³n recibida!</h2>
-      <p>RecibirÃ¡s confirmaciÃ³n por correo electrÃ³nico</p>
+      <div class="confirm-check">✓</div>
+      <h2>¡Reservación recibida!</h2>
+      <p>Recibirás confirmación por correo electrónico</p>
     </div>
     <div class="confirm-id-box">
-      <div class="cid-label">NÃºmero de reservaciÃ³n</div>
+      <div class="cid-label">Número de reservación</div>
       <div class="cid-value" id="confirmId">EXP-XXXX</div>
     </div>
     <div class="confirm-body">
-      <p>Tu reservaciÃ³n estÃ¡ siendo procesada. El equipo de Domo la estÃ¡ revisando y recibirÃ¡s confirmaciÃ³n del handyman asignado y la hora exacta pronto.</p>
+      <p>Tu reservación está siendo procesada. El equipo de Domo la está revisando y recibirás confirmación del handyman asignado y la hora exacta pronto.</p>
       <div class="confirm-steps">
         <div class="confirm-step">
           <div class="cs-num">1</div>
-          <div class="cs-text"><strong>Email de confirmaciÃ³n</strong> enviado a tu correo con todos los detalles.</div>
+          <div class="cs-text"><strong>Email de confirmación</strong> enviado a tu correo con todos los detalles.</div>
         </div>
         <div class="confirm-step">
           <div class="cs-num">2</div>
@@ -767,49 +767,49 @@
         </div>
         <div class="confirm-step">
           <div class="cs-num">3</div>
-          <div class="cs-text"><strong>El dÃ­a del servicio</strong>, el handyman llega y completa tus tareas.</div>
+          <div class="cs-text"><strong>El día del servicio</strong>, el handyman llega y completa tus tareas.</div>
         </div>
         <div class="confirm-step">
           <div class="cs-num">4</div>
-          <div class="cs-text"><strong>Pagas despuÃ©s del servicio</strong> â ATH MÃ³vil o tarjeta.</div>
+          <div class="cs-text"><strong>Pagas después del servicio</strong> — ATH Móvil o tarjeta.</div>
         </div>
       </div>
       <div class="confirm-note">
-        Â¿Preguntas? Llama al <strong>(787) 419-0300</strong> o escrÃ­benos a <strong>info@domoyourhome.com</strong>
+        ¿Preguntas? Llama al <strong>(787) 419-0300</strong> o escríbenos a <strong>info@domoyourhome.com</strong>
       </div>
-      <button class="btn-new" onclick="resetForm()">Hacer otra reservaciÃ³n</button>
+      <button class="btn-new" onclick="resetForm()">Hacer otra reservación</button>
     </div>
   </div>
 
   <footer class="site-footer">
-    <div>Domo Â· San Juan, Puerto Rico</div>
-    <div><a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a> Â· <a href="tel:7874190300">(787) 419-0300</a></div>
+    <div>Domo · San Juan, Puerto Rico</div>
+    <div><a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a> · <a href="tel:7874190300">(787) 419-0300</a></div>
   </footer>
 
 </div><!-- /page -->
 
 <script>
-// ââ Configuration ââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Configuration ──────────────────────────────────────────────
 const API_URL = '/api/book';   // Netlify function endpoint
 
-// ââ Task menu âââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Task menu ─────────────────────────────────────────────────
 const TASKS = [
-  { id: 't1',  icon: 'ðº', label: 'Montaje de TV' },
-  { id: 't2',  icon: 'ð¡', label: 'InstalaciÃ³n de abanico de techo' },
-  { id: 't3',  icon: 'ð', label: 'InstalaciÃ³n de lÃ¡mpara o accesorio de luz' },
-  { id: 't4',  icon: 'ð¿', label: 'Cambio de pluma (cocina o baÃ±o)' },
-  { id: 't5',  icon: 'ðª', label: 'InstalaciÃ³n de cortina, persiana o shade' },
-  { id: 't6',  icon: 'ðï¸', label: 'Ensamblaje de mueble' },
-  { id: 't7',  icon: 'ðª', label: 'ReparaciÃ³n de puerta o cerradura' },
-  { id: 't8',  icon: 'ð¡', label: 'InstalaciÃ³n de ring / cÃ¡mara / timbre' },
-  { id: 't9',  icon: 'ð', label: 'Cambio de toma corriente o switch' },
-  { id: 't10', icon: 'ð¨', label: 'Touch-up de pintura (hasta 2 paredes)' },
-  { id: 't11', icon: 'ð¼ï¸', label: 'Anclaje de espejo, cuadro o repisa' },
-  { id: 't12', icon: 'ð½', label: 'InstalaciÃ³n de inodoro (fixture)' },
-  { id: 'tOther', icon: 'âï¸', label: 'Otra tarea (especifica abajo)', isOther: true },
+  { id: 't1',  icon: '📺', label: 'Montaje de TV' },
+  { id: 't2',  icon: '💡', label: 'Instalación de abanico de techo' },
+  { id: 't3',  icon: '🔆', label: 'Instalación de lámpara o accesorio de luz' },
+  { id: 't4',  icon: '🚿', label: 'Cambio de pluma (cocina o baño)' },
+  { id: 't5',  icon: '🪟', label: 'Instalación de cortina, persiana o shade' },
+  { id: 't6',  icon: '🛋️', label: 'Ensamblaje de mueble' },
+  { id: 't7',  icon: '🚪', label: 'Reparación de puerta o cerradura' },
+  { id: 't8',  icon: '📡', label: 'Instalación de ring / cámara / timbre' },
+  { id: 't9',  icon: '🔌', label: 'Cambio de toma corriente o switch' },
+  { id: 't10', icon: '🎨', label: 'Touch-up de pintura (hasta 2 paredes)' },
+  { id: 't11', icon: '🖼️', label: 'Anclaje de espejo, cuadro o repisa' },
+  { id: 't12', icon: '🚽', label: 'Instalación de inodoro (fixture)' },
+  { id: 'tOther', icon: '✏️', label: 'Otra tarea (especifica abajo)', isOther: true },
 ];
 
-// ââ State âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── State ─────────────────────────────────────────────────────
 const state = {
   step: 1,
   selectedTasks: [],     // array of task labels
@@ -825,11 +825,11 @@ const state = {
   materialsDetail: '',
 };
 
-// ââ Step config âââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Step config ───────────────────────────────────────────────
 const STEP_TITLES  = ['', 'Domo Express', 'Elige tus tareas', 'Fecha y hora', 'Tus datos', 'Confirmar'];
 const STEP_PERCENTS= [0,  20, 40, 60, 80, 100];
 
-// ââ Init ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Init ──────────────────────────────────────────────────────
 (function init() {
   renderTaskGrid();
   renderDateGrid();
@@ -849,7 +849,7 @@ function renderTaskGrid() {
     if (t.isOther) {
       const inp = document.createElement('input');
       inp.type = 'text'; inp.id = 'otherInput';
-      inp.placeholder = 'Describe la tarea adicionalâ¦';
+      inp.placeholder = 'Describe la tarea adicional…';
       inp.style.cssText = 'display:none;width:100%;margin-top:8px;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;font-family:inherit;outline:none;';
       inp.oninput = () => { state.otherTask = inp.value; };
       inp.onfocus = () => inp.style.borderColor = 'var(--blue)';
@@ -862,10 +862,10 @@ function renderTaskGrid() {
 function renderDateGrid() {
   const grid = document.getElementById('dateGrid');
   grid.innerHTML = '';
-  const dayNames = ['Dom','Lun','Mar','MiÃ©','Jue','Vie','SÃ¡b'];
+  const dayNames = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const monthNames = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   const longMonths = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const longDays   = ['domingo','lunes','martes','miÃ©rcoles','jueves','viernes','sÃ¡bado'];
+  const longDays   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 
   for (let i = 1; i <= 7; i++) {
     const d = new Date();
@@ -886,7 +886,7 @@ function renderDateGrid() {
   }
 }
 
-// ââ Task toggle âââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Task toggle ───────────────────────────────────────────────
 function toggleTask(el, task) {
   if (task.isOther) {
     const isSelected = el.classList.contains('selected');
@@ -933,7 +933,7 @@ function updateSelCount() {
   document.getElementById('selCount').textContent = state.selectedTasks.length;
 }
 
-// ââ Date / time âââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Date / time ───────────────────────────────────────────────
 function selectDate(el) {
   document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
@@ -946,7 +946,7 @@ function selectTime(el) {
   state.selectedTime = el.dataset.time;
 }
 
-// ââ Payment & materials âââââââââââââââââââââââââââââââââââââââ
+// ── Payment & materials ───────────────────────────────────────
 function selectPay(el) {
   document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
@@ -961,7 +961,7 @@ function toggleMaterials() {
   const prMat = document.getElementById('prMatRow');
 
   row.classList.toggle('selected', state.materialsRequested);
-  tog.textContent  = state.materialsRequested ? 'â' : '';
+  tog.textContent  = state.materialsRequested ? '✓' : '';
   detWr.style.display = state.materialsRequested ? 'block' : 'none';
   prMat.style.display = state.materialsRequested ? 'flex' : 'none';
 
@@ -976,7 +976,7 @@ function updatePrice() {
   document.getElementById('reviewTotal').textContent = `$${total}`;
 }
 
-// ââ Navigation ââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Navigation ────────────────────────────────────────────────
 function goToStep(n) {
   if (n > state.step) return; // can't skip forward
   showStep(n);
@@ -1015,11 +1015,11 @@ function showStep(n) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ââ Validation ââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Validation ────────────────────────────────────────────────
 function validateStep(n) {
   hideErr(n);
   if (n === 1) {
-    return true; // intro / pricing — nothing to validate
+    return true; // intro / pricing - nothing to validate
   }
   if (n === 2) {
     if (state.selectedTasks.length < 2) { showErr(2, 'Por favor selecciona 2 tareas para continuar.'); return false; }
@@ -1044,10 +1044,10 @@ function validateStep(n) {
     const pay   = state.paymentMethod;
 
     if (!name)  { showErr(4, 'Por favor ingresa tu nombre.'); return false; }
-    if (!phone) { showErr(4, 'Por favor ingresa tu telÃ©fono.'); return false; }
-    if (!email || !email.includes('@')) { showErr(4, 'Por favor ingresa un correo electrÃ³nico vÃ¡lido.'); return false; }
-    if (!addr)  { showErr(4, 'Por favor ingresa la direcciÃ³n del servicio.'); return false; }
-    if (!pay)   { showErr(4, 'Por favor selecciona un mÃ©todo de pago.'); return false; }
+    if (!phone) { showErr(4, 'Por favor ingresa tu teléfono.'); return false; }
+    if (!email || !email.includes('@')) { showErr(4, 'Por favor ingresa un correo electrónico válido.'); return false; }
+    if (!addr)  { showErr(4, 'Por favor ingresa la dirección del servicio.'); return false; }
+    if (!pay)   { showErr(4, 'Por favor selecciona un método de pago.'); return false; }
 
     state.customerName  = `${name} ${last}`.trim();
     state.customerPhone = phone;
@@ -1067,20 +1067,20 @@ function hideErr(n) {
   if (el) el.classList.remove('visible');
 }
 
-// ââ Review table ââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Review table ──────────────────────────────────────────────
 function buildReview() {
-  const payLabel = state.paymentMethod === 'ath_movil' ? 'ATH MÃ³vil' : 'Tarjeta de crÃ©dito';
+  const payLabel = state.paymentMethod === 'ath_movil' ? 'ATH Móvil' : 'Tarjeta de crédito';
   const matLabel = state.materialsRequested
-    ? `SÃ­ â Domo las consigue${state.materialsDetail ? ': ' + state.materialsDetail : ''}`
+    ? `Sí — Domo las consigue${state.materialsDetail ? ': ' + state.materialsDetail : ''}`
     : 'No';
 
   const rows = [
     ['Tareas', `${state.selectedTasks[0]}<br>${state.selectedTasks[1]}`],
     ['Fecha',  state.selectedDate?.label || ''],
     ['Hora',   state.selectedTime || ''],
-    ['DirecciÃ³n', state.address],
+    ['Dirección', state.address],
     ['Contacto', `${state.customerName}<br>${state.customerPhone}<br>${state.customerEmail}`],
-    ['Pago',   payLabel + ' â despuÃ©s del servicio'],
+    ['Pago',   payLabel + ' — después del servicio'],
     ['Materiales', matLabel],
   ];
 
@@ -1092,7 +1092,7 @@ function buildReview() {
   updatePrice();
 }
 
-// ââ Submit ââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Submit ────────────────────────────────────────────────────
 async function submitBooking() {
   document.getElementById('loadingOverlay').classList.add('visible');
   document.getElementById('btnSubmit').disabled = true;
@@ -1137,12 +1137,12 @@ async function submitBooking() {
   } catch (err) {
     document.getElementById('loadingOverlay').classList.remove('visible');
     document.getElementById('btnSubmit').disabled = false;
-    showErr(4, `No pudimos procesar tu reservaciÃ³n: ${err.message}. Por favor intenta de nuevo o llama al (787) 419-0300.`);
+    showErr(4, `No pudimos procesar tu reservación: ${err.message}. Por favor intenta de nuevo o llama al (787) 419-0300.`);
     document.getElementById('err4').classList.add('visible');
   }
 }
 
-// ââ Reset âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Reset ─────────────────────────────────────────────────────
 function resetForm() {
   Object.assign(state, {
     step: 1, selectedTasks: [], otherTask: '',
