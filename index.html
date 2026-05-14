@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Domo Express — Reserva tu handyman</title>
   <meta name="description" content="Reserva 2 tareas de handyman en menos de 2 minutos. $175 tarifa fija. Sin sorpresas.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&display=swap">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -48,19 +51,27 @@
       padding: 16px 24px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 32px;
     }
-    .site-header .logo-mark {
-      width: 32px; height: 32px;
-      background: var(--periwinkle);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 16px; color: var(--white);
+    .site-logo {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 10px;
+      color: var(--white);
+      text-decoration: none;
     }
-    .site-header .brand { color: var(--white); font-weight: 700; font-size: 18px; }
+    .site-logo .logo-word {
+      font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      line-height: 1;
+      letter-spacing: -.02em;
+    }
+    .site-logo .logo-dot { color: var(--lime); }
     .site-header .badge {
-      margin-left: 4px;
+      margin-left: 2px;
+      align-self: center;
       background: var(--periwinkle);
       color: var(--white);
       font-size: 10px; font-weight: 700;
@@ -606,8 +617,9 @@
 
   <!-- Header -->
   <header class="site-header" style="max-width:540px;border-radius:0 0 0 0;margin-bottom:24px;width:100%;">
-    <div class="logo-mark">D</div>
-    <span class="brand">Domo</span>
+    <a class="site-logo" href="https://domoyourhome.com" aria-label="Domo">
+      <span class="logo-word">domo<span class="logo-dot">.</span></span>
+    </a>
     <span class="badge">Express</span>
   </header>
 
