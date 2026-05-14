@@ -149,6 +149,7 @@ exports.handler = async (event) => {
       task_1:              body.task_1,
       task_2:              body.task_2,
       booking_date:        body.booking_date,
+      booking_date_iso:    body.booking_date_iso || null,
       booking_time:        body.booking_time,
       payment_method:           body.payment_method,
       materials_requested:      body.materials_requested || false,

@@ -326,6 +326,19 @@
     .date-chip.selected { border-color: var(--blue); background: var(--bluelt); }
     .date-chip.selected .day-num { color: var(--blue); }
 
+    /* ── Schedule load / empty states ── */
+    .schedule-state {
+      font-size: 13px;
+      color: var(--muted);
+      background: var(--bluelt);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .schedule-state.schedule-empty { background: #FEF0EE; border-color: #F8B4AC; color: var(--red); }
+
     /* ── Time grid ── */
     .time-section-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 16px 0 8px; }
     .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
@@ -699,24 +712,19 @@
     <div class="step-panel" id="step3">
       <div class="step-intro">
         <h2>¿Cuándo te viene bien?</h2>
-        <p>Disponibilidad para los próximos 7 días, sujeto a confirmación.</p>
+        <p>Disponibilidad real para los próximos 14 días. Reserva con al menos 24h de anticipo.</p>
       </div>
       <div class="step-error" id="err3">Por favor selecciona fecha y hora.</div>
 
+      <div class="schedule-state" id="scheduleLoading">Cargando disponibilidad…</div>
+      <div class="schedule-state schedule-empty" id="scheduleEmpty" style="display:none;">
+        No hay horarios disponibles en este momento. Llámanos al (787) 419-0300.
+      </div>
+
       <div class="date-grid" id="dateGrid"><!-- populated by JS --></div>
 
-      <div class="time-section-label">Hora preferida</div>
-      <div class="time-grid">
-        <div class="time-chip" data-time="8:00 AM" onclick="selectTime(this)">8:00 AM</div>
-        <div class="time-chip" data-time="9:00 AM" onclick="selectTime(this)">9:00 AM</div>
-        <div class="time-chip" data-time="10:00 AM" onclick="selectTime(this)">10:00 AM</div>
-        <div class="time-chip" data-time="11:00 AM" onclick="selectTime(this)">11:00 AM</div>
-        <div class="time-chip" data-time="1:00 PM" onclick="selectTime(this)">1:00 PM</div>
-        <div class="time-chip" data-time="2:00 PM" onclick="selectTime(this)">2:00 PM</div>
-        <div class="time-chip" data-time="3:00 PM" onclick="selectTime(this)">3:00 PM</div>
-        <div class="time-chip" data-time="4:00 PM" onclick="selectTime(this)">4:00 PM</div>
-        <div class="time-chip" data-time="Flexible" onclick="selectTime(this)">Flexible</div>
-      </div>
+      <div class="time-section-label" id="timeLabel" style="display:none;">Hora disponible</div>
+      <div class="time-grid" id="timeGrid"><!-- populated by JS per selected date --></div>
 
       <div class="btn-row">
         <button class="btn-next" onclick="nextStep(3)">Siguiente →</button>
@@ -979,10 +987,14 @@ const state = {
 // ── Step config ───────────────────────────────────────────────
 const STEP_TITLES = ['', 'Domo Express', 'Escoge 2 tareas', 'Elige fecha y hora', 'Tus datos', 'Revisa y confirma'];
 
+// ── Availability cache (filled by /api/availability) ──────────
+let availability = null; // [{iso, slots: [...]}, ...]
+let availabilityState = 'idle'; // 'idle' | 'loading' | 'ready' | 'error'
+
 // ── Init ──────────────────────────────────────────────────────
 (function init() {
   renderTaskGrid();
-  renderDateGrid();
+  loadAvailability();
 })();
 
 function renderTaskGrid() {
@@ -1022,30 +1034,107 @@ function renderTaskGrid() {
   });
 }
 
+const DAY_SHORT  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const DAY_LONG   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MONTH_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MONTH_LONG  = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+function isoToParts(iso) {
+  // Treat the ISO as a calendar date (no TZ math); pick weekday from a UTC date.
+  const [Y, M, D] = iso.split('-').map(Number);
+  const d = new Date(Date.UTC(Y, M - 1, D));
+  return {
+    weekday: d.getUTCDay(),
+    day:     D,
+    month:   M - 1,
+  };
+}
+
+function dateLongLabel(iso) {
+  const p = isoToParts(iso);
+  return `${DAY_LONG[p.weekday]}, ${p.day} de ${MONTH_LONG[p.month]}`;
+}
+
+async function loadAvailability() {
+  availabilityState = 'loading';
+  toggleScheduleUI();
+  try {
+    const res = await fetch('/api/availability');
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    const data = await res.json();
+    availability = Array.isArray(data.dates) ? data.dates : [];
+    availabilityState = 'ready';
+  } catch (err) {
+    console.error('availability fetch failed', err);
+    availability = [];
+    availabilityState = 'error';
+  }
+  toggleScheduleUI();
+  renderDateGrid();
+}
+
+function toggleScheduleUI() {
+  const loading = document.getElementById('scheduleLoading');
+  const empty   = document.getElementById('scheduleEmpty');
+  const grid    = document.getElementById('dateGrid');
+  const label   = document.getElementById('timeLabel');
+  const times   = document.getElementById('timeGrid');
+
+  const isLoading = availabilityState === 'loading';
+  const isEmpty   = availabilityState !== 'loading' && (!availability || availability.length === 0);
+
+  loading.style.display = isLoading ? 'block' : 'none';
+  empty.style.display   = isEmpty   ? 'block' : 'none';
+  if (availabilityState === 'error') {
+    empty.textContent = 'No pudimos cargar la disponibilidad. Intenta recargar la página o llámanos al (787) 419-0300.';
+  }
+
+  grid.style.display  = isLoading || isEmpty ? 'none' : 'grid';
+  label.style.display = 'none';
+  times.style.display = 'none';
+  times.innerHTML = '';
+}
+
 function renderDateGrid() {
   const grid = document.getElementById('dateGrid');
   grid.innerHTML = '';
-  const dayNames = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  const monthNames = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  const longMonths = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const longDays   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  if (!availability) return;
 
-  for (let i = 1; i <= 7; i++) {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    const dayName  = dayNames[d.getDay()];
-    const dayNum   = d.getDate();
-    const monthShort = monthNames[d.getMonth()];
-    const label    = `${longDays[d.getDay()]}, ${dayNum} de ${longMonths[d.getMonth()]}`;
-    const iso      = d.toISOString().split('T')[0];
-
+  for (const entry of availability) {
+    const p = isoToParts(entry.iso);
     const div = document.createElement('div');
     div.className = 'date-chip';
-    div.dataset.label = label;
-    div.dataset.iso   = iso;
-    div.innerHTML = `<div class="day-name">${dayName}</div><div class="day-num">${dayNum}</div><div class="day-mo">${monthShort}</div>`;
+    div.dataset.iso = entry.iso;
+    div.innerHTML = `
+      <div class="day-name">${DAY_SHORT[p.weekday]}</div>
+      <div class="day-num">${p.day}</div>
+      <div class="day-mo">${MONTH_SHORT[p.month]}</div>`;
     div.onclick = () => selectDate(div);
     grid.appendChild(div);
+  }
+}
+
+function renderTimeGrid(iso) {
+  const grid  = document.getElementById('timeGrid');
+  const label = document.getElementById('timeLabel');
+  grid.innerHTML = '';
+
+  const entry = availability && availability.find(d => d.iso === iso);
+  if (!entry || !entry.slots.length) {
+    label.style.display = 'none';
+    grid.style.display  = 'none';
+    return;
+  }
+
+  label.style.display = 'block';
+  grid.style.display  = 'grid';
+  for (const slot of entry.slots) {
+    const chip = document.createElement('div');
+    chip.className = 'time-chip';
+    chip.dataset.time = slot;
+    chip.textContent = slot;
+    chip.onclick = () => selectTime(chip);
+    grid.appendChild(chip);
   }
 }
 
@@ -1105,7 +1194,10 @@ function updateSelCount() {
 function selectDate(el) {
   document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
-  state.selectedDate = { label: el.dataset.label, iso: el.dataset.iso };
+  const iso = el.dataset.iso;
+  state.selectedDate = { label: dateLongLabel(iso), iso };
+  state.selectedTime = null;
+  renderTimeGrid(iso);
 }
 
 function selectTime(el) {
@@ -1312,6 +1404,7 @@ async function submitBooking() {
     task_1:              state.selectedTasks[0],
     task_2:              state.selectedTasks[1],
     booking_date:        state.selectedDate?.label,
+    booking_date_iso:    state.selectedDate?.iso,
     booking_time:        state.selectedTime,
     payment_method:      state.paymentMethod,
     materials_requested: state.materialsRequested,
@@ -1394,7 +1487,8 @@ function resetForm() {
   document.getElementById('confirmCard').style.display = 'none';
   document.getElementById('bookingCard').style.display = 'block';
   renderTaskGrid();
-  renderDateGrid();
+  // Re-fetch availability in case it changed while the user was on the confirmation screen.
+  loadAvailability();
   showStep(1);
   // clear form inputs
   ['fName','fLastName','fPhone','fEmail','fAddress'].forEach(id => {
