@@ -2,10 +2,10 @@
 // POST /api/send-reminders
 //
 // Cron-triggered (via GitHub Actions on a schedule — see
-// .github/workflows/send-reminders.yml). Finds confirmed/new
-// express_bookings whose service start is approximately 24
-// hours away and that haven't received their reminder yet,
-// then sends a WhatsApp reminder via respond.io.
+// .github/workflows/send-reminders.yml). Runs once a day at
+// 8 AM PR time and sends a WhatsApp reminder via respond.io for
+// every confirmed/unassigned booking happening "tomorrow" in PR
+// time that hasn't been reminded yet.
 //
 // Authentication: requires header `x-cron-secret: <CRON_SECRET>`
 // matching the CRON_SECRET env var. Without this anyone who
@@ -17,9 +17,6 @@
 //   RESPONDIO_API_TOKEN     respond.io API JWT
 //   RESPONDIO_CHANNEL_ID    the numeric channel ID for the WA channel
 //   SITE_URL                base URL for reschedule links (default: book.domoyourhome.com)
-//
-// Window: bookings whose start time falls in [now+23h, now+25h]
-// (a 2h sweep gives slack for cron drift / retries).
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
@@ -33,14 +30,11 @@ const supabase = createClient(
 const PR_OFFSET_HOURS = -4;
 const SITE_URL = process.env.SITE_URL || 'https://book.domoyourhome.com';
 
-function slotStartUtcMs(iso, slot) {
-  if (!iso || !slot) return 0;
-  const [time, period] = slot.split(' ');
-  let [h, m] = time.split(':').map(Number);
-  if (period === 'PM' && h !== 12) h += 12;
-  if (period === 'AM' && h === 12) h = 0;
-  const [Y, M, D] = iso.split('-').map(Number);
-  return Date.UTC(Y, M - 1, D, h - PR_OFFSET_HOURS, m || 0);
+// Tomorrow's date in PR time, as an ISO date string. PR is UTC-4
+// year-round (no DST), so "now in PR" = UTC now shifted by -4h.
+// To get the ISO date of "tomorrow in PR", shift by (+24h - 4h) = +20h.
+function tomorrowInPR() {
+  return new Date(Date.now() + 20 * 3600 * 1000).toISOString().slice(0, 10);
 }
 
 // Normalize a phone string to E.164 (+1XXXXXXXXXX assumed for PR / US).
@@ -101,21 +95,12 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: JSON.stringify({ error: 'respondio_not_configured' }) };
   }
 
-  const nowMs = Date.now();
-  const minMs = nowMs + 23 * 3600 * 1000;
-  const maxMs = nowMs + 25 * 3600 * 1000;
-
-  // Date range covering bookings 23-25h from now. We over-fetch by
-  // date and filter precisely by slot time in JS — booking_date_iso
-  // is just a date, so we can't easily express the 2h window in SQL.
-  const minDate = new Date(minMs).toISOString().slice(0, 10);
-  const maxDate = new Date(maxMs + 24 * 3600 * 1000).toISOString().slice(0, 10);
+  const targetDate = tomorrowInPR();
 
   const { data: candidates, error: fetchErr } = await supabase
     .from('express_bookings')
     .select('booking_id, customer_name, customer_phone, address, task_1, task_2, booking_date, booking_date_iso, booking_time, status')
-    .gte('booking_date_iso', minDate)
-    .lte('booking_date_iso', maxDate)
+    .eq('booking_date_iso', targetDate)
     .is('reminder_sent_at', null)
     .neq('status', 'cancelled');
 
@@ -124,13 +109,8 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: JSON.stringify({ error: 'db_error', detail: fetchErr.message }) };
   }
 
-  const due = (candidates || []).filter(b => {
-    const startMs = slotStartUtcMs(b.booking_date_iso, b.booking_time);
-    return startMs >= minMs && startMs <= maxMs;
-  });
-
   const results = [];
-  for (const booking of due) {
+  for (const booking of (candidates || [])) {
     const phone = toE164(booking.customer_phone);
     if (!phone) {
       results.push({ booking_id: booking.booking_id, skipped: 'invalid_phone' });
@@ -154,8 +134,8 @@ exports.handler = async (event) => {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      scanned:   candidates ? candidates.length : 0,
-      due:       due.length,
+      target_date: targetDate,
+      scanned:     candidates ? candidates.length : 0,
       results,
     }),
   };

@@ -1,15 +1,15 @@
-name: Send 24h-before WhatsApp reminders
+name: Send next-day WhatsApp reminders
 
-# Fires once an hour during the operating window (12 UTC = 8 AM PR
-# through 22 UTC = 6 PM PR). Each invocation looks for bookings
-# whose start is 23-25h in the future and sends the reminder via
-# respond.io. Idempotent — express_bookings.reminder_sent_at is
-# set on success so a row can't fire twice.
+# Fires once a day at 8 AM PR time (= 12:00 UTC, since PR is UTC-4
+# year-round with no DST). One run pings the Netlify endpoint
+# which sends a reminder for every confirmed/unassigned booking
+# scheduled for "tomorrow" in PR time. Idempotent — the row's
+# reminder_sent_at is stamped on success so the next day's run
+# won't re-fire.
 
 on:
   schedule:
-    # cron is UTC. 12-22 UTC = 8 AM - 6 PM PR (year-round; PR has no DST).
-    - cron: "0 12-22 * * *"
+    - cron: "0 12 * * *"
   workflow_dispatch:  # manual trigger for testing
 
 jobs:
