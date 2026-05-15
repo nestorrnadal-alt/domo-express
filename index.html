@@ -527,7 +527,25 @@
     }
     .stripe-element.StripeElement--focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(54,82,165,.1); }
     .stripe-element.StripeElement--invalid { border-color: var(--red); }
-    .card-hint  { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    .card-hint  {
+      font-size: 12px; color: var(--text); margin-top: 8px; line-height: 1.5;
+      background: #E2F0E8;
+      border: 1px solid #A6D6BB;
+      border-radius: 6px;
+      padding: 8px 10px;
+    }
+    .card-hint strong { color: var(--green); }
+    .card-trust {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.5;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-trust-icon { font-size: 13px; }
+    .card-trust strong { color: var(--text); font-weight: 700; }
     .card-error { font-size: 12px; color: var(--red); margin-top: 6px; min-height: 16px; }
 
     /* ── Materials toggle ── */
@@ -576,9 +594,18 @@
     /* ── Review summary ── */
     .review-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .review-table td { padding: 9px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
-    .review-table td:first-child { color: var(--muted); width: 38%; padding-right: 12px; }
-    .review-table td:last-child { font-weight: 600; color: var(--navy); }
+    .review-table td:first-child  { color: var(--muted); width: 30%; padding-right: 12px; }
+    .review-table td:nth-child(2) { font-weight: 600; color: var(--navy); }
+    .review-table td:last-child   { width: 56px; text-align: right; padding-left: 8px; }
     .review-table tr:last-child td { border-bottom: none; }
+    .review-table .edit-link {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .review-table .edit-link:hover { text-decoration: underline; }
 
     .review-price {
       margin-top: 16px;
@@ -705,21 +732,38 @@
     }
     .confirm-when .cw-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
     .confirm-when .cw-val   { font-size: 15px; color: var(--text); font-weight: 700; }
-    .confirm-when .cw-cta {
-      display: block;
+    .confirm-when .cw-ctas {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
       margin-top: 12px;
-      padding: 12px 14px;
+    }
+    .confirm-when .cw-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 10px;
       background: var(--bluelt);
       border: 1px solid var(--border);
       border-radius: 10px;
       text-align: center;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--blue);
       text-decoration: none;
       transition: background .15s, border-color .15s;
     }
     .confirm-when .cw-cta:hover { background: #E2E8F8; border-color: var(--blue); }
+    .confirm-when .cw-cta-wa {
+      background: #E1F5E5;
+      border-color: #A6D6BB;
+      color: #0E6B3F;
+    }
+    .confirm-when .cw-cta-wa:hover { background: #C9EBD3; border-color: #6CC58A; }
+    @media (max-width: 480px) {
+      .confirm-when .cw-ctas { grid-template-columns: 1fr; }
+    }
 
     .confirm-actions {
       margin: -4px 0 16px;
@@ -1189,7 +1233,13 @@
       <div class="card-wrap" id="cardWrap" style="display:none;">
         <label class="card-label">Datos de la tarjeta</label>
         <div id="cardElement" class="stripe-element"></div>
-        <div class="card-hint">Guardamos tu tarjeta de forma segura con Stripe. Se cobra después del servicio.</div>
+        <div class="card-hint">
+          <strong>Tu tarjeta no se cobra hoy.</strong> Pagas después del servicio.
+        </div>
+        <div class="card-trust">
+          <span class="card-trust-icon" aria-hidden="true">🔒</span>
+          Procesado por <strong>Stripe</strong> con encriptación SSL · Domo nunca ve el número de tu tarjeta.
+        </div>
         <div class="card-error" id="cardError"></div>
       </div>
 
@@ -1281,9 +1331,14 @@
         <span class="cw-label">Hora</span>
         <span class="cw-val" id="confirmTime">—</span>
       </div>
-      <a class="cw-cta" id="addToCalendar" href="#" target="_blank" rel="noopener">
-        <span aria-hidden="true">📅</span> Agregar a Google Calendar
-      </a>
+      <div class="cw-ctas">
+        <a class="cw-cta" id="addToCalendar" href="#" target="_blank" rel="noopener">
+          <span aria-hidden="true">📅</span> Agregar a Google Calendar
+        </a>
+        <a class="cw-cta cw-cta-wa" id="shareWA" href="#" target="_blank" rel="noopener">
+          <span aria-hidden="true">📱</span> Comparte por WhatsApp
+        </a>
+      </div>
     </div>
     <div class="confirm-body">
       <p>Tu reservación está siendo procesada. El equipo de Domo la está revisando y recibirás confirmación del handyman asignado y la hora exacta pronto.</p>
@@ -1974,6 +2029,32 @@ function isoToParts(iso) {
   };
 }
 
+// Renders a slot like "9:00 AM" as the full service window
+// "9:00 - 11:30 AM" (or with AM/PM shifts: "11:00 AM - 1:30 PM",
+// "10:00 AM - 12:30 PM"). Service is 2.5 hours.
+function slotRangeLabel(slot) {
+  if (!slot) return '';
+  const [time, period] = slot.split(' ');
+  if (!time || !period) return slot;
+  const [h, m] = time.split(':').map(Number);
+  let endH = h + 2;
+  let endM = (m || 0) + 30;
+  if (endM >= 60) { endH += 1; endM -= 60; }
+  let endPeriod = period;
+  let displayEndH = endH;
+  if (period === 'AM' && endH >= 12) {
+    endPeriod = 'PM';
+    displayEndH = endH > 12 ? endH - 12 : 12;
+  } else if (period === 'PM' && endH > 12) {
+    displayEndH = endH - 12;
+  }
+  const startStr = `${h}:${String(m || 0).padStart(2, '0')}`;
+  const endStr   = `${displayEndH}:${String(endM).padStart(2, '0')}`;
+  return period === endPeriod
+    ? `${startStr} - ${endStr} ${period}`
+    : `${startStr} ${period} - ${endStr} ${endPeriod}`;
+}
+
 function dateLongLabel(iso) {
   const p = isoToParts(iso);
   return `${DAY_LONG[p.weekday]}, ${p.day} de ${MONTH_LONG[p.month]}`;
@@ -2078,7 +2159,7 @@ function renderTimeGrid(iso) {
     const chip = document.createElement('div');
     chip.className = 'time-chip';
     chip.dataset.time = slot;
-    chip.textContent = slot;
+    chip.textContent = slotRangeLabel(slot);
     chip.onclick = () => selectTime(chip);
     grid.appendChild(chip);
   }
@@ -2319,18 +2400,22 @@ function buildReview() {
     : 'No';
 
   const rows = [
-    ['Tareas', `${state.selectedTasks[0]}<br>${state.selectedTasks[1]}`],
-    ['Fecha',  state.selectedDate?.label || ''],
-    ['Hora',   state.selectedTime || ''],
-    ['Dirección', state.address],
-    ['Contacto', `${state.customerName}<br>${state.customerPhone}<br>${state.customerEmail}`],
-    ['Pago',   payLabel + ' — después del servicio'],
-    ['Materiales', matLabel],
+    ['Tareas',     `${state.selectedTasks[0]}<br>${state.selectedTasks[1]}`,         2],
+    ['Fecha',      state.selectedDate?.label || '',                                    3],
+    ['Hora',       slotRangeLabel(state.selectedTime),                                 3],
+    ['Dirección',  state.address,                                                      4],
+    ['Contacto',   `${state.customerName}<br>${state.customerPhone}<br>${state.customerEmail}`, 4],
+    ['Pago',       payLabel + ' — después del servicio',                               4],
+    ['Materiales', matLabel,                                                           4],
   ];
 
   const tbody = document.getElementById('reviewTable');
-  tbody.innerHTML = rows.map(([l, v]) =>
-    `<tr><td>${l}</td><td>${v}</td></tr>`
+  tbody.innerHTML = rows.map(([l, v, step]) =>
+    `<tr>
+       <td>${l}</td>
+       <td>${v}</td>
+       <td><a class="edit-link" onclick="goToStep(${step});return false;">Editar</a></td>
+     </tr>`
   ).join('');
 
   updatePrice();
@@ -2452,8 +2537,17 @@ async function submitBooking() {
     document.getElementById('confirmId').textContent = data.booking_id;
     document.getElementById('confirmDate').textContent = state.selectedDate?.label || '';
     document.getElementById('confirmTime').textContent = state.selectedTime
-      ? `${state.selectedTime} (servicio de 2.5 horas)`
+      ? slotRangeLabel(state.selectedTime)
       : '';
+    // WhatsApp share — pre-filled with the key booking facts so the
+    // customer can forward it to their spouse / housekeeper / whoever
+    // will be at the property.
+    const waShareText =
+      `Reservé Domo Express ${data.booking_id} para ${state.selectedDate?.label || ''} ` +
+      `de ${slotRangeLabel(state.selectedTime)} en ${state.address}. ` +
+      `Tareas: ${(state.selectedTasks || []).join(' y ')}.`;
+    document.getElementById('shareWA').href =
+      'https://wa.me/?text=' + encodeURIComponent(waShareText);
     document.getElementById('addToCalendar').href = buildGCalUrl({
       iso:       state.selectedDate?.iso,
       slot:      state.selectedTime,
