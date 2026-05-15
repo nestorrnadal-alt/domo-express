@@ -1279,6 +1279,8 @@
     <div class="footer-bottom">
       <div>&copy; 2026 Domo</div>
       <div>
+        <a href="#" onclick="openPolicy('faq');return false;">Preguntas frecuentes</a>
+        &middot;
         <a href="/cancelacion.html">Política de cancelación</a>
       </div>
     </div>
@@ -1298,6 +1300,7 @@
       <button class="policy-tab active" id="tabTerms"   onclick="switchPolicy('terms')">Términos</button>
       <button class="policy-tab"        id="tabPrivacy" onclick="switchPolicy('privacy')">Privacidad</button>
       <button class="policy-tab"        id="tabCancel"  onclick="switchPolicy('cancellation')">Cancelación</button>
+      <button class="policy-tab"        id="tabFaq"     onclick="switchPolicy('faq')">FAQ</button>
     </div>
 
     <div class="policy-body" id="policyTerms">
@@ -1657,6 +1660,52 @@
 
       <h3>Reembolsos</h3>
       <p>Si se realizó un cargo a tu tarjeta y aplicas para reembolso bajo esta política, lo procesamos al método de pago original dentro de <strong>5–7 días hábiles</strong>.</p>
+    </div>
+
+    <div class="policy-body" id="policyFaq" style="display:none;">
+
+      <h3>¿Qué es Domo Express?</h3>
+      <p>Un servicio express de mantenimiento: <strong>2 tareas pequeñas, en una sola visita de hasta 2.5 horas, por una tarifa fija de $175</strong>. Lo hace un handyman de Domo. Reserva en línea y confirma al instante.</p>
+
+      <h3>¿Qué cuenta como "1 tarea"?</h3>
+      <p>Una reparación o instalación específica que se pueda hacer en aproximadamente 60–75 minutos: cambiar una manilla, instalar una repisa, sellar una grieta, montar un TV pequeño, ajustar bisagras, cambiar un grifo. Si tu trabajo es más complejo, considera nuestro <strong>servicio de día completo</strong> en domoyourhome.com.</p>
+
+      <h3>¿Qué NO incluye Domo Express?</h3>
+      <ul>
+        <li>Trabajo eléctrico mayor, plomería estructural o conexiones de gas.</li>
+        <li>Remoción de moho, asbesto u otros materiales peligrosos.</li>
+        <li>Trabajos que requieran permiso de construcción o inspección oficial.</li>
+        <li>Trabajo en techos sin acceso seguro o equipo apropiado.</li>
+        <li>Tareas que tomen más de 2.5 horas combinadas.</li>
+      </ul>
+      <p>Si tu solicitud cae fuera del alcance, te contactamos antes del servicio para reprogramar o reembolsar.</p>
+
+      <h3>¿Domo trae los materiales?</h3>
+      <p>Por defecto tú provees los materiales. Si prefieres que Domo los compre por ti, hay una opción al final del formulario: <strong>+$25 de gestión + el costo real de los materiales</strong>. Te enviamos el recibo.</p>
+
+      <h3>¿Cuándo me cobran la tarjeta?</h3>
+      <p><strong>Después</strong> del servicio. Tu tarjeta se guarda de forma segura con Stripe al momento de reservar, pero no se cobra hasta que el handyman confirma que las tareas se completaron. Si escogiste ATH Móvil, se cobra manualmente el día del servicio.</p>
+
+      <h3>¿Puedo reprogramar o cancelar?</h3>
+      <p>Sí. Hasta <strong>24 horas antes</strong> del servicio, sin costo, desde el enlace <em>Reprogramar o cancelar</em> que recibiste en tu correo. Con menos de 24 horas hay un cargo de <strong>$50</strong>. Un no-show o falta de acceso cuando el handyman llega se cobra al precio completo.</p>
+
+      <h3>¿Tengo que estar en casa?</h3>
+      <p>Sí, tú o un adulto autorizado mayor de 18 años. El handyman necesita acceso a la propiedad y guía sobre las tareas. Si tienes un código de acceso o llaves bajo un sistema seguro, puedes coordinarlo con nosotros antes.</p>
+
+      <h3>¿Qué áreas cubre Domo Express?</h3>
+      <p>Área metropolitana de San Juan. Si tu dirección está fuera del rango usual, te contactamos antes de cobrar y, si es necesario, reprogramamos o cancelamos sin costo.</p>
+
+      <h3>¿Qué pasa si no estoy contento con el trabajo?</h3>
+      <p>Garantizamos la calidad del trabajo realizado por <strong>7 días</strong> a partir de la fecha del servicio. Si algo no quedó bien, contáctanos a <a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a> o por WhatsApp y volvemos sin costo a corregir.</p>
+
+      <h3>¿Y si el handyman daña algo?</h3>
+      <p>Reporta el incidente dentro de <strong>24 horas</strong> a <a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a> con fotografías y descripción. Coordinamos con el handyman y, si aplica, con su carrier de seguro.</p>
+
+      <h3>¿Reciben propinas?</h3>
+      <p>Sí, son opcionales y van completas al handyman. Domo no retiene ninguna parte.</p>
+
+      <h3>¿Cómo me comunico con ustedes?</h3>
+      <p>WhatsApp es lo más rápido — usa la burbuja verde en cualquier pantalla del sitio, o llámanos al <a href="tel:7874190300">(787) 419-0300</a>. También respondemos por <a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a>.</p>
     </div>
 
     <div class="policy-foot">
@@ -2376,13 +2425,14 @@ function switchPolicy(which) {
     terms:        { body: 'policyTerms',   tab: 'tabTerms',   title: 'Términos de servicio' },
     privacy:      { body: 'policyPrivacy', tab: 'tabPrivacy', title: 'Política de privacidad' },
     cancellation: { body: 'policyCancel',  tab: 'tabCancel',  title: 'Política de cancelación' },
+    faq:          { body: 'policyFaq',     tab: 'tabFaq',     title: 'Preguntas frecuentes' },
   };
   const cfg = tabs[which] || tabs.terms;
-  ['policyTerms','policyPrivacy','policyCancel'].forEach(id => {
+  ['policyTerms','policyPrivacy','policyCancel','policyFaq'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = (id === cfg.body) ? 'block' : 'none';
   });
-  ['tabTerms','tabPrivacy','tabCancel'].forEach(id => {
+  ['tabTerms','tabPrivacy','tabCancel','tabFaq'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('active', id === cfg.tab);
   });
