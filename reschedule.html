@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reprogramar — Domo Express</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#142543">
+  <style>
+    :root {
+      --navy:  #142543;
+      --blue:  #3652A5;
+      --lime:  #D6E264;
+      --peri:  #80A2F9;
+      --bluelt:#EEF1FA;
+      --border:#D4DAF0;
+      --text:  #142543;
+      --muted: #6B7A99;
+      --bg:    #F4F6FC;
+      --white: #FFFFFF;
+      --red:   #C0392B;
+      --green: #1A7A4A;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--blue); }
+
+    .site-header {
+      width: 100%;
+      background: var(--navy);
+      padding: 16px 0;
+      margin-bottom: 24px;
+    }
+    .site-header-inner {
+      width: 100%; max-width: 540px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .site-logo {
+      display: inline-flex;
+      align-items: baseline;
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 28px;
+      letter-spacing: -.02em;
+    }
+    .site-logo .dot { color: var(--lime); }
+    .site-header .badge {
+      background: var(--peri);
+      color: var(--white);
+      font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px;
+      letter-spacing: .06em; text-transform: uppercase;
+    }
+    .site-header .header-back {
+      margin-left: auto;
+      color: rgba(255,255,255,.7);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .site-header .header-back:hover { color: var(--white); }
+
+    .page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px 48px;
+    }
+
+    .card {
+      width: 100%; max-width: 540px;
+      background: var(--white);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(20,37,67,.08);
+    }
+    .card-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 18px 22px;
+    }
+    .card-header h1 { font-size: 19px; }
+    .card-header p  { font-size: 13px; color: rgba(255,255,255,.7); margin-top: 2px; }
+
+    .body { padding: 24px 26px; }
+
+    .booking-summary {
+      background: var(--bluelt);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    .booking-summary .b-row { display: flex; justify-content: space-between; padding: 3px 0; }
+    .booking-summary .b-row .bk { color: var(--muted); font-weight: 600; }
+    .booking-summary .b-row .bv { color: var(--text); font-weight: 700; }
+    .booking-id { font-size: 12px; color: var(--muted); margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+    h2 { font-size: 15px; font-weight: 700; margin: 18px 0 10px; color: var(--navy); }
+
+    .date-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .date-chip {
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .12s;
+      font-size: 11px;
+    }
+    .date-chip:hover { border-color: var(--blue); }
+    .date-chip .dow { color: var(--muted); font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: .05em; }
+    .date-chip .day { font-weight: 700; font-size: 16px; color: var(--navy); margin: 1px 0; }
+    .date-chip .mon { color: var(--muted); font-size: 10px; }
+    .date-chip.selected { background: var(--navy); border-color: var(--navy); }
+    .date-chip.selected .dow, .date-chip.selected .day, .date-chip.selected .mon { color: var(--white); }
+    .date-chip.current { border-style: dashed; }
+
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .time-chip {
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 6px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .12s;
+      color: var(--text);
+    }
+    .time-chip:hover { border-color: var(--blue); }
+    .time-chip.selected { background: var(--navy); border-color: var(--navy); color: var(--white); }
+    .time-chip.current  { border-style: dashed; }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 24px;
+    }
+    .btn-confirm, .btn-cancel {
+      flex: 1;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .btn-confirm {
+      background: var(--blue);
+      color: var(--white);
+    }
+    .btn-confirm[disabled] { background: #B0BACE; cursor: not-allowed; }
+    .btn-cancel {
+      background: transparent;
+      border: 1.5px solid var(--red);
+      color: var(--red);
+    }
+    .btn-cancel:hover { background: #FEF0EE; }
+
+    .msg {
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 12px 0;
+    }
+    .msg.err { background: #FEF0EE; border: 1px solid #F8B4AC; color: var(--red); }
+    .msg.ok  { background: #E6F4EC; border: 1px solid #A6D6BB; color: var(--green); }
+
+    .center { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 14px; }
+
+    /* WhatsApp bubble */
+    .wa-bubble {
+      position: fixed;
+      bottom: 18px; right: 18px;
+      width: 56px; height: 56px;
+      background: #25D366;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 16px rgba(0,0,0,.18);
+      z-index: 50;
+      text-decoration: none;
+    }
+    .wa-bubble svg { width: 30px; height: 30px; fill: #fff; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="site-logo" href="/">domo<span class="dot">.</span></a>
+    <span class="badge">Express</span>
+    <a class="header-back" href="https://domoyourhome.com">&larr; Home</a>
+  </div>
+</header>
+
+<main class="page">
+  <div class="card">
+    <div class="card-header">
+      <h1>Reprogramar o cancelar</h1>
+      <p>Cambia tu fecha y hora, o cancela si no podrás recibirnos.</p>
+    </div>
+    <div class="body" id="body">
+      <div class="center">Cargando…</div>
+    </div>
+  </div>
+</main>
+
+<a class="wa-bubble" href="https://wa.me/17874190300?text=Hola%20Domo%2C%20tengo%20una%20pregunta%20sobre%20mi%20reservaci%C3%B3n." target="_blank" rel="noopener" aria-label="WhatsApp Domo">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.768.967-.941 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.693.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
+<script>
+const DAY_SHORT  = ['dom','lun','mar','mié','jue','vie','sáb'];
+const MONTH_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+const params = new URLSearchParams(location.search);
+const TOKEN  = params.get('token');
+
+let booking = null;
+let availDates = [];
+let selected = { date: null, time: null };
+
+window.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+  if (!TOKEN) {
+    showError('Falta el enlace de acceso. Abre el enlace que recibiste por correo.');
+    return;
+  }
+  try {
+    const res = await fetch('/api/reschedule/lookup?token=' + encodeURIComponent(TOKEN));
+    const data = await res.json();
+    if (!res.ok) {
+      if (data.error === 'invalid_or_expired_token')
+        return showError('Este enlace expiró o no es válido. Escríbenos a info@domoyourhome.com para reprogramar.');
+      if (data.error === 'too_close')
+        return showError(data.message);
+      if (data.error === 'already_cancelled')
+        return showError('Esta reservación ya está cancelada.');
+      return showError(data.error || 'Error de servidor.');
+    }
+    booking    = data.booking;
+    availDates = data.dates || [];
+    selected.date = booking.booking_date_iso;
+    selected.time = booking.booking_time;
+    render();
+  } catch (e) {
+    showError('Error de red. Recarga la página.');
+  }
+}
+
+function showError(msg) {
+  document.getElementById('body').innerHTML =
+    `<div class="msg err">${escapeHtml(msg)}</div>
+     <p style="font-size:13px;color:#6B7A99;text-align:center;margin-top:12px;">¿Necesitas ayuda? Llama al <a href="tel:7874190300">(787) 419-0300</a></p>`;
+}
+function showOk(msg) {
+  document.getElementById('body').innerHTML =
+    `<div class="msg ok">${escapeHtml(msg)}</div>
+     <p style="font-size:13px;color:#6B7A99;text-align:center;margin-top:12px;">Puedes cerrar esta ventana.</p>`;
+}
+
+function render() {
+  const cur = `${booking.booking_date} · ${booking.booking_time}`;
+  const totalUsd = (booking.total_amount / 100).toFixed(2);
+  // make sure the current slot appears in availDates so the user can re-select it
+  if (!availDates.find(d => d.iso === booking.booking_date_iso)) {
+    availDates.unshift({ iso: booking.booking_date_iso, slots: [booking.booking_time] });
+  } else {
+    const d = availDates.find(d => d.iso === booking.booking_date_iso);
+    if (!d.slots.includes(booking.booking_time)) d.slots.push(booking.booking_time);
+  }
+
+  document.getElementById('body').innerHTML = `
+    <div class="booking-summary">
+      <div class="b-row"><span class="bk">Cliente</span><span class="bv">${escapeHtml(booking.customer_name)}</span></div>
+      <div class="b-row"><span class="bk">Tareas</span><span class="bv">${escapeHtml(booking.task_1)}, ${escapeHtml(booking.task_2)}</span></div>
+      <div class="b-row"><span class="bk">Total</span><span class="bv">$${totalUsd}</span></div>
+      <div class="b-row"><span class="bk">Fecha actual</span><span class="bv">${escapeHtml(cur)}</span></div>
+      <div class="booking-id">Reservación ${escapeHtml(booking.booking_id)}</div>
+    </div>
+
+    <h2>Escoge nueva fecha</h2>
+    <div class="date-grid" id="dateGrid"></div>
+
+    <h2>Escoge nueva hora</h2>
+    <div class="time-grid" id="timeGrid"></div>
+
+    <div id="msg"></div>
+
+    <div class="actions">
+      <button class="btn-cancel" onclick="cancelBooking()">Cancelar reservación</button>
+      <button class="btn-confirm" id="confirmBtn" onclick="confirmReschedule()">Guardar cambios →</button>
+    </div>
+  `;
+  renderDateGrid();
+  renderTimeGrid();
+  updateConfirmButton();
+}
+
+function renderDateGrid() {
+  const grid = document.getElementById('dateGrid');
+  grid.innerHTML = availDates.map(({ iso }) => {
+    const [Y, M, D] = iso.split('-').map(Number);
+    const dow = new Date(Date.UTC(Y, M - 1, D)).getUTCDay();
+    const isSel = iso === selected.date;
+    const isCurrent = iso === booking.booking_date_iso;
+    return `
+      <div class="date-chip ${isSel ? 'selected' : ''} ${isCurrent ? 'current' : ''}" onclick="pickDate('${iso}')">
+        <div class="dow">${DAY_SHORT[dow]}</div>
+        <div class="day">${D}</div>
+        <div class="mon">${MONTH_SHORT[M - 1]}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderTimeGrid() {
+  const grid = document.getElementById('timeGrid');
+  const day  = availDates.find(d => d.iso === selected.date);
+  if (!day) { grid.innerHTML = '<div style="grid-column:1/-1;color:#6B7A99;font-size:13px;">No hay horas para esta fecha.</div>'; return; }
+  grid.innerHTML = day.slots.map(slot => {
+    const isSel     = slot === selected.time && selected.date === booking.booking_date_iso || slot === selected.time;
+    const isCurrent = slot === booking.booking_time && selected.date === booking.booking_date_iso;
+    return `<div class="time-chip ${slot === selected.time ? 'selected' : ''} ${isCurrent ? 'current' : ''}" onclick="pickTime('${slot}')">${slot}</div>`;
+  }).join('');
+}
+
+function pickDate(iso) {
+  selected.date = iso;
+  // if the previously-selected slot isn't in this date's list, clear it
+  const day = availDates.find(d => d.iso === iso);
+  if (!day || !day.slots.includes(selected.time)) selected.time = null;
+  renderDateGrid();
+  renderTimeGrid();
+  updateConfirmButton();
+}
+function pickTime(slot) {
+  selected.time = slot;
+  renderTimeGrid();
+  updateConfirmButton();
+}
+
+function updateConfirmButton() {
+  const same = selected.date === booking.booking_date_iso && selected.time === booking.booking_time;
+  const btn  = document.getElementById('confirmBtn');
+  btn.disabled = !selected.date || !selected.time || same;
+  btn.textContent = same ? 'Sin cambios' : 'Guardar cambios →';
+}
+
+async function confirmReschedule() {
+  const btn = document.getElementById('confirmBtn');
+  const msg = document.getElementById('msg');
+  msg.innerHTML = '';
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+  try {
+    const res = await fetch('/api/reschedule/update', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ token: TOKEN, new_date_iso: selected.date, new_time: selected.time }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      msg.innerHTML = `<div class="msg err">${escapeHtml(data.message || data.error || 'Error')}</div>`;
+      btn.disabled = false; btn.textContent = 'Guardar cambios →';
+      // refresh availability if slot was taken
+      if (data.error === 'slot_taken') init();
+      return;
+    }
+    showOk(`Tu reservación se reprogramó a ${data.booking.booking_date} a las ${data.booking.booking_time}. Recibirás un correo con los detalles.`);
+  } catch (e) {
+    msg.innerHTML = `<div class="msg err">Error de red. Intenta otra vez.</div>`;
+    btn.disabled = false; btn.textContent = 'Guardar cambios →';
+  }
+}
+
+async function cancelBooking() {
+  if (!confirm('¿Cancelar esta reservación? No se puede deshacer desde aquí.')) return;
+  const msg = document.getElementById('msg');
+  msg.innerHTML = '';
+  try {
+    const res = await fetch('/api/reschedule/cancel', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ token: TOKEN }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      msg.innerHTML = `<div class="msg err">${escapeHtml(data.message || data.error || 'Error')}</div>`;
+      return;
+    }
+    showOk('Tu reservación se canceló. Te enviamos un correo de confirmación.');
+  } catch (e) {
+    msg.innerHTML = `<div class="msg err">Error de red. Intenta otra vez.</div>`;
+  }
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+</script>
+</body>
+</html>

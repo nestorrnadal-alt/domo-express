@@ -1817,10 +1817,11 @@ async function submitBooking() {
       tasks:     state.selectedTasks,
       address:   state.address,
     });
-    document.getElementById('reschedLink').href =
-      'mailto:info@domoyourhome.com'
-      + '?subject=' + encodeURIComponent('Reservación ' + data.booking_id + ' — cambio o cancelación')
-      + '&body='    + encodeURIComponent('Hola,\n\nQuisiera reprogramar o cancelar mi reservación ' + data.booking_id + '.\n\nGracias.');
+    document.getElementById('reschedLink').href = data.reschedule_token
+      ? '/reschedule.html?token=' + encodeURIComponent(data.reschedule_token)
+      : 'mailto:info@domoyourhome.com'
+        + '?subject=' + encodeURIComponent('Reservación ' + data.booking_id + ' — cambio o cancelación')
+        + '&body='    + encodeURIComponent('Hola,\n\nQuisiera reprogramar o cancelar mi reservación ' + data.booking_id + '.\n\nGracias.');
 
   } catch (err) {
     document.getElementById('loadingOverlay').classList.remove('visible');
