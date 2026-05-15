@@ -140,6 +140,67 @@
     }
     .toolbar .stat b { color: var(--navy); }
     .toolbar .spacer { flex: 1; }
+    .bulk-charge-btn {
+      background: var(--green);
+      color: var(--white);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .12s;
+    }
+    .bulk-charge-btn:hover { background: #166542; }
+    .bulk-charge-btn[disabled] { background: #B0BACE; cursor: not-allowed; }
+
+    .bulk-list {
+      max-height: 320px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 14px 0 16px;
+    }
+    .bulk-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .bulk-row:last-child { border-bottom: none; }
+    .bulk-row .br-name { font-weight: 700; color: var(--navy); }
+    .bulk-row .br-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .bulk-row .br-amount { font-weight: 700; color: var(--navy); }
+    .bulk-row .br-status { font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+    .bulk-row.pending .br-status   { background: var(--bluelt); color: var(--blue); }
+    .bulk-row.charging .br-status  { background: #FFF1B8;       color: var(--amber); }
+    .bulk-row.charged .br-status   { background: #C9EBD3;       color: var(--green); }
+    .bulk-row.failed .br-status    { background: #FEF0EE;       color: var(--red); }
+    .bulk-summary {
+      padding: 14px;
+      background: var(--bluelt);
+      border-radius: 10px;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .bulk-summary b { color: var(--navy); }
+    .bulk-actions { display: flex; gap: 8px; }
+    .bulk-actions button {
+      flex: 1;
+      padding: 11px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .bulk-actions .bulk-go { background: var(--green); color: var(--white); }
+    .bulk-actions .bulk-go[disabled] { background: #B0BACE; cursor: not-allowed; }
+    .bulk-actions .bulk-cancel { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+    .bulk-actions .bulk-cancel:hover { color: var(--blue); border-color: var(--blue); }
 
     .filter-toolbar { margin-top: -4px; margin-bottom: 12px; }
     .filter-search {
@@ -450,6 +511,7 @@
       <span class="stat" id="totalStat">— reservaciones</span>
       <span class="stat" id="readyStat">— listas p/cobrar</span>
       <span class="stat" id="chargedStat">— cobradas</span>
+      <button class="bulk-charge-btn" id="bulkChargeBtn" onclick="bulkCharge()" style="display:none;">Cobrar todas las listas</button>
     </div>
 
     <div class="toolbar filter-toolbar">
@@ -481,6 +543,17 @@
 
 </main>
 
+<!-- Bulk-charge modal -->
+<div class="modal-bg" id="bulkBg" onclick="if(event.target===this && !state.bulkRunning)closeBulk()">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <h2 id="bulkTitle">Cobrar listas</h2>
+      <button class="modal-close" id="bulkCloseBtn" onclick="closeBulk()" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-body" id="bulkBody"></div>
+  </div>
+</div>
+
 <!-- Booking modal -->
 <div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
   <div class="modal">
@@ -508,6 +581,7 @@ let state = {
   current:   null,             // booking currently open in modal
   search:    '',               // free-text filter on name / phone / email / booking_id
   status:    '',               // status-bucket filter ('', 'unassigned', 'pending', 'completed', 'charged', 'cancelled')
+  bulkRunning: false,          // true while a bulk-charge run is iterating
 };
 
 function mondayOfToday() {
@@ -693,6 +767,12 @@ function renderWeek() {
   document.getElementById('totalStat').innerHTML   = `<b>${totalActive}</b> reservaciones`;
   document.getElementById('readyStat').innerHTML   = `<b>${counts.completed}</b> listas p/cobrar`;
   document.getElementById('chargedStat').innerHTML = `<b>${counts.charged}</b> cobradas`;
+  // Show the bulk-charge button only when there's at least one ready row.
+  const bulkBtn = document.getElementById('bulkChargeBtn');
+  if (bulkBtn) {
+    bulkBtn.style.display = counts.completed > 0 ? 'inline-block' : 'none';
+    bulkBtn.textContent = `Cobrar ${counts.completed} lista${counts.completed === 1 ? '' : 's'}`;
+  }
   if (filtering) {
     const matches = state.bookings.filter(b => matchesFilters(b, nowMs)).length;
     document.getElementById('filterCount').textContent = `${matches} resultado${matches === 1 ? '' : 's'}`;
@@ -886,6 +966,117 @@ async function chargeBooking(bookingId) {
     state.current = b;
     document.getElementById('modalBody').innerHTML = renderBookingBody(b);
   }
+  renderWeek();
+}
+
+// ── Bulk charge ────────────────────────────────────────────
+function readyToCharge(nowMs) {
+  return state.bookings.filter(b => bookingColor(b, nowMs) === 'completed');
+}
+
+function bulkCharge() {
+  if (state.bulkRunning) return;
+  const list = readyToCharge(Date.now());
+  if (list.length === 0) return;
+  const total = list.reduce((s, b) => s + (b.total_amount || 0), 0) / 100;
+  document.getElementById('bulkTitle').textContent = `Cobrar ${list.length} lista${list.length === 1 ? '' : 's'}`;
+  document.getElementById('bulkBody').innerHTML = `
+    <div class="bulk-summary">
+      Vas a cobrar <b>${list.length} reservación${list.length === 1 ? '' : 'es'}</b> por un total de <b>$${total.toFixed(2)}</b>.
+      <br><span style="font-size:12px;color:#6B7A99;">Cada cobro se procesa por separado. Si alguno falla, los demás siguen.</span>
+    </div>
+    <div class="bulk-list" id="bulkList">
+      ${list.map(b => `
+        <div class="bulk-row pending" data-bid="${b.booking_id}">
+          <div>
+            <div class="br-name">${escapeHtml(b.customer_name)}</div>
+            <div class="br-meta">${escapeHtml(b.booking_id)} · ${escapeHtml(b.booking_date)} · ${escapeHtml(b.booking_time)}</div>
+          </div>
+          <div class="br-amount">$${((b.total_amount || 0) / 100).toFixed(2)}</div>
+          <div class="br-status">pendiente</div>
+        </div>`).join('')}
+    </div>
+    <div class="bulk-actions">
+      <button class="bulk-cancel" onclick="closeBulk()">Cancelar</button>
+      <button class="bulk-go" id="bulkGoBtn" onclick="runBulk()">Cobrar todas</button>
+    </div>
+  `;
+  document.getElementById('bulkBg').classList.add('visible');
+}
+
+function closeBulk() {
+  if (state.bulkRunning) return;
+  document.getElementById('bulkBg').classList.remove('visible');
+}
+
+async function runBulk() {
+  state.bulkRunning = true;
+  const goBtn   = document.getElementById('bulkGoBtn');
+  const closeBtn = document.getElementById('bulkCloseBtn');
+  goBtn.disabled = true;
+  goBtn.textContent = 'Cobrando…';
+  closeBtn.style.display = 'none';
+
+  const rows = Array.from(document.querySelectorAll('#bulkList .bulk-row'));
+  let succeeded = 0;
+  let failed = 0;
+
+  for (const row of rows) {
+    const bid = row.dataset.bid;
+    row.classList.remove('pending');
+    row.classList.add('charging');
+    row.querySelector('.br-status').textContent = 'cobrando…';
+
+    try {
+      const res = await fetch('/api/admin/charge', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ booking_id: bid }),
+      });
+      if (res.status === 401) {
+        row.classList.remove('charging');
+        row.classList.add('failed');
+        row.querySelector('.br-status').textContent = 'sesión expiró';
+        failed++;
+        continue;
+      }
+      const data = await res.json();
+      if (!res.ok) {
+        row.classList.remove('charging');
+        row.classList.add('failed');
+        row.querySelector('.br-status').textContent = data.code || data.error || 'error';
+        row.querySelector('.br-status').title = data.detail || '';
+        failed++;
+        continue;
+      }
+      row.classList.remove('charging');
+      row.classList.add('charged');
+      row.querySelector('.br-status').textContent = '✓ cobrado';
+      succeeded++;
+    } catch (e) {
+      row.classList.remove('charging');
+      row.classList.add('failed');
+      row.querySelector('.br-status').textContent = 'red';
+      row.querySelector('.br-status').title = e.message || '';
+      failed++;
+    }
+  }
+
+  state.bulkRunning = false;
+  goBtn.style.display = 'none';
+  closeBtn.style.display = '';
+
+  const summary = document.querySelector('#bulkBody .bulk-summary');
+  if (summary) {
+    summary.innerHTML = `
+      <b>${succeeded}</b> cobrada${succeeded === 1 ? '' : 's'}${failed > 0 ? ` · <span style="color:#C0392B;"><b>${failed}</b> fallida${failed === 1 ? '' : 's'}</span>` : ''}.
+      <br><span style="font-size:12px;color:#6B7A99;">Las fallidas las puedes intentar individualmente desde el grid.</span>
+    `;
+  }
+  document.querySelector('.bulk-actions .bulk-cancel').textContent = 'Cerrar';
+
+  // Refresh the week so colors update.
+  await fetchWeek();
   renderWeek();
 }
 
