@@ -700,10 +700,19 @@
     }
     .footer-grid {
       display: grid;
-      grid-template-columns: 1.4fr 1fr 1fr;
+      grid-template-columns: 1.4fr 1fr;
       gap: 28px;
       margin-bottom: 24px;
     }
+    .footer-home-link {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--blue);
+      text-decoration: none;
+    }
+    .footer-home-link:hover { text-decoration: underline; }
     .footer-col h4 {
       font-size: 11px;
       font-weight: 700;
@@ -1071,16 +1080,8 @@
     <div class="footer-grid">
       <div class="footer-col footer-brand">
         <a class="footer-logo" href="https://domoyourhome.com">domo<span class="logo-dot">.</span></a>
-        <div class="footer-tagline">Tu casa, en buenas manos. San Juan, Puerto Rico.</div>
-      </div>
-
-      <div class="footer-col">
-        <h4>Domo</h4>
-        <ul>
-          <li><a href="https://domoyourhome.com">Inicio</a></li>
-          <li><a href="https://domoyourhome.com/about/">Sobre nosotros</a></li>
-          <li><a href="https://domoyourhome.com/booknow/handyman-new-flow">Día completo</a></li>
-        </ul>
+        <div class="footer-tagline">Mantener tu casa nunca ha sido tan fácil.</div>
+        <a class="footer-home-link" href="https://domoyourhome.com">← Volver a domoyourhome.com</a>
       </div>
 
       <div class="footer-col">
@@ -1094,11 +1095,9 @@
     </div>
 
     <div class="footer-bottom">
-      <div>&copy; 2026 Domo &middot; Todos los derechos reservados</div>
+      <div>&copy; 2026 Domo</div>
       <div>
-        <a href="https://domoyourhome.com/terms-of-service/">Términos</a> &middot;
-        <a href="https://domoyourhome.com/privacy-policy/">Privacidad</a> &middot;
-        <a href="/cancelacion.html">Cancelación</a>
+        <a href="/cancelacion.html">Política de cancelación</a>
       </div>
     </div>
   </footer>
