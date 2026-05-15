@@ -141,6 +141,51 @@
     .toolbar .stat b { color: var(--navy); }
     .toolbar .spacer { flex: 1; }
 
+    .filter-toolbar { margin-top: -4px; margin-bottom: 12px; }
+    .filter-search {
+      flex: 1;
+      min-width: 240px;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--white);
+    }
+    .filter-search:focus { outline: none; border-color: var(--blue); }
+    .filter-select {
+      padding: 8px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      background: var(--white);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .filter-clear {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      display: none;
+    }
+    .filter-clear:hover { color: var(--blue); border-color: var(--blue); }
+    .filter-clear.active { display: inline-flex; }
+    .filter-count { font-size: 12px; color: var(--muted); }
+
+    /* Dimmed cell — filtered out but kept visible so the day's layout stays intact */
+    .week-grid td.cell.dim {
+      opacity: 0.18;
+      cursor: default;
+      transform: none !important;
+      box-shadow: none !important;
+      pointer-events: none;
+    }
+
     .legend {
       display: flex;
       gap: 12px;
@@ -407,6 +452,20 @@
       <span class="stat" id="chargedStat">— cobradas</span>
     </div>
 
+    <div class="toolbar filter-toolbar">
+      <input type="search" id="searchInput" class="filter-search" placeholder="Buscar por nombre, teléfono, correo o EXP-…" oninput="onFilterChange()" autocomplete="off">
+      <select id="statusFilter" class="filter-select" onchange="onFilterChange()">
+        <option value="">Todos los estados</option>
+        <option value="unassigned">Sin asignar</option>
+        <option value="pending">Pendiente</option>
+        <option value="completed">Listo p/cobrar</option>
+        <option value="charged">Cobrado</option>
+        <option value="cancelled">Cancelada</option>
+      </select>
+      <button id="clearFilters" class="filter-clear" onclick="clearFilters()">Limpiar</button>
+      <span class="filter-count" id="filterCount"></span>
+    </div>
+
     <div class="legend">
       <span class="legend-item"><span class="legend-dot unassigned"></span>Sin asignar</span>
       <span class="legend-item"><span class="legend-dot pending"></span>Pendiente</span>
@@ -447,6 +506,8 @@ let state = {
   weekStart: mondayOfToday(), // ISO date string for the Monday of the visible week
   bookings:  [],
   current:   null,             // booking currently open in modal
+  search:    '',               // free-text filter on name / phone / email / booking_id
+  status:    '',               // status-bucket filter ('', 'unassigned', 'pending', 'completed', 'charged', 'cancelled')
 };
 
 function mondayOfToday() {
@@ -588,11 +649,42 @@ function slotEndUtcMs(iso, slot) {
   return startMs + 2.5 * 60 * 60 * 1000;
 }
 
+function onFilterChange() {
+  state.search = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+  state.status = document.getElementById('statusFilter').value || '';
+  document.getElementById('clearFilters').classList.toggle('active', !!state.search || !!state.status);
+  renderWeek();
+}
+
+function clearFilters() {
+  state.search = '';
+  state.status = '';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('statusFilter').value = '';
+  document.getElementById('clearFilters').classList.remove('active');
+  renderWeek();
+}
+
+function matchesFilters(b, nowMs) {
+  if (state.status) {
+    if (bookingColor(b, nowMs) !== state.status) return false;
+  }
+  if (state.search) {
+    const haystack = [
+      b.customer_name, b.customer_phone, b.customer_email, b.booking_id,
+      b.address, b.task_1, b.task_2,
+    ].filter(Boolean).join(' ').toLowerCase();
+    if (!haystack.includes(state.search)) return false;
+  }
+  return true;
+}
+
 function renderWeek() {
   const days = [];
   for (let i = 0; i < 7; i++) days.push(shiftIso(state.weekStart, i));
   const today = isoToday();
   const nowMs = Date.now();
+  const filtering = !!state.search || !!state.status;
 
   // Stats
   const counts = { unassigned: 0, pending: 0, completed: 0, charged: 0, cancelled: 0 };
@@ -601,6 +693,12 @@ function renderWeek() {
   document.getElementById('totalStat').innerHTML   = `<b>${totalActive}</b> reservaciones`;
   document.getElementById('readyStat').innerHTML   = `<b>${counts.completed}</b> listas p/cobrar`;
   document.getElementById('chargedStat').innerHTML = `<b>${counts.charged}</b> cobradas`;
+  if (filtering) {
+    const matches = state.bookings.filter(b => matchesFilters(b, nowMs)).length;
+    document.getElementById('filterCount').textContent = `${matches} resultado${matches === 1 ? '' : 's'}`;
+  } else {
+    document.getElementById('filterCount').textContent = '';
+  }
 
   // Week label
   const first = days[0], last = days[6];
@@ -631,7 +729,8 @@ function renderWeek() {
       const color = bookingColor(booking, nowMs);
       const first = (booking.customer_name || '').split(' ')[0];
       const task  = booking.task_1 || '';
-      return `<td class="cell ${color}" onclick="openModal('${booking.booking_id}')" title="${escapeHtml(booking.customer_name)} — ${escapeHtml(task)}">
+      const dimmed = filtering && !matchesFilters(booking, nowMs);
+      return `<td class="cell ${color}${dimmed ? ' dim' : ''}" ${dimmed ? '' : `onclick="openModal('${booking.booking_id}')"`} title="${escapeHtml(booking.customer_name)} — ${escapeHtml(task)}">
         <div class="cell-name">${escapeHtml(first)}</div>
         <div class="cell-task">${escapeHtml(task)}</div>
       </td>`;
