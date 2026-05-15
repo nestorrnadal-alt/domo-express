@@ -80,10 +80,13 @@ function buildEmailHtml(data) {
     + '<tr><td style="padding:24px 28px">'
     + '<p style="margin:0 0 20px;font-size:14px;color:#444">Hola ' + data.customer_name + ', recibimos tu reservaci\u00f3n.</p>'
     + '<table width="100%" style="font-size:13px;border:1px solid #e0e4ef">'
+    + '<tr><td style="color:#666;padding:6px 12px">Cliente</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.customer_name + '</td></tr>'
+    + '<tr><td style="color:#666;padding:6px 12px">Tel\u00e9fono</td><td style="text-align:right;font-weight:600;padding:6px 12px"><a href="tel:' + (data.customer_phone || '').replace(/\D/g,'') + '" style="color:#3652A5;text-decoration:none">' + data.customer_phone + '</a></td></tr>'
+    + '<tr><td style="color:#666;padding:6px 12px">Correo</td><td style="text-align:right;font-weight:600;padding:6px 12px"><a href="mailto:' + data.customer_email + '" style="color:#3652A5;text-decoration:none">' + data.customer_email + '</a></td></tr>'
+    + '<tr><td style="color:#666;padding:6px 12px">Direcci\u00f3n</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.address + '</td></tr>'
     + '<tr><td style="color:#666;padding:6px 12px">Tareas</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.task_1 + '<br>' + data.task_2 + '</td></tr>'
     + '<tr><td style="color:#666;padding:6px 12px">Fecha</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.booking_date + '</td></tr>'
     + '<tr><td style="color:#666;padding:6px 12px">Hora</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.booking_time + '</td></tr>'
-    + '<tr><td style="color:#666;padding:6px 12px">Direcci\u00f3n</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.address + '</td></tr>'
     + '<tr><td style="color:#666;padding:6px 12px">Pago</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + payLbl + ' \u2014 despu\u00e9s del servicio</td></tr>'
     + matRow
     + '<tr style="background:#EEF1FA"><td style="padding:8px 12px;font-weight:700">Total</td><td style="text-align:right;font-weight:700;font-size:16px;padding:8px 12px;color:#3652A5">$' + price + '</td></tr>'
@@ -111,12 +114,15 @@ function buildEmailText(data) {
     'Hola ' + data.customer_name + ',',
     'Tu reservaci\u00f3n fue recibida.',
     '',
-    'Tareas:   ' + data.task_1 + ' / ' + data.task_2,
-    'Fecha:    ' + data.booking_date + ' a las ' + data.booking_time,
+    'Cliente:   ' + data.customer_name,
+    'Tel\u00e9fono:  ' + data.customer_phone,
+    'Correo:    ' + data.customer_email,
     'Direcci\u00f3n: ' + data.address,
-    'Pago:     ' + payLbl + ' (despu\u00e9s del servicio)',
+    'Tareas:    ' + data.task_1 + ' / ' + data.task_2,
+    'Fecha:     ' + data.booking_date + ' a las ' + data.booking_time,
+    'Pago:      ' + payLbl + ' (despu\u00e9s del servicio)',
     data.materials_requested ? 'Materiales: Domo los consigue (+$30 gesti\u00f3n + costo real)' : null,
-    'Total:    $' + price,
+    'Total:     $' + price,
     '',
     data.reschedule_url ? 'Reprogramar o cancelar (24h+): ' + data.reschedule_url : null,
     'Tel\u00e9fono: (787) 419-0300 \u00b7 info@domoyourhome.com',
