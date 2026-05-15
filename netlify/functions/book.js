@@ -61,6 +61,32 @@ function validate(body) {
   return null;
 }
 
+// "9:00 AM" → "9:00 - 11:30 AM" (service runs 2.5h). Mirrors the
+// frontend slotRangeLabel helper so the email shows the same range
+// the customer just selected on screen.
+function slotRange(slot) {
+  if (!slot) return '';
+  const [time, period] = String(slot).split(' ');
+  if (!time || !period) return slot;
+  const [h, m] = time.split(':').map(Number);
+  let endH = h + 2;
+  let endM = (m || 0) + 30;
+  if (endM >= 60) { endH += 1; endM -= 60; }
+  let endPeriod = period;
+  let displayEndH = endH;
+  if (period === 'AM' && endH >= 12) {
+    endPeriod = 'PM';
+    displayEndH = endH > 12 ? endH - 12 : 12;
+  } else if (period === 'PM' && endH > 12) {
+    displayEndH = endH - 12;
+  }
+  const startStr = h + ':' + String(m || 0).padStart(2, '0');
+  const endStr   = displayEndH + ':' + String(endM).padStart(2, '0');
+  return period === endPeriod
+    ? startStr + ' - ' + endStr + ' ' + period
+    : startStr + ' ' + period + ' - ' + endStr + ' ' + endPeriod;
+}
+
 function buildEmailHtml(data) {
   const price  = (data.total_amount / 100).toFixed(0);
   const payLbl = data.payment_method === 'ath_movil' ? 'ATH M\u00f3vil' : 'Tarjeta de cr\u00e9dito';
@@ -86,7 +112,7 @@ function buildEmailHtml(data) {
     + '<tr><td style="color:#666;padding:6px 12px">Direcci\u00f3n</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.address + '</td></tr>'
     + '<tr><td style="color:#666;padding:6px 12px">Tareas</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.task_1 + '<br>' + data.task_2 + '</td></tr>'
     + '<tr><td style="color:#666;padding:6px 12px">Fecha</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.booking_date + '</td></tr>'
-    + '<tr><td style="color:#666;padding:6px 12px">Hora</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.booking_time + '</td></tr>'
+    + '<tr><td style="color:#666;padding:6px 12px">Hora</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + slotRange(data.booking_time) + '</td></tr>'
     + '<tr><td style="color:#666;padding:6px 12px">Pago</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + payLbl + ' \u2014 despu\u00e9s del servicio</td></tr>'
     + matRow
     + '<tr style="background:#EEF1FA"><td style="padding:8px 12px;font-weight:700">Total</td><td style="text-align:right;font-weight:700;font-size:16px;padding:8px 12px;color:#3652A5">$' + price + '</td></tr>'
@@ -119,7 +145,7 @@ function buildEmailText(data) {
     'Correo:    ' + data.customer_email,
     'Direcci\u00f3n: ' + data.address,
     'Tareas:    ' + data.task_1 + ' / ' + data.task_2,
-    'Fecha:     ' + data.booking_date + ' a las ' + data.booking_time,
+    'Fecha:     ' + data.booking_date + ' · ' + slotRange(data.booking_time),
     'Pago:      ' + payLbl + ' (despu\u00e9s del servicio)',
     data.materials_requested ? 'Materiales: Domo los consigue (+$30 gesti\u00f3n + costo real)' : null,
     'Total:     $' + price,
@@ -181,6 +207,18 @@ exports.handler = async (event) => {
     }
     return { statusCode: 500, body: JSON.stringify({ error: 'Database error', detail: dbError.message }) };
   }
+
+  // Clear any abandoned-cart partial for this email \u2014 they made it.
+  // Failure is non-fatal; the recovery cron also checks for completed
+  // bookings before sending.
+  if (body.customer_email) {
+    supabase
+      .from('express_partial_bookings')
+      .delete()
+      .ilike('customer_email', String(body.customer_email).trim())
+      .then(({ error }) => { if (error) console.error('book: failed to clear partial', error); });
+  }
+
   // Reschedule token + URL \u2014 handed back to the client and embedded
   // in the confirmation email so customers can self-serve up to 24h
   // before the service.
