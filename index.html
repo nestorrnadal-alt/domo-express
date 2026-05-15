@@ -308,6 +308,53 @@
     }
 
     /* ── Task categories ── */
+    .task-search-wrap {
+      position: relative;
+      margin-bottom: 18px;
+    }
+    .task-search {
+      width: 100%;
+      padding: 11px 36px 11px 38px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      background: var(--white);
+      color: var(--text);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7A99' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 12px 50%;
+      background-size: 16px 16px;
+    }
+    .task-search:focus { outline: none; border-color: var(--blue); }
+    .task-search-clear {
+      position: absolute;
+      right: 4px; top: 50%;
+      transform: translateY(-50%);
+      width: 30px; height: 30px;
+      background: transparent;
+      border: none;
+      font-size: 22px;
+      line-height: 1;
+      color: var(--muted);
+      cursor: pointer;
+      display: none;
+    }
+    .task-search-clear:hover { color: var(--navy); }
+    .task-search-clear.active { display: inline-flex; align-items: center; justify-content: center; }
+
+    .task-empty {
+      padding: 28px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.6;
+      background: var(--bluelt);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+    .task-empty strong { color: var(--navy); }
+
     .task-category { margin-bottom: 22px; }
     .task-cat-title {
       font-size: 15px;
@@ -1043,7 +1090,17 @@
         <button class="btn-next btn-next-inline" onclick="nextStep(2)" id="btnNext2Top" disabled>Siguiente &rarr;</button>
       </div>
 
+      <div class="task-search-wrap">
+        <input type="search" id="taskSearch" class="task-search" placeholder="Buscar tarea (ej: repisa, manilla, pintura…)" oninput="filterTasks()" autocomplete="off">
+        <button type="button" class="task-search-clear" id="taskSearchClear" onclick="clearTaskSearch()" aria-label="Limpiar búsqueda">×</button>
+      </div>
+
       <div id="taskGrid"><!-- populated by JS as categorized chips --></div>
+
+      <div class="task-empty" id="taskEmpty" style="display:none;">
+        <p>No encontramos tareas con ese término.</p>
+        <p>Si tu tarea no aparece en la lista, escógela como <strong>"Otra tarea"</strong> y descríbela.</p>
+      </div>
 
       <div class="other-input-wrap" id="otherInputWrap" style="display:none;">
         <label for="otherInput">Describe la tarea adicional</label>
@@ -1857,6 +1914,50 @@ function renderTaskGrid() {
   });
 }
 
+// Live-filter the task chips on step 2 as the user types.
+// Hides chips whose label doesn't contain the query (accent-insensitive),
+// hides empty categories, and surfaces the "Otra tarea" hint when
+// nothing matches.
+function filterTasks() {
+  const input = document.getElementById('taskSearch');
+  const q = (input.value || '').trim().toLowerCase();
+  document.getElementById('taskSearchClear').classList.toggle('active', !!q);
+
+  const grid  = document.getElementById('taskGrid');
+  const empty = document.getElementById('taskEmpty');
+
+  if (!q) {
+    grid.querySelectorAll('.task-chip').forEach(c => c.style.display = '');
+    grid.querySelectorAll('.task-category').forEach(c => c.style.display = '');
+    empty.style.display = 'none';
+    return;
+  }
+
+  const normalize = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const nq = normalize(q);
+
+  let totalVisible = 0;
+  grid.querySelectorAll('.task-category').forEach(cat => {
+    let catVisible = 0;
+    cat.querySelectorAll('.task-chip').forEach(chip => {
+      const text = normalize(chip.textContent);
+      const match = text.includes(nq);
+      chip.style.display = match ? '' : 'none';
+      if (match) catVisible++;
+    });
+    cat.style.display = catVisible > 0 ? '' : 'none';
+    totalVisible += catVisible;
+  });
+
+  empty.style.display = totalVisible === 0 ? 'block' : 'none';
+}
+
+function clearTaskSearch() {
+  const input = document.getElementById('taskSearch');
+  if (input) input.value = '';
+  filterTasks();
+}
+
 const DAY_SHORT  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const DAY_LONG   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MONTH_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -2385,6 +2486,7 @@ function resetForm() {
   document.getElementById('confirmCard').style.display = 'none';
   document.getElementById('bookingCard').style.display = 'block';
   renderTaskGrid();
+  clearTaskSearch();
   // Re-fetch availability in case it changed while the user was on the confirmation screen.
   loadAvailability();
   showStep(1);
