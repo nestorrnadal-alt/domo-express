@@ -1,0 +1,32 @@
+name: Send 24h-before WhatsApp reminders
+
+# Fires once an hour during the operating window (12 UTC = 8 AM PR
+# through 22 UTC = 6 PM PR). Each invocation looks for bookings
+# whose start is 23-25h in the future and sends the reminder via
+# respond.io. Idempotent — express_bookings.reminder_sent_at is
+# set on success so a row can't fire twice.
+
+on:
+  schedule:
+    # cron is UTC. 12-22 UTC = 8 AM - 6 PM PR (year-round; PR has no DST).
+    - cron: "0 12-22 * * *"
+  workflow_dispatch:  # manual trigger for testing
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call send-reminders endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "CRON_SECRET secret is not configured — refusing to call the endpoint." >&2
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error \
+               --request POST \
+               --header "x-cron-secret: ${CRON_SECRET}" \
+               --header "content-type: application/json" \
+               https://book.domoyourhome.com/api/send-reminders
