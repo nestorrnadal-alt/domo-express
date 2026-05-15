@@ -115,17 +115,22 @@
     .toolbar {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
+      gap: 10px;
+      margin-bottom: 14px;
       flex-wrap: wrap;
     }
-    .toolbar input[type=date] {
-      padding: 7px 10px;
+    .toolbar button {
+      background: var(--white);
       border: 1.5px solid var(--border);
       border-radius: 8px;
+      padding: 7px 12px;
       font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
     }
-    .toolbar .toolbar-label { font-size: 13px; color: var(--muted); font-weight: 600; }
+    .toolbar button:hover { border-color: var(--blue); color: var(--blue); }
+    .toolbar .week-label { font-size: 14px; font-weight: 700; color: var(--navy); }
     .toolbar .stat {
       background: var(--white);
       border: 1px solid var(--border);
@@ -134,66 +139,98 @@
       font-size: 12px; color: var(--muted);
     }
     .toolbar .stat b { color: var(--navy); }
+    .toolbar .spacer { flex: 1; }
 
-    .day {
+    .legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+    .legend-dot {
+      width: 12px; height: 12px;
+      border-radius: 3px;
+      border: 1px solid;
+    }
+    .legend-dot.unassigned { background: #FFD6E8; border-color: #F2A8C8; }
+    .legend-dot.pending    { background: #CFE0FF; border-color: #80A2F9; }
+    .legend-dot.completed  { background: #FFF1B8; border-color: #E5C04A; }
+    .legend-dot.charged    { background: #C9EBD3; border-color: #6CC58A; }
+    .legend-dot.cancelled  { background: #ECECF2; border-color: var(--border); }
+
+    /* ── Week grid ── */
+    .week-wrap {
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: 12px;
-      margin-bottom: 14px;
-      overflow: hidden;
+      padding: 4px;
+      overflow-x: auto;
     }
-    .day-header {
-      padding: 12px 18px;
+    table.week-grid {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 4px;
+      min-width: 720px;
+    }
+    .week-grid th, .week-grid td { padding: 0; }
+    .week-grid th.day-col {
+      padding: 8px 4px 6px;
+      text-align: center;
       background: var(--bluelt);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
+      border-radius: 6px;
+      vertical-align: middle;
     }
-    .day-date { font-size: 16px; font-weight: 700; color: var(--navy); }
-    .day-weekday { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
-    .day-count { margin-left: auto; font-size: 12px; color: var(--muted); }
+    .week-grid th.day-col.today { background: #DCE5F8; outline: 2px solid var(--blue); }
+    .day-col .dow  { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .day-col .dnum { font-size: 17px; font-weight: 700; color: var(--navy); margin-top: 2px; }
+    .day-col .dmon { font-size: 10px; color: var(--muted); margin-top: 1px; }
 
-    .slot-row {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-      padding: 12px 18px 16px;
-    }
-    .slot {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 10px;
-      min-height: 64px;
-      font-size: 12px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: border-color .12s, background .12s;
-    }
-    .slot.empty {
-      background: #FAFBFE;
+    .week-grid th.hour-row {
+      width: 60px;
+      font-size: 11px;
       color: var(--muted);
-      font-style: italic;
+      font-weight: 700;
+      text-align: right;
+      padding: 0 10px 0 0;
+      vertical-align: middle;
+    }
+    .week-grid td.cell {
+      min-width: 88px;
+      height: 56px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 7px;
+      font-size: 11px;
+      vertical-align: top;
+      line-height: 1.3;
+      cursor: pointer;
+      transition: transform .08s, box-shadow .08s;
+    }
+    .week-grid td.cell:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(20,37,67,.12); }
+    .week-grid td.cell.empty {
+      background: #FAFBFE;
       cursor: default;
     }
-    .slot.has-booking { cursor: pointer; background: var(--white); }
-    .slot.has-booking:hover { border-color: var(--blue); }
-    .slot-time { font-weight: 700; color: var(--navy); }
-    .slot-customer { color: var(--text); font-weight: 600; line-height: 1.25; }
-    .slot-badge {
-      display: inline-block;
-      font-size: 10px; font-weight: 700;
-      padding: 1px 6px; border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: .04em;
+    .week-grid td.cell.empty:hover { transform: none; box-shadow: none; }
+    .cell-name {
+      font-weight: 700;
+      color: var(--navy);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .status-new       { background: var(--bluelt); color: var(--blue); }
-    .status-confirmed { background: #E2F0E8;       color: var(--green); }
-    .status-completed { background: #DCEEDF;       color: var(--green); }
-    .status-cancelled { background: #FEF0EE;       color: var(--red); }
-    .status-no_show   { background: #FFF4E0;       color: var(--amber); }
-    .charged-mark { color: var(--green); font-size: 11px; font-weight: 700; }
+    .cell-task { color: var(--muted); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Status colors */
+    .cell.unassigned { background: #FFD6E8; border-color: #F2A8C8; }
+    .cell.pending    { background: #CFE0FF; border-color: #80A2F9; }
+    .cell.completed  { background: #FFF1B8; border-color: #E5C04A; }
+    .cell.charged    { background: #C9EBD3; border-color: #6CC58A; }
+    .cell.cancelled  { background: #ECECF2; border-color: var(--border); }
+    .cell.cancelled .cell-name { text-decoration: line-through; color: var(--muted); }
 
     .loading-state, .empty-state {
       text-align: center;
@@ -357,17 +394,30 @@
     </div>
   </section>
 
-  <!-- Calendar / day list -->
+  <!-- Weekly calendar -->
   <section id="adminScreen" style="display:none;">
     <div class="toolbar">
-      <span class="toolbar-label">Rango</span>
-      <input type="date" id="fromDate" onchange="loadBookings()">
-      <span class="toolbar-label">→</span>
-      <input type="date" id="toDate"   onchange="loadBookings()">
+      <button onclick="prevWeek()" aria-label="Semana anterior">←</button>
+      <button onclick="thisWeek()">Hoy</button>
+      <button onclick="nextWeek()" aria-label="Semana siguiente">→</button>
+      <span class="week-label" id="weekLabel"></span>
+      <span class="spacer"></span>
       <span class="stat" id="totalStat">— reservaciones</span>
+      <span class="stat" id="readyStat">— listas p/cobrar</span>
       <span class="stat" id="chargedStat">— cobradas</span>
     </div>
-    <div id="dayList"></div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot unassigned"></span>Sin asignar</span>
+      <span class="legend-item"><span class="legend-dot pending"></span>Pendiente</span>
+      <span class="legend-item"><span class="legend-dot completed"></span>Listo p/cobrar</span>
+      <span class="legend-item"><span class="legend-dot charged"></span>Cobrado</span>
+      <span class="legend-item"><span class="legend-dot cancelled"></span>Cancelada</span>
+    </div>
+
+    <div class="week-wrap">
+      <div id="weekGrid"></div>
+    </div>
   </section>
 
 </main>
@@ -384,14 +434,33 @@
 </div>
 
 <script>
-const SLOTS = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','1:00 PM'];
+// Hours displayed in the weekly grid. We list 8 AM → 1 PM so Janet can
+// see (or manually slot) any booking in the standard window; the booking
+// form itself still only offers 8/9/10/11/13 to customers.
+const HOURS = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM'];
 const DAY_LONG    = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const DAY_SHORT   = ['dom','lun','mar','mié','jue','vie','sáb'];
 const MONTH_LONG  = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const MONTH_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
 let state = {
-  bookings: [],
-  current:  null, // booking currently open in modal
+  weekStart: mondayOfToday(), // ISO date string for the Monday of the visible week
+  bookings:  [],
+  current:   null,             // booking currently open in modal
 };
+
+function mondayOfToday() {
+  return mondayOfIso(isoToday());
+}
+function mondayOfIso(iso) {
+  const [Y, M, D] = iso.split('-').map(Number);
+  const d = new Date(Date.UTC(Y, M - 1, D));
+  // 0=Sun, 1=Mon, ..., 6=Sat. We want Monday at the start.
+  const dow = d.getUTCDay();
+  const offset = (dow === 0) ? -6 : (1 - dow);
+  d.setUTCDate(d.getUTCDate() + offset);
+  return d.toISOString().slice(0, 10);
+}
 
 // ── Init ────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', init);
@@ -413,20 +482,21 @@ async function init() {
 }
 
 async function tryLoadOrLogin() {
-  const today = isoToday();
-  const from  = shiftIso(today, -3);
-  const to    = shiftIso(today, 21);
-  document.getElementById('fromDate').value = from;
-  document.getElementById('toDate').value   = to;
-  const res = await fetch('/api/admin/bookings?from=' + from + '&to=' + to);
-  if (res.status === 401) { showLogin(); return; }
-  if (!res.ok) {
-    showLogin('Error de servidor. Intenta otra vez.');
-    return;
-  }
+  const res = await fetchWeek();
+  if (res === 'unauthorized') { showLogin(); return; }
+  if (res === 'error') { showLogin('Error de servidor. Intenta otra vez.'); return; }
   showAdmin();
+  renderWeek();
+}
+
+async function fetchWeek() {
+  const from = state.weekStart;
+  const to   = shiftIso(from, 6);
+  const res  = await fetch(`/api/admin/bookings?from=${from}&to=${to}`);
+  if (res.status === 401) return 'unauthorized';
+  if (!res.ok) return 'error';
   state.bookings = (await res.json()).bookings || [];
-  renderDays(from, to);
+  return 'ok';
 }
 
 function showLogin(msg) {
@@ -483,73 +553,94 @@ async function logout() {
   location.reload();
 }
 
-// ── Bookings load + render ──────────────────────────────────
-async function loadBookings() {
-  const from = document.getElementById('fromDate').value;
-  const to   = document.getElementById('toDate').value;
-  if (!from || !to) return;
-  const res = await fetch(`/api/admin/bookings?from=${from}&to=${to}`);
-  if (res.status === 401) { showLogin(); return; }
-  state.bookings = (await res.json()).bookings || [];
-  renderDays(from, to);
+// ── Weekly grid ─────────────────────────────────────────────
+async function prevWeek() { state.weekStart = shiftIso(state.weekStart, -7); await reloadWeek(); }
+async function nextWeek() { state.weekStart = shiftIso(state.weekStart,  7); await reloadWeek(); }
+async function thisWeek() { state.weekStart = mondayOfToday();                 await reloadWeek(); }
+
+async function reloadWeek() {
+  const res = await fetchWeek();
+  if (res === 'unauthorized') { showLogin(); return; }
+  renderWeek();
 }
 
-function renderDays(from, to) {
-  const list = document.getElementById('dayList');
+// Booking → color bucket. Priority: charged > cancelled > completed (done) > pending > unassigned.
+function bookingColor(b, nowMs) {
+  if (b.charged_at)                                       return 'charged';
+  if (b.status === 'cancelled')                           return 'cancelled';
+  if (b.status === 'completed' || b.status === 'no_show') return 'completed';
+  const endMs = slotEndUtcMs(b.booking_date_iso, b.booking_time);
+  if (endMs && endMs < nowMs)                             return 'completed';
+  if (b.status === 'confirmed')                           return 'pending';
+  return 'unassigned'; // null, '', or 'new' → unassigned
+}
+
+// PR is UTC-4 year-round (no DST). Returns end-of-service in ms UTC.
+function slotEndUtcMs(iso, slot) {
+  if (!iso || !slot) return 0;
+  const [time, period] = slot.split(' ');
+  let [h, m] = time.split(':').map(Number);
+  if (period === 'PM' && h !== 12) h += 12;
+  if (period === 'AM' && h === 12) h = 0;
+  const [Y, M, D] = iso.split('-').map(Number);
+  // start time in UTC; service is 2.5h
+  const startMs = Date.UTC(Y, M - 1, D, h + 4, m || 0); // PR -> UTC: +4h
+  return startMs + 2.5 * 60 * 60 * 1000;
+}
+
+function renderWeek() {
   const days = [];
-  let cur = from;
-  while (cur <= to) {
-    days.push(cur);
-    cur = shiftIso(cur, 1);
-  }
+  for (let i = 0; i < 7; i++) days.push(shiftIso(state.weekStart, i));
+  const today = isoToday();
+  const nowMs = Date.now();
 
-  let totalBookings = 0;
-  let totalCharged  = 0;
-  state.bookings.forEach(b => {
-    if (b.status !== 'cancelled') totalBookings++;
-    if (b.charged_at) totalCharged++;
-  });
-  document.getElementById('totalStat').innerHTML   = `<b>${totalBookings}</b> reservaciones`;
-  document.getElementById('chargedStat').innerHTML = `<b>${totalCharged}</b> cobradas`;
+  // Stats
+  const counts = { unassigned: 0, pending: 0, completed: 0, charged: 0, cancelled: 0 };
+  state.bookings.forEach(b => { counts[bookingColor(b, nowMs)]++; });
+  const totalActive = counts.unassigned + counts.pending + counts.completed + counts.charged;
+  document.getElementById('totalStat').innerHTML   = `<b>${totalActive}</b> reservaciones`;
+  document.getElementById('readyStat').innerHTML   = `<b>${counts.completed}</b> listas p/cobrar`;
+  document.getElementById('chargedStat').innerHTML = `<b>${counts.charged}</b> cobradas`;
 
-  list.innerHTML = days.map(iso => {
+  // Week label
+  const first = days[0], last = days[6];
+  const [fy, fm, fd] = first.split('-').map(Number);
+  const [ly, lm, ld] = last.split('-').map(Number);
+  const weekLabel = (fm === lm)
+    ? `${fd}–${ld} ${MONTH_LONG[fm - 1]} ${ly}`
+    : `${fd} ${MONTH_SHORT[fm - 1]} – ${ld} ${MONTH_SHORT[lm - 1]} ${ly}`;
+  document.getElementById('weekLabel').textContent = weekLabel;
+
+  // Header row (days)
+  const headerHtml = `<th></th>` + days.map(iso => {
     const [Y, M, D] = iso.split('-').map(Number);
     const d = new Date(Date.UTC(Y, M - 1, D));
-    const weekday = DAY_LONG[d.getUTCDay()];
-    const dayLabel = `${D} ${MONTH_LONG[M - 1]}`;
-    const dayBookings = state.bookings.filter(b => b.booking_date_iso === iso);
-    const dayCount = dayBookings.filter(b => b.status !== 'cancelled').length;
-
-    const slotsHtml = SLOTS.map(slot => {
-      const booking = dayBookings.find(b => b.booking_time === slot);
-      if (!booking) {
-        return `<div class="slot empty"><div class="slot-time">${slot}</div><div>—</div></div>`;
-      }
-      const statusClass = `status-${booking.status || 'new'}`;
-      const charged = booking.charged_at ? '<div class="charged-mark">✓ cobrado</div>' : '';
-      return `
-        <div class="slot has-booking" onclick="openModal('${booking.booking_id}')">
-          <div>
-            <div class="slot-time">${slot}</div>
-            <div class="slot-customer">${escapeHtml(booking.customer_name)}</div>
-          </div>
-          <div>
-            <span class="slot-badge ${statusClass}">${booking.status || 'new'}</span>
-            ${charged}
-          </div>
-        </div>`;
-    }).join('');
-
-    return `
-      <div class="day">
-        <div class="day-header">
-          <span class="day-weekday">${weekday}</span>
-          <span class="day-date">${dayLabel}</span>
-          <span class="day-count">${dayCount} reservación${dayCount === 1 ? '' : 'es'}</span>
-        </div>
-        <div class="slot-row">${slotsHtml}</div>
-      </div>`;
+    const todayCls = (iso === today) ? ' today' : '';
+    return `<th class="day-col${todayCls}">
+      <div class="dow">${DAY_SHORT[d.getUTCDay()]}</div>
+      <div class="dnum">${D}</div>
+      <div class="dmon">${MONTH_SHORT[M - 1]}</div>
+    </th>`;
   }).join('');
+
+  // Body rows (one per hour)
+  const bodyHtml = HOURS.map(slot => {
+    const cells = days.map(iso => {
+      const booking = state.bookings.find(b => b.booking_date_iso === iso && b.booking_time === slot);
+      if (!booking) return `<td class="cell empty"></td>`;
+      const color = bookingColor(booking, nowMs);
+      const first = (booking.customer_name || '').split(' ')[0];
+      const task  = booking.task_1 || '';
+      return `<td class="cell ${color}" onclick="openModal('${booking.booking_id}')" title="${escapeHtml(booking.customer_name)} — ${escapeHtml(task)}">
+        <div class="cell-name">${escapeHtml(first)}</div>
+        <div class="cell-task">${escapeHtml(task)}</div>
+      </td>`;
+    }).join('');
+    return `<tr><th class="hour-row">${slot}</th>${cells}</tr>`;
+  }).join('');
+
+  document.getElementById('weekGrid').innerHTML =
+    `<table class="week-grid"><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table>`;
 }
 
 // ── Modal ──────────────────────────────────────────────────
@@ -643,12 +734,12 @@ async function setStatus(bookingId, status) {
     alert('No pudimos actualizar: ' + (data.error || res.status));
     return;
   }
-  // Replace booking in local state + redraw modal
+  // Replace booking in local state + redraw modal + redraw grid
   const idx = state.bookings.findIndex(b => b.booking_id === bookingId);
   if (idx >= 0) state.bookings[idx] = data.booking;
   state.current = data.booking;
   document.getElementById('modalBody').innerHTML = renderBookingBody(data.booking);
-  renderDays(document.getElementById('fromDate').value, document.getElementById('toDate').value);
+  renderWeek();
 }
 
 async function saveNotes(bookingId) {
@@ -689,20 +780,14 @@ async function chargeBooking(bookingId) {
     err.textContent = 'No se pudo cobrar: ' + (data.detail || data.error || res.status);
     return;
   }
-  // Refresh the booking from server (charged_at is now set)
-  const refreshed = await fetch('/api/admin/bookings?from='
-    + document.getElementById('fromDate').value
-    + '&to='
-    + document.getElementById('toDate').value);
-  if (refreshed.ok) {
-    state.bookings = (await refreshed.json()).bookings || [];
-    const b = state.bookings.find(x => x.booking_id === bookingId);
-    if (b) {
-      state.current = b;
-      document.getElementById('modalBody').innerHTML = renderBookingBody(b);
-    }
-    renderDays(document.getElementById('fromDate').value, document.getElementById('toDate').value);
+  // Refresh the week from server (charged_at is now set)
+  await fetchWeek();
+  const b = state.bookings.find(x => x.booking_id === bookingId);
+  if (b) {
+    state.current = b;
+    document.getElementById('modalBody').innerHTML = renderBookingBody(b);
   }
+  renderWeek();
 }
 
 // ── Helpers ────────────────────────────────────────────────
