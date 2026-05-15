@@ -16,9 +16,14 @@
   <meta property="og:description" content="2 tareas, 2.5 horas, $175 tarifa fija. Confirma al instante.">
   <meta property="og:url"         content="https://book.domoyourhome.com/">
   <meta property="og:locale"      content="es_PR">
+  <meta property="og:image"        content="https://book.domoyourhome.com/og-image.png">
+  <meta property="og:image:width"  content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt"    content="Domo Express — Mantener tu casa nunca ha sido tan fácil">
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Domo Express — Reserva tu handyman en 2 minutos">
   <meta name="twitter:description" content="2 tareas, 2.5 horas, $175 tarifa fija. Confirma al instante.">
+  <meta name="twitter:image"       content="https://book.domoyourhome.com/og-image.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,7 +35,11 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-75BRLFC7HC');
+    gtag('config', 'G-75BRLFC7HC', {
+      // Cross-domain linker so a session that starts on domoyourhome.com
+      // and lands here keeps the same client ID + session.
+      linker: { domains: ['domoyourhome.com', 'book.domoyourhome.com'] },
+    });
   </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1760,6 +1769,18 @@ async function submitBooking() {
     }
 
     // Success
+    if (typeof gtag === 'function') {
+      gtag('event', 'purchase', {
+        transaction_id: data.booking_id,
+        value:    total / 100,
+        currency: 'USD',
+        items: state.selectedTasks.map((t, i) => ({
+          item_id:   `task_${i + 1}`,
+          item_name: t,
+          quantity:  1,
+        })),
+      });
+    }
     document.getElementById('loadingOverlay').classList.remove('visible');
     document.getElementById('bookingCard').style.display  = 'none';
     document.getElementById('confirmCard').style.display  = 'block';
