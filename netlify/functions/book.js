@@ -207,6 +207,18 @@ exports.handler = async (event) => {
     }
     return { statusCode: 500, body: JSON.stringify({ error: 'Database error', detail: dbError.message }) };
   }
+
+  // Clear any abandoned-cart partial for this email \u2014 they made it.
+  // Failure is non-fatal; the recovery cron also checks for completed
+  // bookings before sending.
+  if (body.customer_email) {
+    supabase
+      .from('express_partial_bookings')
+      .delete()
+      .ilike('customer_email', String(body.customer_email).trim())
+      .then(({ error }) => { if (error) console.error('book: failed to clear partial', error); });
+  }
+
   // Reschedule token + URL \u2014 handed back to the client and embedded
   // in the confirmation email so customers can self-serve up to 24h
   // before the service.

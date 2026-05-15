@@ -2313,6 +2313,45 @@ function goToStep(n) {
 function nextStep(from) {
   if (!validateStep(from)) return;
   showStep(from + 1);
+  // When the customer crosses 4 -> 5, we've collected enough info
+  // (email + phone + name + tasks + slot) to re-engage if they bail
+  // on the review step. Fire-and-forget — failure is invisible.
+  if (from === 4) trackPartial();
+}
+
+function trackPartial() {
+  if (!state.customerEmail || !state.customerEmail.includes('@')) return;
+  const base  = 17500;
+  const total = state.materialsRequested ? base + 2500 : base;
+  const payload = {
+    customer_name:       state.customerName,
+    customer_phone:      state.customerPhone,
+    customer_email:      state.customerEmail,
+    address:             state.address,
+    task_1:              state.selectedTasks[0] || null,
+    task_2:              state.selectedTasks[1] || null,
+    booking_date:        state.selectedDate?.label || null,
+    booking_date_iso:    state.selectedDate?.iso   || null,
+    booking_time:        state.selectedTime,
+    payment_method:      state.paymentMethod,
+    materials_requested: state.materialsRequested,
+    materials_detail:    state.materialsDetail || null,
+    total_amount:        total,
+  };
+  // Use sendBeacon when available so the request still goes out if the
+  // user closes the tab right after stepping into review.
+  try {
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/track-partial', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+    } else {
+      fetch('/api/track-partial', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+        keepalive: true,
+      }).catch(() => {});
+    }
+  } catch (e) { /* swallow */ }
 }
 
 function prevStep(from) {

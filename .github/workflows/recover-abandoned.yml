@@ -1,0 +1,33 @@
+name: Recover abandoned bookings
+
+# Fires every 30 minutes between 8 AM and 9 PM PR (12 - 01 UTC).
+# For each express_partial_bookings row older than 30 minutes that
+# hasn't been notified yet:
+#   - skip if customer has since completed a booking
+#   - send a recovery email to the customer
+#   - send an alert email to ops (janet@ + info@)
+#   - stamp the row so we don't re-fire on it
+
+on:
+  schedule:
+    - cron: "*/30 12-23 * * *"
+  workflow_dispatch:  # manual trigger for testing
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call recover-abandoned endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "CRON_SECRET secret is not configured — refusing to call the endpoint." >&2
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error \
+               --request POST \
+               --header "x-cron-secret: ${CRON_SECRET}" \
+               --header "content-type: application/json" \
+               https://book.domoyourhome.com/api/recover-abandoned
