@@ -864,9 +864,35 @@
       font-weight: 700;
     }
     .policy-body h3:first-child { margin-top: 0; }
+    .policy-body h4 {
+      font-size: 13px;
+      color: var(--navy);
+      margin: 12px 0 4px;
+      font-weight: 700;
+    }
     .policy-body p, .policy-body li { color: #2A3957; }
     .policy-body ul { padding-left: 22px; margin: 4px 0 8px; }
     .policy-body li { margin-bottom: 3px; }
+    .policy-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 12px;
+    }
+    .policy-body th, .policy-body td {
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      text-align: left;
+      vertical-align: top;
+      color: #2A3957;
+    }
+    .policy-body th {
+      background: var(--bluelt);
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
     .policy-body .updated { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
     .policy-foot {
       padding: 12px 20px;
@@ -1269,49 +1295,342 @@
       <button class="policy-close" onclick="closePolicy()" aria-label="Cerrar">×</button>
     </div>
     <div class="policy-tabs">
-      <button class="policy-tab active" id="tabTerms"  onclick="switchPolicy('terms')">Términos de servicio</button>
-      <button class="policy-tab"        id="tabCancel" onclick="switchPolicy('cancellation')">Política de cancelación</button>
+      <button class="policy-tab active" id="tabTerms"   onclick="switchPolicy('terms')">Términos</button>
+      <button class="policy-tab"        id="tabPrivacy" onclick="switchPolicy('privacy')">Privacidad</button>
+      <button class="policy-tab"        id="tabCancel"  onclick="switchPolicy('cancellation')">Cancelación</button>
     </div>
 
     <div class="policy-body" id="policyTerms">
-      <div class="updated">Última actualización: 15 de mayo de 2026</div>
+      <div class="updated">Effective Date: 15 May 2026 · Document Version v2026-05-15. Provided in English for legal precision.</div>
 
-      <h3>1. Qué incluye Domo Express</h3>
-      <p>Cada reservación cubre <strong>2 tareas pequeñas de mantenimiento</strong> en una sola visita de hasta <strong>2.5 horas</strong> con un handyman de Domo, por una tarifa fija de <strong>$175</strong>. Si solicitas que Domo lleve los materiales, se añaden <strong>$25 de gestión + el costo real de los materiales</strong> a la factura final.</p>
+      <p>These Terms of Service (the "Terms") govern your access to and use of the website located at domoyourhome.com, the Domo mobile or web application, and any related services, features, content, or tools offered by Domo, LLC (collectively, the "Service"). The Service is operated by Domo, LLC, a Puerto Rico limited liability company ("Domo," "we," "us," or "our").</p>
+      <p>By accessing or using the Service — whether as a visitor, registered user, customer, or independent service provider — you agree to be bound by these Terms and by our <a href="#" onclick="switchPolicy('privacy');return false;">Privacy Policy</a>. If you do not agree to these Terms, you must not access or use the Service.</p>
+      <p>If you are an independent service provider offering services through the Service, you are additionally bound by the separate Provider Agreement.</p>
 
-      <h3>2. Qué no incluye</h3>
-      <p>Domo Express está pensado para tareas pequeñas y específicas. Algunas cosas que <em>no</em> entran:</p>
+      <h3>1. Definitions</h3>
       <ul>
-        <li>Trabajo eléctrico mayor, plomería estructural o conexiones de gas.</li>
-        <li>Remoción de moho, asbesto o materiales peligrosos.</li>
-        <li>Trabajos que requieran permiso de construcción o inspección oficial.</li>
-        <li>Trabajo en techos sin acceso seguro o sin equipos provistos por el cliente.</li>
-      </ul>
-      <p>Si tu solicitud cae fuera del alcance, te contactamos antes del servicio para reprogramar o reembolsar.</p>
-
-      <h3>3. Tu rol como cliente</h3>
-      <ul>
-        <li>Estar presente o tener un adulto autorizado al momento del servicio.</li>
-        <li>Dar acceso a la propiedad y a las áreas de trabajo.</li>
-        <li>Tener los materiales listos si escogiste no contratar la opción de materiales.</li>
-        <li>Comunicar con claridad qué necesitas hecho antes de la llegada del handyman.</li>
+        <li><strong>"Customer" or "Homeowner"</strong> means a user who books a Service through Domo to be performed at a property the user owns, rents, or otherwise controls.</li>
+        <li><strong>"Provider"</strong> means an independent third-party individual or company that offers home services through the Domo platform.</li>
+        <li><strong>"Services"</strong> means the home services (including but not limited to residential cleaning, pool maintenance, landscaping, handyman work, and short-term rental turnover) made available through the Domo platform and performed by Providers.</li>
+        <li><strong>"Booking"</strong> means a scheduled appointment for a Service, created through any channel (website, app, phone, WhatsApp, email, or in person).</li>
+        <li><strong>"Platform Fees"</strong> means any service fee, commission, technology fee, or convenience fee charged by Domo in connection with a Booking.</li>
       </ul>
 
-      <h3>4. Pago</h3>
-      <p>No te cobramos al momento de reservar. Si pagas con tarjeta, <strong>guardamos el método de pago de forma segura con Stripe</strong> y lo cobramos <em>después</em> del servicio una vez confirmado. ATH Móvil se cobra manualmente el día del servicio.</p>
-      <p>Si el servicio no se pudo completar por razones ajenas a Domo (falta de acceso, materiales no provistos, tarea fuera de alcance no comunicada), se cobra la tarifa completa.</p>
+      <h3>2. Acceptance of These Terms</h3>
+      <h4>2.1 Multiple Channels of Acceptance</h4>
+      <p>You agree to these Terms by doing any of the following:</p>
+      <p>(a) creating an account on the Service;<br>
+      (b) requesting, scheduling, or accepting a Booking through any channel — including the website, the app, telephone, WhatsApp, SMS, email, in-person request, or any other communication channel offered by Domo;<br>
+      (c) allowing a Provider to perform a Service at a property you control; or<br>
+      (d) making a payment for a Service through Domo.</p>
+      <p>This means that if Domo creates a Booking on your behalf (for example, because you requested service via phone or WhatsApp), your confirmation of the appointment — by reply message, email click-through, payment of the invoice, or by permitting the Service to occur — constitutes your acceptance of these Terms and the Privacy Policy in effect at the time of the Booking.</p>
+      <h4>2.2 Changes to These Terms</h4>
+      <p>Domo may revise these Terms at any time. The current version is always posted at domoyourhome.com/terms with the Effective Date and Document Version shown. If a change is material, Domo will give at least thirty (30) days' notice by email or by message to your account before the change takes effect. Your continued use of the Service after the new Effective Date constitutes acceptance of the revised Terms.</p>
 
-      <h3>5. Garantía</h3>
-      <p>Garantizamos la calidad del trabajo realizado por <strong>7 días</strong> a partir de la fecha del servicio. Si algo no quedó bien hecho dentro de ese período, contáctanos y volvemos sin costo a corregir el trabajo específico.</p>
+      <h3>3. Eligibility</h3>
+      <p>You must be at least eighteen (18) years old and have the legal capacity to enter into binding contracts under the laws of the Commonwealth of Puerto Rico (or your jurisdiction of residence) to use the Service. By using the Service you represent and warrant that you meet these requirements.</p>
 
-      <h3>6. Limitaciones</h3>
-      <p>Domo no se responsabiliza por daños preexistentes, por la instalación o configuración de equipos electrónicos provistos por el cliente más allá de lo expresamente acordado, ni por problemas derivados de materiales defectuosos provistos por el cliente.</p>
+      <h3>4. The Domo Service and Domo's Role</h3>
+      <h4>4.1 What Domo Does</h4>
+      <p>Domo operates a platform that connects Customers with independent Providers. Domo facilitates discovery, scheduling, communications, and payment between Customers and Providers, and may provide tools for ratings, feedback, and dispute coordination.</p>
+      <h4>4.2 What Domo Does Not Do</h4>
+      <p>Domo is <strong>not</strong> the employer, agent, joint venturer, partner, or contractor of any Provider. Domo does not own, control, supervise, direct, or manage the actual Services performed at any property. Domo does not warrant the quality, safety, suitability, or legality of any Service.</p>
+      <p>The contract for Services is between the Customer and the Provider. Domo acts only as an intermediary that facilitates that relationship and the related payment, except where these Terms or the Provider Agreement expressly state otherwise.</p>
+      <h4>4.3 Background and Vetting</h4>
+      <p>Domo may, but is not required to, perform background checks, reference checks, or other vetting of Providers. Any such checks are not a guarantee of safety, performance, or fitness, and Domo expressly disclaims any warranty or representation regarding any Provider.</p>
 
-      <h3>7. Privacidad</h3>
-      <p>Solo guardamos la información necesaria para procesar tu reservación (nombre, contacto, dirección, tareas) y para cobrar el servicio (método de pago vía Stripe). No vendemos ni compartimos tus datos con terceros fuera de los proveedores que hacen funcionar el servicio (Supabase, Stripe, Resend, Netlify).</p>
+      <h3>5. Account Registration</h3>
+      <p>To access certain features of the Service you may need to create an account. You agree to provide accurate, current, and complete information at registration and to keep that information up to date. You are responsible for safeguarding your password and for any activity that occurs under your account. You must promptly notify Domo at <a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a> of any unauthorized use or suspected security breach.</p>
 
-      <h3>8. Contacto</h3>
-      <p>Cualquier pregunta o reclamo: <a href="tel:7874190300">(787) 419-0300</a> · <a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a></p>
+      <h3>6. Bookings, Pricing, and Payment</h3>
+      <h4>6.1 Booking and Confirmation</h4>
+      <p>When you request a Booking, Domo will confirm the date, time, scope, address, and price through the channel you use (website, app, WhatsApp, or email). The Booking is considered confirmed once Domo or a Provider sends you a confirmation message.</p>
+      <h4>6.2 Pricing and Fees</h4>
+      <p>The price of each Service is the amount disclosed to you at the time of Booking and may include the Provider's service fee, Platform Fees, applicable taxes (including Puerto Rico IVU where applicable), and any optional add-ons you select. Recurring Service prices may be adjusted with at least thirty (30) days' notice.</p>
+      <h4>6.3 Payment Methods and Saved Card on File</h4>
+      <p>By placing a Booking, you authorize Domo and its payment processor to charge your selected payment method for all amounts owed in connection with the Booking, including the Service fee, applicable taxes, late fees, and authorized incidentals.</p>
+      <p>You agree that <strong>Domo (through its payment processor, Stripe) will store your payment method on file</strong> and may charge that payment method for any current or future Booking you authorize, and for any unpaid amounts as described in Section 6.5. You may update or remove your payment method at any time by contacting Domo, except that you may not remove a payment method while an invoice remains unpaid.</p>
+      <h4>6.4 Payment Processing by Stripe</h4>
+      <p>All card payments are processed by Stripe, Inc. ("Stripe"). Your payment card data is collected, stored, and processed by Stripe in accordance with Stripe's terms and privacy policy. Domo does not store full card numbers on its systems.</p>
+      <h4>6.5 Late Payment and Auto-Charge of Pending Invoices</h4>
+      <p>Invoices for Services rendered are due upon receipt unless otherwise stated. If an invoice remains unpaid for more than thirty (30) days from the invoice date:</p>
+      <p>(a) the unpaid balance will accrue interest at a rate of <strong>one and one-half percent (1.5%) per month</strong> (eighteen percent (18%) per annum), or the maximum rate permitted under Puerto Rico law, whichever is lower, calculated from the original due date until paid in full;</p>
+      <p>(b) <strong>you expressly authorize Domo to automatically charge the payment method on file</strong> for the full outstanding balance, including accrued interest, without further notice. This authorization applies to every Booking placed with Domo and continues for as long as Domo holds a payment method on your behalf;</p>
+      <p>(c) Domo may suspend further Services and refer the account to a collections agent. You are responsible for any reasonable costs of collection, including attorneys' fees.</p>
+      <p>You acknowledge that this is a clear and conspicuous authorization to charge your saved card for amounts owed for Services already rendered, and that this authorization is a condition of using the Service.</p>
+      <h4>6.6 Tipping</h4>
+      <p>Tips are optional and go entirely to the Provider. Domo does not retain any portion of any tip.</p>
+      <h4>6.7 Refunds and Service Credits</h4>
+      <p>Refunds are issued at Domo's reasonable discretion and only where appropriate (for example, where a Service was not performed or was materially deficient and could not be remedied). Any refund or service credit will be issued to your original payment method or as an account credit, at Domo's choice.</p>
+
+      <h3>7. Cancellations, Reschedules, and Access</h3>
+      <h4>7.1 Customer Cancellation</h4>
+      <p>You may cancel or reschedule a Booking at no charge if you provide notice at least <strong>twenty-four (24) hours</strong> before the scheduled start time. Cancellations or reschedules made with less than 24 hours' notice will be charged a flat cancellation fee of <strong>fifty U.S. dollars ($50)</strong>, automatically charged to the payment method on file. A no-show, lockout, or denial of access at the scheduled time will be charged the full Service fee.</p>
+      <h4>7.2 No-Access / Lockout</h4>
+      <p>If a Provider arrives at the property at the scheduled time and is unable to access the property because the Customer is not present, has not provided keys or access codes, or has otherwise prevented entry, the Booking will be treated as a no-show and the full Service fee will be charged.</p>
+      <h4>7.3 Provider Cancellation</h4>
+      <p>If a Provider cancels, Domo will use commercially reasonable efforts to reassign the Booking to another available Provider or to reschedule. If reassignment is not possible, you will not be charged for the cancelled Booking.</p>
+      <h4>7.4 Force Majeure</h4>
+      <p>Neither party is responsible for cancellation, delay, or non-performance caused by events outside its reasonable control, including hurricanes, tropical storms, floods, earthquakes, power or water outages, government orders, civil unrest, pandemics, or telecommunications failures.</p>
+
+      <h3>8. Damage Claims</h3>
+      <p>Domo and its Providers take reasonable care while performing Services. If you believe that a Provider has caused damage to your property during a Service:</p>
+      <p>(a) you must report the claim to Domo at <a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a> or via WhatsApp <strong>within twenty-four (24) hours</strong> of completion of the Service;<br>
+      (b) your report must include the date and time of Service, a description of the damage, and photographs;<br>
+      (c) Domo will coordinate review of the claim with the Provider and, where appropriate, with the Provider's insurance carrier. Domo's involvement is limited to facilitating the claim — Domo is not a party to it.</p>
+      <p>Claims reported after the 24-hour window may be denied. Domo does not insure your property and recommends that you maintain your own homeowners or renters insurance.</p>
+
+      <h3>9. Recurring Services</h3>
+      <p>Some Services are scheduled on a recurring basis (weekly, biweekly, monthly, or as otherwise agreed). Recurring Bookings will continue at the agreed cadence until cancelled by you with at least seven (7) days' written notice (email or WhatsApp). Recurring Service pricing may be adjusted with at least thirty (30) days' notice.</p>
+
+      <h3>10. Homeowner Responsibilities and FSE</h3>
+      <p>You are responsible for providing a safe working environment and for complying with all laws applicable to the engagement of service workers at your property. <strong>In particular, if you regularly engage domestic or maintenance workers at your residential or commercial property in Puerto Rico, you are responsible for maintaining current and active workers' compensation coverage with the Corporación del Fondo del Seguro del Estado ("CFSE") as required by Puerto Rico law (often referred to as keeping your CFSE policy "al día"), and you agree to hold Domo and its Providers harmless from any claim, fine, or liability arising from your failure to maintain such coverage.</strong></p>
+      <p>You also agree to:</p>
+      <ul>
+        <li>provide accurate information about the property and the scope of work requested;</li>
+        <li>secure or remove valuables, fragile items, and pets before a Provider's arrival;</li>
+        <li>provide reasonable access to water, electricity, and any equipment or supplies you have agreed to make available;</li>
+        <li>treat Providers with respect and not subject them to discrimination, harassment, or unsafe conditions; and</li>
+        <li>comply with all condominium, HOA, or building rules applicable to the property.</li>
+      </ul>
+
+      <h3>11. Non-Circumvention and the Provider-Homeowner Relationship</h3>
+      <p>The relationship between you and a Provider is established through Domo. <strong>You agree that, for so long as you use the Service and for a period of twenty-four (24) months after the last Booking with a particular Provider, you will not directly or indirectly engage, hire, retain, or pay that Provider for any home service outside of the Domo platform.</strong> This includes hiring the Provider directly, hiring an employee or family member of the Provider, or arranging payment outside of Domo for Services that would otherwise be booked through the Service.</p>
+      <p>This restriction protects the investment Domo makes in vetting, scheduling, insuring, training, and supporting Providers, and protects Providers from being approached outside the agreed economic structure.</p>
+      <p>If you violate this Section 11, you agree that Domo's damages would be difficult to calculate and that you will pay Domo, as liquidated damages and not as a penalty, an amount equal to <strong>twelve (12) months of the average monthly fees you previously paid Domo for the same Service</strong>, plus any reasonable costs of enforcement.</p>
+      <p>This Section survives termination of these Terms.</p>
+
+      <h3>12. User Conduct</h3>
+      <p>You agree not to use the Service to:</p>
+      <ul>
+        <li>(a) violate any applicable law, regulation, ordinance, or third-party right;</li>
+        <li>(b) harass, threaten, defame, or discriminate against any other user, Provider, or Domo personnel;</li>
+        <li>(c) interfere with or damage the Service, including by introducing viruses, attempting to gain unauthorized access, or scraping content with automated tools;</li>
+        <li>(d) impersonate any person or misrepresent your affiliation with any person or entity;</li>
+        <li>(e) use the Service to send unsolicited communications or spam;</li>
+        <li>(f) reverse engineer, decompile, or attempt to derive the source code of the Service;</li>
+        <li>(g) bypass payment, ratings, or other features of the Service; or</li>
+        <li>(h) exploit or attempt to exploit any minor.</li>
+      </ul>
+      <p>Domo may suspend or terminate accounts, refuse service, and report violations to law enforcement.</p>
+
+      <h3>13. Communications and Consent (Email, SMS, WhatsApp, Calls)</h3>
+      <p>By providing your email address or phone number, you expressly consent to receive transactional communications from Domo and Providers — including Booking confirmations, reminders, scheduling messages, payment notices, and service follow-ups — by email, SMS, WhatsApp, or voice call, including via automated systems. Message and data rates may apply.</p>
+      <p>You may opt out of marketing communications at any time:</p>
+      <ul>
+        <li>For email: click "unsubscribe" in the footer of any marketing email.</li>
+        <li>For SMS or WhatsApp: reply <strong>STOP</strong> to any message.</li>
+      </ul>
+      <p>Opting out of marketing communications does not stop transactional communications related to your Bookings, payments, or account.</p>
+
+      <h3>14. Automated Processing and AI</h3>
+      <p>Domo uses automated systems and artificial intelligence tools (including third-party AI services) to assist with scheduling, customer support, message drafting, billing automation, and operational analytics. These tools may process information you provide — such as your name, address, Booking details, and message content — in order to deliver the Service. Domo does not use your personal information to train third-party AI models. See the <a href="#" onclick="switchPolicy('privacy');return false;">Privacy Policy</a> for details.</p>
+
+      <h3>15. User Content</h3>
+      <p>You may submit reviews, ratings, photos, comments, and other content to the Service ("User Content"). You retain ownership of your User Content, but you grant Domo a worldwide, perpetual, irrevocable, royalty-free, sublicensable license to use, reproduce, modify, distribute, display, and create derivative works of your User Content in connection with the Service and Domo's business, including for marketing.</p>
+      <p>You represent that you own or have all rights necessary to grant this license, and that your User Content does not infringe any third-party right or violate any law.</p>
+      <p>Domo may, but is not required to, review, edit, or remove User Content at its discretion.</p>
+
+      <h3>16. Intellectual Property</h3>
+      <p>The Service, including its software, content, design, logos, and trademarks, is owned by Domo or its licensors and is protected by intellectual property laws. The marks "Domo," "DomoYourHome," and related logos are trademarks of Domo, LLC. You may not copy, modify, distribute, or create derivative works of the Service except as expressly permitted in these Terms.</p>
+
+      <h3>17. Third-Party Services</h3>
+      <p>The Service relies on third-party platforms and processors, including Stripe (payments), BookingKoala (scheduling), Supabase (data storage), Meta/WhatsApp (messaging), and others described in the Privacy Policy. Your use of those third-party services is also governed by their respective terms and privacy policies. Domo is not responsible for third-party services it does not control.</p>
+
+      <h3>18. Disclaimer of Warranties</h3>
+      <p>THE SERVICE AND ALL SERVICES PERFORMED BY PROVIDERS ARE PROVIDED "AS IS" AND "AS AVAILABLE," WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND ACCURACY. DOMO MAKES NO WARRANTY REGARDING THE QUALITY, SAFETY, OR RELIABILITY OF ANY PROVIDER OR SERVICE.</p>
+
+      <h3>19. Limitation of Liability</h3>
+      <p>TO THE FULLEST EXTENT PERMITTED BY LAW, IN NO EVENT WILL DOMO, ITS OFFICERS, DIRECTORS, MEMBERS, EMPLOYEES, OR AFFILIATES BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF PROFITS, REVENUE, OR DATA, ARISING FROM OR RELATED TO THESE TERMS OR THE SERVICE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+      <p>DOMO'S TOTAL AGGREGATE LIABILITY TO YOU FOR ANY CLAIM ARISING UNDER OR RELATED TO THESE TERMS OR THE SERVICE WILL NOT EXCEED THE GREATER OF (a) THE AMOUNTS YOU PAID TO DOMO IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM AND (b) ONE HUNDRED U.S. DOLLARS ($100).</p>
+
+      <h3>20. Indemnification</h3>
+      <p>You agree to defend, indemnify, and hold harmless Domo, its members, officers, employees, and Providers from and against any claim, loss, damage, liability, or expense (including reasonable attorneys' fees) arising out of or related to: (a) your breach of these Terms; (b) your violation of any law or third-party right; (c) damage to property or persons caused by you or your guests; or (d) your failure to maintain CFSE coverage where required.</p>
+
+      <h3>21. Termination</h3>
+      <p>You may close your account at any time by contacting <a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a>. Domo may suspend or terminate your account, without notice, for any breach of these Terms or for any reason in Domo's reasonable discretion. Sections that by their nature should survive termination (including 6.5, 8, 11, 15, 18, 19, 20, 22, and 23) will survive.</p>
+
+      <h3>22. Governing Law and Arbitration</h3>
+      <h4>22.1 Governing Law</h4>
+      <p>These Terms and any dispute arising under or related to them are governed by the laws of the Commonwealth of Puerto Rico, without regard to its conflict-of-laws principles.</p>
+      <h4>22.2 Binding Arbitration</h4>
+      <p><strong>You and Domo agree that any dispute, claim, or controversy arising out of or relating to these Terms or the Service, including its breach, termination, enforcement, interpretation, or validity, will be resolved by binding arbitration administered by the American Arbitration Association ("AAA") under its Consumer Arbitration Rules.</strong> The arbitration will be conducted in San Juan, Puerto Rico, in English or Spanish at the parties' election. Judgment on the award may be entered in any court of competent jurisdiction.</p>
+      <h4>22.3 Class Action Waiver</h4>
+      <p><strong>You and Domo each waive any right to participate in a class, collective, or representative action.</strong> All disputes must be brought in the parties' individual capacity. If this waiver is held to be unenforceable, the rest of Section 22 will be null and void for that dispute.</p>
+      <h4>22.4 Exceptions</h4>
+      <p>Either party may bring an individual action in small-claims court, or seek injunctive or equitable relief from a court of competent jurisdiction to protect intellectual property rights or enforce Section 11 (Non-Circumvention).</p>
+
+      <h3>23. Miscellaneous</h3>
+      <h4>23.1 Severability</h4>
+      <p>If any provision of these Terms is held to be unenforceable, the remaining provisions will continue in full force and effect, and the unenforceable provision will be modified to the minimum extent necessary to make it enforceable.</p>
+      <h4>23.2 No Waiver</h4>
+      <p>Domo's failure to enforce any provision is not a waiver of its right to enforce that provision later.</p>
+      <h4>23.3 Assignment</h4>
+      <p>You may not assign these Terms without Domo's written consent. Domo may assign these Terms in connection with a merger, acquisition, or sale of assets.</p>
+      <h4>23.4 Entire Agreement</h4>
+      <p>These Terms, together with the Privacy Policy and (for Providers) the Provider Agreement, are the entire agreement between you and Domo regarding the Service and supersede all prior agreements.</p>
+      <h4>23.5 Electronic Acceptance</h4>
+      <p>You agree that these Terms may be accepted electronically and that your electronic acceptance — including by clicking a button, replying YES to a message, paying an invoice, or otherwise confirming a Booking — has the same legal effect as a handwritten signature.</p>
+
+      <h3>24. Contact</h3>
+      <p>Questions, notices, or claims under these Terms should be sent to:</p>
+      <p><strong>Domo, LLC</strong><br>
+      Email: <a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a><br>
+      Website: domoyourhome.com</p>
+    </div>
+
+    <div class="policy-body" id="policyPrivacy" style="display:none;">
+      <div class="updated">Effective Date: 15 May 2026 · Document Version v2026-05-15. Provided in English for legal precision.</div>
+
+      <p>Domo, LLC ("Domo," "we," "us," or "our") respects your privacy. This Privacy Policy explains what personal information we collect, how we use and share it, and the rights and choices you have. It applies to your use of the Domo website at domoyourhome.com, the Domo application, and any services or communications provided by Domo (collectively, the "Service").</p>
+      <p>By using the Service you agree to this Privacy Policy and to our <a href="#" onclick="switchPolicy('terms');return false;">Terms of Service</a>.</p>
+
+      <h3>1. Who We Are</h3>
+      <p>The data controller for personal information collected through the Service is Domo, LLC, a Puerto Rico limited liability company. Contact:</p>
+      <ul>
+        <li><strong>Email (privacy):</strong> <a href="mailto:privacy@domoyourhome.com">privacy@domoyourhome.com</a></li>
+        <li><strong>Email (general):</strong> <a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a></li>
+        <li><strong>Website:</strong> domoyourhome.com</li>
+      </ul>
+
+      <h3>2. Information We Collect</h3>
+      <h4>2.1 Information You Provide</h4>
+      <p>We collect information you give us directly when you:</p>
+      <ul>
+        <li>create an account or request a Booking (name, email address, phone number, service address, gate codes or access notes you choose to share, preferences);</li>
+        <li>pay for a Service (billing name, billing address, last four digits of payment card; full card data is collected and stored by Stripe, not by Domo);</li>
+        <li>communicate with us (WhatsApp messages, SMS, emails, voice notes, photos sent to support);</li>
+        <li>post a review, rating, or other User Content; or</li>
+        <li>apply or onboard as a Provider (identity documents, banking information for payouts, references, certifications).</li>
+      </ul>
+      <h4>2.2 Information Collected Automatically</h4>
+      <p>When you interact with the Service we automatically collect:</p>
+      <ul>
+        <li>device and connection information (IP address, browser type and version, operating system, device identifiers);</li>
+        <li>usage information (pages visited, features used, time of interaction, search queries);</li>
+        <li>approximate location derived from your IP address; and</li>
+        <li>cookies and similar technologies (see Section 7).</li>
+      </ul>
+      <h4>2.3 Information from Third Parties</h4>
+      <p>We may receive information about you from:</p>
+      <ul>
+        <li>our payment processor (Stripe) regarding payment status and disputes;</li>
+        <li>our scheduling provider (BookingKoala) regarding Booking history;</li>
+        <li>messaging providers (Meta/WhatsApp Business, SMS gateways) regarding message delivery;</li>
+        <li>Providers you have engaged through the Service, who may share notes or photos from a job; and</li>
+        <li>public sources, where relevant for verification.</li>
+      </ul>
+
+      <h3>3. How We Use Your Information</h3>
+      <p>We use your information to:</p>
+      <ul>
+        <li>provide, operate, and maintain the Service, including scheduling Bookings and routing Providers;</li>
+        <li>process payments, issue invoices and refunds, and charge saved payment methods for amounts owed (including auto-charge of invoices that remain unpaid for more than 30 days, as described in the Terms of Service);</li>
+        <li>communicate with you about Bookings, account activity, customer support, and (where you have consented) marketing;</li>
+        <li>improve the Service, our routing, and our customer support — including by using automated and AI-assisted tools (see Section 5);</li>
+        <li>prevent fraud, abuse, and security incidents;</li>
+        <li>comply with legal obligations, including tax and regulatory requirements in Puerto Rico; and</li>
+        <li>enforce our Terms of Service and Provider Agreement, including the non-circumvention provisions.</li>
+      </ul>
+
+      <h3>4. Third Parties with Whom We Share Information</h3>
+      <p>We share personal information only with the following categories of recipients, and only as needed to operate the Service:</p>
+      <table>
+        <thead>
+          <tr><th>Recipient</th><th>Purpose</th><th>What we share</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Stripe, Inc.</strong></td><td>Card payment processing, saved card storage, payout to Providers</td><td>Name, email, billing details, transaction amount; full card data is collected directly by Stripe</td></tr>
+          <tr><td><strong>BookingKoala</strong></td><td>Booking, scheduling, and dispatch</td><td>Name, contact info, service address, Booking details</td></tr>
+          <tr><td><strong>Supabase, Inc.</strong></td><td>Hosted database for leads, quotes, service history</td><td>Customer records, Booking history, communication metadata</td></tr>
+          <tr><td><strong>Meta Platforms, Inc. (WhatsApp Business)</strong></td><td>Customer messaging</td><td>Phone number, message content</td></tr>
+          <tr><td><strong>respond.io</strong></td><td>Inbound messaging routing and lead capture</td><td>Phone number, message content</td></tr>
+          <tr><td><strong>Make.com and n8n</strong></td><td>Workflow automation between systems</td><td>The minimum data needed to route each workflow</td></tr>
+          <tr><td><strong>Anthropic PBC (Claude)</strong></td><td>AI-assisted message drafting, summarization, and operational analytics</td><td>Booking and message content as needed; we do not authorize use of your personal information to train AI models</td></tr>
+          <tr><td><strong>Netlify, Inc.</strong></td><td>Hosting of internal dashboards and customer-facing pages</td><td>Limited operational data</td></tr>
+          <tr><td><strong>Google (Gmail)</strong></td><td>Email delivery and account communications</td><td>Email address, message content</td></tr>
+          <tr><td><strong>Providers</strong></td><td>To perform the Service you booked</td><td>Your name, address, phone number, Booking details, and any access instructions you provide</td></tr>
+          <tr><td><strong>Professional advisors</strong></td><td>Legal, accounting, and tax compliance</td><td>As required</td></tr>
+          <tr><td><strong>Government and law enforcement</strong></td><td>If required by law, court order, or to protect rights and safety</td><td>As required</td></tr>
+          <tr><td><strong>Successor entities</strong></td><td>In connection with a merger, acquisition, or sale of assets</td><td>Customer and Provider records, subject to this Policy</td></tr>
+        </tbody>
+      </table>
+      <p>We do <strong>not</strong> sell your personal information to third parties for their own marketing purposes.</p>
+
+      <h3>5. Automated Processing and Artificial Intelligence</h3>
+      <p>We use automated systems, including third-party AI services such as those provided by Anthropic, to assist with:</p>
+      <ul>
+        <li>drafting and translating customer-facing messages (WhatsApp, email);</li>
+        <li>summarizing call notes and conversations;</li>
+        <li>categorizing and prioritizing leads and support tickets;</li>
+        <li>generating invoices, reminders, and routine reports; and</li>
+        <li>internal operational analytics.</li>
+      </ul>
+      <p>Where AI is used to assist with a decision (for example, prioritizing a follow-up call), a human at Domo remains responsible for the final action. We do not use AI for fully automated decisions that have a legal or similarly significant effect on you. We do not authorize the use of your personal information to train third-party AI models.</p>
+      <p>If you would prefer that we limit the use of AI-assisted tools when handling your account, please contact <a href="mailto:privacy@domoyourhome.com">privacy@domoyourhome.com</a>.</p>
+
+      <h3>6. Data Retention</h3>
+      <p>We retain personal information for as long as we have an active relationship with you and for a reasonable period afterward to satisfy legal, tax, accounting, and dispute-resolution obligations. In general:</p>
+      <ul>
+        <li><strong>Account records, Booking history, and invoices:</strong> at least seven (7) years after the most recent transaction, in line with Puerto Rico tax and commercial-records requirements.</li>
+        <li><strong>Payment data:</strong> held by Stripe according to its own retention schedule; Domo retains only summary records.</li>
+        <li><strong>Customer support communications:</strong> up to three (3) years after the last interaction.</li>
+        <li><strong>Marketing preferences and opt-out records:</strong> indefinitely, so we can honor your choices.</li>
+      </ul>
+      <p>When information is no longer needed, we either delete it or anonymize it so it can no longer be linked to you.</p>
+
+      <h3>7. Cookies and Similar Technologies</h3>
+      <p>We and our service providers use cookies and similar technologies to operate the Service, remember your preferences, and understand usage. Categories used include:</p>
+      <ul>
+        <li><strong>Strictly necessary</strong> (login, security, fraud prevention) — cannot be disabled without breaking the Service.</li>
+        <li><strong>Functional</strong> (preference and language storage) — can be disabled in your browser.</li>
+        <li><strong>Analytics</strong> (usage statistics) — you may opt out via browser controls.</li>
+      </ul>
+      <p>We do not currently use cross-site advertising trackers.</p>
+
+      <h3>8. Your Rights and Choices</h3>
+      <p>Regardless of where you reside, you have the right to:</p>
+      <ul>
+        <li><strong>Access</strong> the personal information we hold about you;</li>
+        <li><strong>Correct</strong> inaccurate or incomplete information;</li>
+        <li><strong>Delete</strong> your personal information, subject to legal and operational retention requirements;</li>
+        <li><strong>Export</strong> a copy of your information in a portable format;</li>
+        <li><strong>Object</strong> to or <strong>restrict</strong> certain processing;</li>
+        <li><strong>Withdraw consent</strong> to marketing or to optional processing at any time; and</li>
+        <li><strong>Opt out</strong> of marketing emails (via the unsubscribe link) and of SMS/WhatsApp marketing (reply STOP).</li>
+      </ul>
+      <p>To exercise any of these rights, email <a href="mailto:privacy@domoyourhome.com"><strong>privacy@domoyourhome.com</strong></a> with the request. We will respond within thirty (30) days. We may need to verify your identity before fulfilling certain requests.</p>
+
+      <h3>9. Children's Privacy</h3>
+      <p>The Service is not directed to children under 18. We do not knowingly collect personal information from anyone under 18. If you believe a child has provided information to us, contact <a href="mailto:privacy@domoyourhome.com">privacy@domoyourhome.com</a> and we will delete it.</p>
+
+      <h3>10. Data Security</h3>
+      <p>We use commercially reasonable administrative, technical, and physical safeguards to protect personal information — including encrypted transmission of payment data via Stripe, restricted access to internal systems, and logging of administrative actions. No system is perfectly secure, and we cannot guarantee absolute security. Where you have a password, you are responsible for keeping it confidential.</p>
+      <p>In the event of a breach that compromises your personal information, we will notify you and the relevant authorities as required by applicable law.</p>
+
+      <h3>11. International Data Transfers</h3>
+      <p>Domo is based in Puerto Rico, and some of our service providers (Stripe, Supabase, Meta, Anthropic, Google, Netlify, others) store or process data in data centers located in the mainland United States and other regions. By using the Service, you understand that your information may be processed in jurisdictions other than your own.</p>
+
+      <h3>12. Marketing Communications</h3>
+      <p>We may send you marketing emails or messages about Domo Services, promotions, or news, but only when permitted by law. You can opt out at any time:</p>
+      <ul>
+        <li><strong>Email:</strong> click "unsubscribe" in the footer of any marketing email.</li>
+        <li><strong>WhatsApp/SMS:</strong> reply STOP.</li>
+      </ul>
+      <p>Opting out of marketing does not stop transactional communications related to your Bookings or account.</p>
+
+      <h3>13. Third-Party Links and Services</h3>
+      <p>The Service may contain links to third-party websites or services. We are not responsible for the privacy practices of third parties. Please review their privacy policies before sharing information with them.</p>
+
+      <h3>14. Changes to This Policy</h3>
+      <p>We may update this Privacy Policy from time to time. The current version is always posted at domoyourhome.com/privacy with the Effective Date and Document Version shown. If a change is material, we will provide notice by email or in-app message at least thirty (30) days before the new Effective Date.</p>
+
+      <h3>15. Contact Us</h3>
+      <p>If you have questions, complaints, or requests regarding this Privacy Policy or our handling of your personal information:</p>
+      <p><strong>Domo, LLC — Privacy</strong><br>
+      Email: <a href="mailto:privacy@domoyourhome.com">privacy@domoyourhome.com</a><br>
+      General: <a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a></p>
+      <p>If you are not satisfied with our response, you may contact the Puerto Rico Department of Consumer Affairs (DACO) or any other regulator with jurisdiction.</p>
     </div>
 
     <div class="policy-body" id="policyCancel" style="display:none;">
@@ -2053,13 +2372,22 @@ function closePolicy() {
   document.body.style.overflow = '';
 }
 function switchPolicy(which) {
-  const showTerms = which === 'terms';
-  document.getElementById('policyTerms').style.display  = showTerms ? 'block' : 'none';
-  document.getElementById('policyCancel').style.display = showTerms ? 'none'  : 'block';
-  document.getElementById('tabTerms').classList.toggle('active',  showTerms);
-  document.getElementById('tabCancel').classList.toggle('active', !showTerms);
-  document.getElementById('policyTitle').textContent = showTerms ? 'Términos de servicio' : 'Política de cancelación';
-  const visible = document.getElementById(showTerms ? 'policyTerms' : 'policyCancel');
+  const tabs = {
+    terms:        { body: 'policyTerms',   tab: 'tabTerms',   title: 'Términos de servicio' },
+    privacy:      { body: 'policyPrivacy', tab: 'tabPrivacy', title: 'Política de privacidad' },
+    cancellation: { body: 'policyCancel',  tab: 'tabCancel',  title: 'Política de cancelación' },
+  };
+  const cfg = tabs[which] || tabs.terms;
+  ['policyTerms','policyPrivacy','policyCancel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = (id === cfg.body) ? 'block' : 'none';
+  });
+  ['tabTerms','tabPrivacy','tabCancel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', id === cfg.tab);
+  });
+  document.getElementById('policyTitle').textContent = cfg.title;
+  const visible = document.getElementById(cfg.body);
   if (visible) visible.scrollTop = 0;
 }
 document.addEventListener('keydown', e => {
