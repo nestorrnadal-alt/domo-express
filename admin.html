@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domo Admin — Reservaciones Express</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#142543">
+  <style>
+    :root {
+      --navy:  #142543;
+      --blue:  #3652A5;
+      --teal:  #8BD7D7;
+      --lime:  #D6E264;
+      --peri:  #80A2F9;
+      --bluelt:#EEF1FA;
+      --border:#D4DAF0;
+      --text:  #142543;
+      --muted: #6B7A99;
+      --bg:    #F4F6FC;
+      --white: #FFFFFF;
+      --red:   #C0392B;
+      --green: #1A7A4A;
+      --amber: #B26800;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--blue); }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: var(--navy);
+      color: var(--white);
+      padding: 14px 0;
+    }
+    .topbar-inner {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .topbar-brand {
+      font-weight: 700; font-size: 22px;
+      letter-spacing: -.02em;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .topbar-brand .dot { color: var(--lime); }
+    .topbar-badge {
+      background: var(--peri);
+      font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px;
+      letter-spacing: .06em; text-transform: uppercase;
+    }
+    .topbar-user { margin-left: auto; font-size: 13px; color: rgba(255,255,255,.7); }
+    .topbar-logout {
+      background: transparent; border: 1px solid rgba(255,255,255,.3);
+      color: var(--white); padding: 6px 12px; border-radius: 8px;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .topbar-logout:hover { background: rgba(255,255,255,.08); }
+
+    /* ── Page wrapper ── */
+    .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 80px; }
+
+    /* ── Login card ── */
+    .login-card {
+      max-width: 420px; margin: 60px auto 0;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 4px 24px rgba(20,37,67,.08);
+    }
+    .login-card h1 { font-size: 22px; margin-bottom: 6px; }
+    .login-card p  { font-size: 14px; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+    .login-card label { font-size: 13px; font-weight: 600; }
+    .login-card input[type=email] {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      margin-top: 6px;
+      margin-bottom: 14px;
+      background: var(--white);
+      color: var(--text);
+    }
+    .login-card input[type=email]:focus { outline: none; border-color: var(--blue); }
+    .login-card button {
+      width: 100%;
+      background: var(--blue);
+      color: var(--white);
+      border: none;
+      padding: 13px;
+      border-radius: 10px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer;
+    }
+    .login-card button[disabled] { background: #B0BACE; cursor: not-allowed; }
+    .login-msg { margin-top: 14px; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+    .login-msg.ok   { background: #E6F4EC; border: 1px solid #A6D6BB; color: var(--green); }
+    .login-msg.err  { background: #FEF0EE; border: 1px solid #F8B4AC; color: var(--red); }
+
+    /* ── Day list ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .toolbar input[type=date] {
+      padding: 7px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .toolbar .toolbar-label { font-size: 13px; color: var(--muted); font-weight: 600; }
+    .toolbar .stat {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 12px; color: var(--muted);
+    }
+    .toolbar .stat b { color: var(--navy); }
+
+    .day {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .day-header {
+      padding: 12px 18px;
+      background: var(--bluelt);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .day-date { font-size: 16px; font-weight: 700; color: var(--navy); }
+    .day-weekday { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+    .day-count { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+    .slot-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      padding: 12px 18px 16px;
+    }
+    .slot {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      min-height: 64px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: border-color .12s, background .12s;
+    }
+    .slot.empty {
+      background: #FAFBFE;
+      color: var(--muted);
+      font-style: italic;
+      cursor: default;
+    }
+    .slot.has-booking { cursor: pointer; background: var(--white); }
+    .slot.has-booking:hover { border-color: var(--blue); }
+    .slot-time { font-weight: 700; color: var(--navy); }
+    .slot-customer { color: var(--text); font-weight: 600; line-height: 1.25; }
+    .slot-badge {
+      display: inline-block;
+      font-size: 10px; font-weight: 700;
+      padding: 1px 6px; border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .status-new       { background: var(--bluelt); color: var(--blue); }
+    .status-confirmed { background: #E2F0E8;       color: var(--green); }
+    .status-completed { background: #DCEEDF;       color: var(--green); }
+    .status-cancelled { background: #FEF0EE;       color: var(--red); }
+    .status-no_show   { background: #FFF4E0;       color: var(--amber); }
+    .charged-mark { color: var(--green); font-size: 11px; font-weight: 700; }
+
+    .loading-state, .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* ── Modal ── */
+    .modal-bg {
+      position: fixed; inset: 0;
+      background: rgba(20,37,67,.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-bg.visible { display: flex; }
+    .modal {
+      background: var(--white);
+      border-radius: 16px;
+      max-width: 540px;
+      width: 100%;
+      max-height: 92vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    .modal-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .modal-header h2 { font-size: 17px; flex: 1; }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,.7);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .modal-close:hover { color: var(--white); }
+    .modal-body { padding: 22px; }
+    .modal-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      gap: 12px;
+    }
+    .modal-row:last-of-type { border-bottom: none; }
+    .modal-row .mk { color: var(--muted); font-weight: 600; flex: 0 0 38%; }
+    .modal-row .mv { color: var(--text); text-align: right; word-break: break-word; }
+    .modal-row .mv a { color: var(--blue); }
+
+    .modal-section-title {
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .06em;
+      margin: 20px 0 8px;
+    }
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .modal-actions button {
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      color: var(--text);
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .modal-actions button:hover { border-color: var(--blue); color: var(--blue); }
+    .modal-actions button.active { background: var(--navy); border-color: var(--navy); color: var(--white); }
+    .modal-actions button[disabled] { opacity: .5; cursor: not-allowed; }
+
+    .charge-block { margin-top: 18px; padding: 14px; background: var(--bluelt); border-radius: 10px; }
+    .charge-block .ch-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+    .charge-block .ch-amount { font-size: 26px; font-weight: 800; color: var(--navy); margin: 4px 0; }
+    .charge-block button.charge-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--green);
+      border: none;
+      color: var(--white);
+      font-size: 14px; font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .charge-block button.charge-btn[disabled] { background: #B0BACE; cursor: not-allowed; }
+    .charge-block.charged { background: #E6F4EC; border: 1px solid #A6D6BB; }
+    .charge-block .charged-info { font-size: 13px; color: var(--green); }
+    .charge-block .charged-info strong { font-weight: 700; }
+    .charge-error {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: #FEF0EE;
+      color: var(--red);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .modal-notes label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .modal-notes textarea {
+      width: 100%;
+      margin-top: 6px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      resize: vertical;
+      min-height: 70px;
+      color: var(--text);
+    }
+    .modal-notes button {
+      margin-top: 8px;
+      padding: 8px 14px;
+      background: var(--blue);
+      border: none;
+      color: var(--white);
+      font-size: 13px; font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="topbar-brand" href="/admin.html">domo<span class="dot">.</span></a>
+    <span class="topbar-badge">Admin</span>
+    <span class="topbar-user" id="topbarUser"></span>
+    <button class="topbar-logout" id="logoutBtn" style="display:none;" onclick="logout()">Salir</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- Login screen -->
+  <section id="loginScreen" style="display:none;">
+    <div class="login-card">
+      <h1>Entrar</h1>
+      <p>Introduce tu correo para recibir un enlace de acceso. Solo los correos autorizados pueden entrar.</p>
+      <label for="emailInput">Correo</label>
+      <input type="email" id="emailInput" placeholder="janet@domoyourhome.com" autocomplete="email">
+      <button id="sendLinkBtn" onclick="sendMagicLink()">Enviar enlace →</button>
+      <div id="loginMsg" class="login-msg" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- Calendar / day list -->
+  <section id="adminScreen" style="display:none;">
+    <div class="toolbar">
+      <span class="toolbar-label">Rango</span>
+      <input type="date" id="fromDate" onchange="loadBookings()">
+      <span class="toolbar-label">→</span>
+      <input type="date" id="toDate"   onchange="loadBookings()">
+      <span class="stat" id="totalStat">— reservaciones</span>
+      <span class="stat" id="chargedStat">— cobradas</span>
+    </div>
+    <div id="dayList"></div>
+  </section>
+
+</main>
+
+<!-- Booking modal -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">—</h2>
+      <button class="modal-close" onclick="closeModal()" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const SLOTS = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','1:00 PM'];
+const DAY_LONG    = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MONTH_LONG  = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+let state = {
+  bookings: [],
+  current:  null, // booking currently open in modal
+};
+
+// ── Init ────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+  // If we just landed back from /api/admin/verify, the cookie is set
+  // and we can just try to load. If the load 401s, fall back to login.
+  const params = new URLSearchParams(location.search);
+  if (params.get('error') === 'invalid') {
+    showLogin('Enlace inválido o expirado. Pide uno nuevo.');
+    return;
+  }
+  if (params.get('token')) {
+    // Land directly on /admin.html?token=... — verify before showing UI
+    location.replace('/api/admin/verify?token=' + encodeURIComponent(params.get('token')));
+    return;
+  }
+  await tryLoadOrLogin();
+}
+
+async function tryLoadOrLogin() {
+  const today = isoToday();
+  const from  = shiftIso(today, -3);
+  const to    = shiftIso(today, 21);
+  document.getElementById('fromDate').value = from;
+  document.getElementById('toDate').value   = to;
+  const res = await fetch('/api/admin/bookings?from=' + from + '&to=' + to);
+  if (res.status === 401) { showLogin(); return; }
+  if (!res.ok) {
+    showLogin('Error de servidor. Intenta otra vez.');
+    return;
+  }
+  showAdmin();
+  state.bookings = (await res.json()).bookings || [];
+  renderDays(from, to);
+}
+
+function showLogin(msg) {
+  document.getElementById('loginScreen').style.display = 'block';
+  document.getElementById('adminScreen').style.display = 'none';
+  document.getElementById('logoutBtn').style.display   = 'none';
+  if (msg) {
+    const m = document.getElementById('loginMsg');
+    m.textContent = msg; m.className = 'login-msg err'; m.style.display = 'block';
+  }
+}
+function showAdmin() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminScreen').style.display = 'block';
+  document.getElementById('logoutBtn').style.display   = 'inline-block';
+}
+
+// ── Login ───────────────────────────────────────────────────
+async function sendMagicLink() {
+  const email = document.getElementById('emailInput').value.trim();
+  const btn   = document.getElementById('sendLinkBtn');
+  const msg   = document.getElementById('loginMsg');
+  msg.style.display = 'none';
+
+  if (!email || !email.includes('@')) {
+    msg.textContent = 'Introduce un correo válido.';
+    msg.className = 'login-msg err';
+    msg.style.display = 'block';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+  try {
+    await fetch('/api/admin/request-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email }),
+    });
+    msg.textContent = 'Si ese correo está autorizado, te llegará un enlace en unos segundos. Revisa tu inbox (y spam).';
+    msg.className   = 'login-msg ok';
+    msg.style.display = 'block';
+  } catch (e) {
+    msg.textContent = 'Error de red. Intenta otra vez.';
+    msg.className   = 'login-msg err';
+    msg.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enviar enlace →';
+  }
+}
+
+async function logout() {
+  await fetch('/api/admin/logout', { method: 'POST' });
+  location.reload();
+}
+
+// ── Bookings load + render ──────────────────────────────────
+async function loadBookings() {
+  const from = document.getElementById('fromDate').value;
+  const to   = document.getElementById('toDate').value;
+  if (!from || !to) return;
+  const res = await fetch(`/api/admin/bookings?from=${from}&to=${to}`);
+  if (res.status === 401) { showLogin(); return; }
+  state.bookings = (await res.json()).bookings || [];
+  renderDays(from, to);
+}
+
+function renderDays(from, to) {
+  const list = document.getElementById('dayList');
+  const days = [];
+  let cur = from;
+  while (cur <= to) {
+    days.push(cur);
+    cur = shiftIso(cur, 1);
+  }
+
+  let totalBookings = 0;
+  let totalCharged  = 0;
+  state.bookings.forEach(b => {
+    if (b.status !== 'cancelled') totalBookings++;
+    if (b.charged_at) totalCharged++;
+  });
+  document.getElementById('totalStat').innerHTML   = `<b>${totalBookings}</b> reservaciones`;
+  document.getElementById('chargedStat').innerHTML = `<b>${totalCharged}</b> cobradas`;
+
+  list.innerHTML = days.map(iso => {
+    const [Y, M, D] = iso.split('-').map(Number);
+    const d = new Date(Date.UTC(Y, M - 1, D));
+    const weekday = DAY_LONG[d.getUTCDay()];
+    const dayLabel = `${D} ${MONTH_LONG[M - 1]}`;
+    const dayBookings = state.bookings.filter(b => b.booking_date_iso === iso);
+    const dayCount = dayBookings.filter(b => b.status !== 'cancelled').length;
+
+    const slotsHtml = SLOTS.map(slot => {
+      const booking = dayBookings.find(b => b.booking_time === slot);
+      if (!booking) {
+        return `<div class="slot empty"><div class="slot-time">${slot}</div><div>—</div></div>`;
+      }
+      const statusClass = `status-${booking.status || 'new'}`;
+      const charged = booking.charged_at ? '<div class="charged-mark">✓ cobrado</div>' : '';
+      return `
+        <div class="slot has-booking" onclick="openModal('${booking.booking_id}')">
+          <div>
+            <div class="slot-time">${slot}</div>
+            <div class="slot-customer">${escapeHtml(booking.customer_name)}</div>
+          </div>
+          <div>
+            <span class="slot-badge ${statusClass}">${booking.status || 'new'}</span>
+            ${charged}
+          </div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="day">
+        <div class="day-header">
+          <span class="day-weekday">${weekday}</span>
+          <span class="day-date">${dayLabel}</span>
+          <span class="day-count">${dayCount} reservación${dayCount === 1 ? '' : 'es'}</span>
+        </div>
+        <div class="slot-row">${slotsHtml}</div>
+      </div>`;
+  }).join('');
+}
+
+// ── Modal ──────────────────────────────────────────────────
+function openModal(bookingId) {
+  const b = state.bookings.find(x => x.booking_id === bookingId);
+  if (!b) return;
+  state.current = b;
+  document.getElementById('modalTitle').textContent = b.booking_id;
+  document.getElementById('modalBody').innerHTML = renderBookingBody(b);
+  document.getElementById('modalBg').classList.add('visible');
+}
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('visible');
+  state.current = null;
+}
+
+function renderBookingBody(b) {
+  const total = (b.total_amount || 0) / 100;
+  const phoneHref = 'tel:' + (b.customer_phone || '').replace(/\D/g, '');
+  const mapHref   = 'https://maps.google.com/?q=' + encodeURIComponent(b.address || '');
+  const statuses  = ['confirmed', 'completed', 'cancelled', 'no_show'];
+
+  const rows = [
+    ['Cliente',  escapeHtml(b.customer_name)],
+    ['Teléfono', `<a href="${phoneHref}">${escapeHtml(b.customer_phone)}</a>`],
+    ['Correo',   `<a href="mailto:${escapeHtml(b.customer_email)}">${escapeHtml(b.customer_email)}</a>`],
+    ['Dirección',`<a href="${mapHref}" target="_blank" rel="noopener">${escapeHtml(b.address)}</a>`],
+    ['Fecha',    escapeHtml(b.booking_date)],
+    ['Hora',     escapeHtml(b.booking_time) + ' (2.5h)'],
+    ['Tarea 1',  escapeHtml(b.task_1)],
+    ['Tarea 2',  escapeHtml(b.task_2)],
+    ['Pago',     b.payment_method === 'credit_card' ? 'Tarjeta (guardada)' : 'ATH Móvil'],
+    ['Materiales', b.materials_requested ? `Sí (+$25)<br><small style="color:#6B7A99;">${escapeHtml(b.materials_detail || '—')}</small>` : 'No'],
+    ['Total',    `$${total.toFixed(2)}`],
+  ];
+
+  let chargeHtml = '';
+  if (b.charged_at) {
+    const ts = new Date(b.charged_at).toLocaleString('es-PR');
+    chargeHtml = `
+      <div class="charge-block charged">
+        <div class="ch-label">Pago</div>
+        <div class="charged-info"><strong>✓ Cobrado el ${ts}</strong><br>$${((b.charged_amount || 0) / 100).toFixed(2)} · PI: ${escapeHtml(b.stripe_payment_intent_id || '—')}</div>
+      </div>`;
+  } else if (b.payment_method === 'credit_card' && b.stripe_payment_method_id) {
+    chargeHtml = `
+      <div class="charge-block" id="chargeBlock">
+        <div class="ch-label">Cobrar tarjeta guardada</div>
+        <div class="ch-amount">$${total.toFixed(2)}</div>
+        <button class="charge-btn" id="chargeBtn" onclick="chargeBooking('${b.booking_id}')">Cobrar $${total.toFixed(2)}</button>
+        <div id="chargeError" class="charge-error" style="display:none;"></div>
+      </div>`;
+  } else {
+    chargeHtml = `
+      <div class="charge-block">
+        <div class="ch-label">Pago</div>
+        <div style="font-size:13px;color:#6B7A99;">${b.payment_method === 'credit_card' ? 'No hay tarjeta guardada para esta reservación.' : 'Pago por ATH Móvil — gestiona fuera del sistema.'}</div>
+      </div>`;
+  }
+
+  return `
+    ${rows.map(([k, v]) => `<div class="modal-row"><span class="mk">${k}</span><span class="mv">${v}</span></div>`).join('')}
+
+    <div class="modal-section-title">Estado</div>
+    <div class="modal-actions">
+      ${statuses.map(s => `
+        <button class="${(b.status === s) ? 'active' : ''}" onclick="setStatus('${b.booking_id}','${s}')">${s}</button>
+      `).join('')}
+    </div>
+
+    ${chargeHtml}
+
+    <div class="modal-section-title">Notas internas</div>
+    <div class="modal-notes">
+      <textarea id="notesField" placeholder="Anotaciones internas…">${escapeHtml(b.notes || '')}</textarea>
+      <button onclick="saveNotes('${b.booking_id}')">Guardar notas</button>
+    </div>
+  `;
+}
+
+// ── Booking actions ────────────────────────────────────────
+async function setStatus(bookingId, status) {
+  const res = await fetch('/api/admin/update', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ booking_id: bookingId, status }),
+  });
+  if (res.status === 401) { showLogin(); return; }
+  const data = await res.json();
+  if (!res.ok) {
+    alert('No pudimos actualizar: ' + (data.error || res.status));
+    return;
+  }
+  // Replace booking in local state + redraw modal
+  const idx = state.bookings.findIndex(b => b.booking_id === bookingId);
+  if (idx >= 0) state.bookings[idx] = data.booking;
+  state.current = data.booking;
+  document.getElementById('modalBody').innerHTML = renderBookingBody(data.booking);
+  renderDays(document.getElementById('fromDate').value, document.getElementById('toDate').value);
+}
+
+async function saveNotes(bookingId) {
+  const notes = document.getElementById('notesField').value;
+  const res = await fetch('/api/admin/update', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ booking_id: bookingId, notes }),
+  });
+  if (res.status === 401) { showLogin(); return; }
+  if (!res.ok) {
+    alert('No pudimos guardar las notas.');
+    return;
+  }
+  const data = await res.json();
+  const idx = state.bookings.findIndex(b => b.booking_id === bookingId);
+  if (idx >= 0) state.bookings[idx] = data.booking;
+}
+
+async function chargeBooking(bookingId) {
+  const btn = document.getElementById('chargeBtn');
+  const err = document.getElementById('chargeError');
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Cobrando…';
+
+  const res = await fetch('/api/admin/charge', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ booking_id: bookingId }),
+  });
+  if (res.status === 401) { showLogin(); return; }
+  const data = await res.json();
+  if (!res.ok) {
+    btn.disabled = false;
+    btn.textContent = 'Cobrar';
+    err.style.display = 'block';
+    err.textContent = 'No se pudo cobrar: ' + (data.detail || data.error || res.status);
+    return;
+  }
+  // Refresh the booking from server (charged_at is now set)
+  const refreshed = await fetch('/api/admin/bookings?from='
+    + document.getElementById('fromDate').value
+    + '&to='
+    + document.getElementById('toDate').value);
+  if (refreshed.ok) {
+    state.bookings = (await refreshed.json()).bookings || [];
+    const b = state.bookings.find(x => x.booking_id === bookingId);
+    if (b) {
+      state.current = b;
+      document.getElementById('modalBody').innerHTML = renderBookingBody(b);
+    }
+    renderDays(document.getElementById('fromDate').value, document.getElementById('toDate').value);
+  }
+}
+
+// ── Helpers ────────────────────────────────────────────────
+function isoToday() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+}
+function shiftIso(iso, days) {
+  const d = new Date(iso + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>

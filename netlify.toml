@@ -9,6 +9,12 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+# Admin endpoints — /api/admin/foo  ->  /.netlify/functions/admin-foo
+[[redirects]]
+  from = "/api/admin/*"
+  to   = "/.netlify/functions/admin-:splat"
+  status = 200
+
 [[redirects]]
   from = "/api/*"
   to   = "/.netlify/functions/:splat"
