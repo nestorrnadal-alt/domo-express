@@ -13,28 +13,22 @@
 // Environment variables required (set in Netlify UI → Site config → Env vars):
 //   SUPABASE_URL          https://dowkxvpdpqqaufjqcjmp.supabase.co
 //   SUPABASE_SERVICE_KEY  <service_role key from Supabase → Settings → API>
-//   OUTLOOK_USER          info@domoyourhome.com
-//   OUTLOOK_PASS          <Outlook / Microsoft 365 app password>
+//   RESEND_API_KEY        <Resend API key — re_...>
+//   RESEND_FROM           <verified sender, e.g. "Domo <book@domoyourhome.com>">
 // ============================================================
 
 const { createClient } = require('@supabase/supabase-js');
-const nodemailer        = require('nodemailer');
+const { Resend }       = require('resend');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
 
-const transporter = nodemailer.createTransport({
-  host:   'smtp.office365.com',
-  port:   587,
-  secure: false,
-  auth: {
-    user: process.env.OUTLOOK_USER,
-    pass: process.env.OUTLOOK_PASS,
-  },
-  tls: { ciphers: 'SSLv3' },
-});
+// If RESEND_API_KEY isn't set, `resend` stays null and the function
+// skips email sends gracefully — booking still succeeds.
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const FROM   = process.env.RESEND_FROM || 'Domo <onboarding@resend.dev>';
 
 function generateBookingId() {
   const num = Math.floor(1000 + Math.random() * 9000);
@@ -173,11 +167,18 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: JSON.stringify({ error: 'Database error', detail: dbError.message }) };
   }
   const data = { ...body, booking_id };
+  if (!resend) {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ booking_id, email_sent: false, warning: 'Resend not configured.' }),
+    };
+  }
   try {
-    await transporter.sendMail({
-      from:    '"Domo" <' + process.env.OUTLOOK_USER + '>',
-      to:      body.customer_email,
-      bcc:     'janet@domoyourhome.com,info@domoyourhome.com',
+    await resend.emails.send({
+      from:    FROM,
+      to:      [body.customer_email],
+      bcc:     ['janet@domoyourhome.com', 'info@domoyourhome.com'],
       subject: 'Reservaci\u00f3n Domo Express ' + booking_id + ' \u2014 ' + body.booking_date,
       text:    buildEmailText(data),
       html:    buildEmailHtml(data),
