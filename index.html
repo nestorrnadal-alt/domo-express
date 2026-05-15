@@ -792,6 +792,99 @@
       .footer-bottom { flex-direction: column; gap: 6px; text-align: center; }
     }
 
+    /* ── Policy popup (terms / cancellation) ── */
+    .policy-bg {
+      position: fixed; inset: 0;
+      background: rgba(20,37,67,.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px;
+    }
+    .policy-bg.visible { display: flex; }
+    .policy-modal {
+      background: var(--white);
+      border-radius: 16px;
+      max-width: 560px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      overflow: hidden;
+    }
+    .policy-head {
+      background: var(--navy);
+      color: var(--white);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .policy-head h2 { font-size: 17px; flex: 1; font-weight: 700; }
+    .policy-close {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,.7);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 4px;
+    }
+    .policy-close:hover { color: var(--white); }
+    .policy-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--bluelt);
+    }
+    .policy-tab {
+      flex: 1;
+      padding: 10px 8px;
+      background: transparent;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .policy-tab.active { color: var(--navy); border-bottom-color: var(--blue); background: var(--white); }
+    .policy-body {
+      padding: 22px 24px;
+      overflow-y: auto;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .policy-body h3 {
+      font-size: 14px;
+      color: var(--blue);
+      margin: 18px 0 6px;
+      font-weight: 700;
+    }
+    .policy-body h3:first-child { margin-top: 0; }
+    .policy-body p, .policy-body li { color: #2A3957; }
+    .policy-body ul { padding-left: 22px; margin: 4px 0 8px; }
+    .policy-body li { margin-bottom: 3px; }
+    .policy-body .updated { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+    .policy-foot {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--bluelt);
+      text-align: right;
+    }
+    .policy-foot button {
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
     /* ── Floating WhatsApp support bubble ── */
     .wa-bubble {
       position: fixed;
@@ -1075,7 +1168,7 @@
 
       <label class="terms-check" for="termsAccept">
         <input type="checkbox" id="termsAccept">
-        <span>He leído y acepto los <a href="https://domoyourhome.com/terms-of-service/" target="_blank" rel="noopener">términos de servicio</a> y la <a href="/cancelacion.html" target="_blank" rel="noopener">política de cancelación</a>.</span>
+        <span>He leído y acepto los <a href="#" onclick="openPolicy('terms');return false;">términos de servicio</a> y la <a href="#" onclick="openPolicy('cancellation');return false;">política de cancelación</a>.</span>
       </label>
 
       <div class="btn-row">
@@ -1168,6 +1261,91 @@
 </div><!-- /page -->
 
 <!-- Floating WhatsApp support bubble (sticks on every screen) -->
+<!-- Policy popup (Terms + Cancelación) -->
+<div class="policy-bg" id="policyBg" onclick="if(event.target===this)closePolicy()">
+  <div class="policy-modal" role="dialog" aria-modal="true" aria-labelledby="policyTitle">
+    <div class="policy-head">
+      <h2 id="policyTitle">Términos y cancelación</h2>
+      <button class="policy-close" onclick="closePolicy()" aria-label="Cerrar">×</button>
+    </div>
+    <div class="policy-tabs">
+      <button class="policy-tab active" id="tabTerms"  onclick="switchPolicy('terms')">Términos de servicio</button>
+      <button class="policy-tab"        id="tabCancel" onclick="switchPolicy('cancellation')">Política de cancelación</button>
+    </div>
+
+    <div class="policy-body" id="policyTerms">
+      <div class="updated">Última actualización: 15 de mayo de 2026</div>
+
+      <h3>1. Qué incluye Domo Express</h3>
+      <p>Cada reservación cubre <strong>2 tareas pequeñas de mantenimiento</strong> en una sola visita de hasta <strong>2.5 horas</strong> con un handyman de Domo, por una tarifa fija de <strong>$175</strong>. Si solicitas que Domo lleve los materiales, se añaden <strong>$25 de gestión + el costo real de los materiales</strong> a la factura final.</p>
+
+      <h3>2. Qué no incluye</h3>
+      <p>Domo Express está pensado para tareas pequeñas y específicas. Algunas cosas que <em>no</em> entran:</p>
+      <ul>
+        <li>Trabajo eléctrico mayor, plomería estructural o conexiones de gas.</li>
+        <li>Remoción de moho, asbesto o materiales peligrosos.</li>
+        <li>Trabajos que requieran permiso de construcción o inspección oficial.</li>
+        <li>Trabajo en techos sin acceso seguro o sin equipos provistos por el cliente.</li>
+      </ul>
+      <p>Si tu solicitud cae fuera del alcance, te contactamos antes del servicio para reprogramar o reembolsar.</p>
+
+      <h3>3. Tu rol como cliente</h3>
+      <ul>
+        <li>Estar presente o tener un adulto autorizado al momento del servicio.</li>
+        <li>Dar acceso a la propiedad y a las áreas de trabajo.</li>
+        <li>Tener los materiales listos si escogiste no contratar la opción de materiales.</li>
+        <li>Comunicar con claridad qué necesitas hecho antes de la llegada del handyman.</li>
+      </ul>
+
+      <h3>4. Pago</h3>
+      <p>No te cobramos al momento de reservar. Si pagas con tarjeta, <strong>guardamos el método de pago de forma segura con Stripe</strong> y lo cobramos <em>después</em> del servicio una vez confirmado. ATH Móvil se cobra manualmente el día del servicio.</p>
+      <p>Si el servicio no se pudo completar por razones ajenas a Domo (falta de acceso, materiales no provistos, tarea fuera de alcance no comunicada), se cobra la tarifa completa.</p>
+
+      <h3>5. Garantía</h3>
+      <p>Garantizamos la calidad del trabajo realizado por <strong>7 días</strong> a partir de la fecha del servicio. Si algo no quedó bien hecho dentro de ese período, contáctanos y volvemos sin costo a corregir el trabajo específico.</p>
+
+      <h3>6. Limitaciones</h3>
+      <p>Domo no se responsabiliza por daños preexistentes, por la instalación o configuración de equipos electrónicos provistos por el cliente más allá de lo expresamente acordado, ni por problemas derivados de materiales defectuosos provistos por el cliente.</p>
+
+      <h3>7. Privacidad</h3>
+      <p>Solo guardamos la información necesaria para procesar tu reservación (nombre, contacto, dirección, tareas) y para cobrar el servicio (método de pago vía Stripe). No vendemos ni compartimos tus datos con terceros fuera de los proveedores que hacen funcionar el servicio (Supabase, Stripe, Resend, Netlify).</p>
+
+      <h3>8. Contacto</h3>
+      <p>Cualquier pregunta o reclamo: <a href="tel:7874190300">(787) 419-0300</a> · <a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a></p>
+    </div>
+
+    <div class="policy-body" id="policyCancel" style="display:none;">
+      <div class="updated">Última actualización: 15 de mayo de 2026</div>
+
+      <h3>Cancelación gratuita (24 horas o más)</h3>
+      <p>Puedes cancelar sin penalidad si lo haces con al menos <strong>24 horas de anticipación</strong>. No se realiza ningún cargo. Usa el enlace <em>Reprogramar o cancelar</em> que recibiste en tu correo de confirmación, o llámanos.</p>
+
+      <h3>Cancelación tardía (menos de 24 horas)</h3>
+      <p>Las cancelaciones con menos de 24 horas, o si no estás presente al momento del servicio, conllevan un cargo de <strong>$50</strong> para cubrir el tiempo reservado del handyman.</p>
+
+      <h3>Reprogramación</h3>
+      <p>Puedes reprogramar tú mismo desde el enlace en tu correo de confirmación, hasta 24 horas antes del servicio, sin costo. Después de ese plazo, contáctanos directamente para coordinar.</p>
+
+      <h3>Cancelaciones por parte de Domo</h3>
+      <p>Si necesitamos cancelar (clima extremo, emergencia del equipo, etc.), te avisaremos lo antes posible. No se te cobra absolutamente nada y te ofreceremos la próxima fecha disponible.</p>
+
+      <h3>Cómo cancelar</h3>
+      <ul>
+        <li>Haz clic en <strong>Reprogramar o cancelar</strong> en el correo de confirmación.</li>
+        <li>O llámanos al <a href="tel:7874190300">(787) 419-0300</a>.</li>
+        <li>O escríbenos a <a href="mailto:info@domoyourhome.com">info@domoyourhome.com</a> con tu número EXP-XXXX.</li>
+      </ul>
+
+      <h3>Reembolsos</h3>
+      <p>Si se realizó un cargo a tu tarjeta y aplicas para reembolso bajo esta política, lo procesamos al método de pago original dentro de <strong>5–7 días hábiles</strong>.</p>
+    </div>
+
+    <div class="policy-foot">
+      <button onclick="closePolicy()">Entendido</button>
+    </div>
+  </div>
+</div>
+
 <a class="wa-bubble"
    href="https://wa.me/17874190300?text=Hola%20Domo%2C%20tengo%20una%20pregunta%20sobre%20Domo%20Express."
    target="_blank" rel="noopener"
@@ -1863,6 +2041,30 @@ function resetForm() {
   document.getElementById('termsAccept').checked = false;
   updatePrice();
 }
+
+// ── Policy popup (Terms / Cancelación) ──────────────────────
+function openPolicy(which) {
+  switchPolicy(which || 'terms');
+  document.getElementById('policyBg').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+function closePolicy() {
+  document.getElementById('policyBg').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+function switchPolicy(which) {
+  const showTerms = which === 'terms';
+  document.getElementById('policyTerms').style.display  = showTerms ? 'block' : 'none';
+  document.getElementById('policyCancel').style.display = showTerms ? 'none'  : 'block';
+  document.getElementById('tabTerms').classList.toggle('active',  showTerms);
+  document.getElementById('tabCancel').classList.toggle('active', !showTerms);
+  document.getElementById('policyTitle').textContent = showTerms ? 'Términos de servicio' : 'Política de cancelación';
+  const visible = document.getElementById(showTerms ? 'policyTerms' : 'policyCancel');
+  if (visible) visible.scrollTop = 0;
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePolicy();
+});
 </script>
 </body>
 </html>
