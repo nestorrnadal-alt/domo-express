@@ -19,6 +19,7 @@
 
 const { createClient } = require('@supabase/supabase-js');
 const { Resend }       = require('resend');
+const { mintBookingToken } = require('./_booking-token');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -29,6 +30,8 @@ const supabase = createClient(
 // skips email sends gracefully — booking still succeeds.
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const FROM   = process.env.RESEND_FROM || 'Domo <onboarding@resend.dev>';
+
+const SITE_URL = process.env.SITE_URL || 'https://book.domoyourhome.com';
 
 function generateBookingId() {
   const num = Math.floor(1000 + Math.random() * 9000);
@@ -85,9 +88,14 @@ function buildEmailHtml(data) {
     + matRow
     + '<tr style="background:#EEF1FA"><td style="padding:8px 12px;font-weight:700">Total</td><td style="text-align:right;font-weight:700;font-size:16px;padding:8px 12px;color:#3652A5">$' + price + '</td></tr>'
     + '</table>'
-    + '<table width="100%" style="margin-top:20px;background:#FFF9E6;border-radius:8px;border:1px solid #f0d060">'
+    + (data.reschedule_url
+        ? '<table width="100%" style="margin-top:20px"><tr><td align="center">'
+          + '<a href="' + data.reschedule_url + '" style="display:inline-block;background:#3652A5;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;font-size:14px;">Reprogramar o cancelar &rarr;</a>'
+          + '</td></tr></table>'
+        : '')
+    + '<table width="100%" style="margin-top:16px;background:#FFF9E6;border-radius:8px;border:1px solid #f0d060">'
     + '<tr><td style="padding:12px 14px;font-size:13px;color:#5a4500">'
-    + '<strong>Recuerda:</strong> Cancela con 24h de anticipo respondiendo este correo o al (787) 419-0300.'
+    + '<strong>Recuerda:</strong> Cambios y cancelaciones con al menos 24h de anticipo. Usa el botón de arriba o llama al (787) 419-0300.'
     + '</td></tr></table></td></tr>'
     + '<tr><td style="background:#f4f6fc;padding:16px 28px;border-top:1px solid #e0e4ef">'
     + '<p style="margin:0;font-size:12px;color:#999;text-align:center">Domo \u00b7 info@domoyourhome.com \u00b7 (787) 419-0300<br>San Juan, Puerto Rico</p>'
@@ -110,7 +118,8 @@ function buildEmailText(data) {
     data.materials_requested ? 'Materiales: Domo los consigue (+$30 gesti\u00f3n + costo real)' : null,
     'Total:    $' + price,
     '',
-    'Cancelaciones 24h+: info@domoyourhome.com | (787) 419-0300',
+    data.reschedule_url ? 'Reprogramar o cancelar (24h+): ' + data.reschedule_url : null,
+    'Tel\u00e9fono: (787) 419-0300 \u00b7 info@domoyourhome.com',
     '',
     '\u2014 Domo',
   ].filter(l => l !== null).join('\n');
@@ -166,12 +175,24 @@ exports.handler = async (event) => {
     }
     return { statusCode: 500, body: JSON.stringify({ error: 'Database error', detail: dbError.message }) };
   }
-  const data = { ...body, booking_id };
+  // Reschedule token + URL \u2014 handed back to the client and embedded
+  // in the confirmation email so customers can self-serve up to 24h
+  // before the service.
+  let reschedule_token = null;
+  let reschedule_url   = null;
+  try {
+    reschedule_token = mintBookingToken(booking_id);
+    reschedule_url   = `${SITE_URL}/reschedule.html?token=${encodeURIComponent(reschedule_token)}`;
+  } catch (e) {
+    console.error('book: minting reschedule token failed (ADMIN_JWT_SECRET set?):', e.message);
+  }
+
+  const data = { ...body, booking_id, reschedule_url };
   if (!resend) {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ booking_id, email_sent: false, warning: 'Resend not configured.' }),
+      body: JSON.stringify({ booking_id, reschedule_token, email_sent: false, warning: 'Resend not configured.' }),
     };
   }
   try {
@@ -187,12 +208,12 @@ exports.handler = async (event) => {
     console.error('Email send error:', mailError);
     return {
       statusCode: 200,
-      body: JSON.stringify({ booking_id, email_sent: false, warning: 'Booking saved but email failed.' }),
+      body: JSON.stringify({ booking_id, reschedule_token, email_sent: false, warning: 'Booking saved but email failed.' }),
     };
   }
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ booking_id, email_sent: true }),
+    body: JSON.stringify({ booking_id, reschedule_token, email_sent: true }),
   };
 };
