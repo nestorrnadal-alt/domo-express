@@ -1056,6 +1056,30 @@
     .wa-bubble:hover { transform: scale(1.06); box-shadow: 0 8px 20px rgba(0,0,0,.22); }
     .wa-bubble svg { width: 30px; height: 30px; fill: #fff; display: block; }
 
+    /* ── Google Places autocomplete dropdown ── */
+    .pac-container {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      border-radius: 10px !important;
+      border: 1px solid var(--border) !important;
+      box-shadow: 0 6px 20px rgba(20, 37, 67, .12) !important;
+      margin-top: 4px;
+      overflow: hidden;
+      z-index: 10000 !important;
+    }
+    .pac-item {
+      padding: 9px 12px !important;
+      color: var(--text) !important;
+      font-size: 13px !important;
+      cursor: pointer !important;
+      border-top: 1px solid var(--bluelt) !important;
+    }
+    .pac-item:first-child { border-top: none !important; }
+    .pac-item:hover { background: var(--bluelt) !important; }
+    .pac-item-query { color: var(--navy) !important; font-weight: 700 !important; }
+    .pac-matched { color: var(--blue) !important; }
+    .pac-icon { display: none !important; }
+    .pac-logo:after { margin: 6px 8px !important; opacity: 0.55; }
+
     /* ── Mobile ── */
     @media (max-width: 480px) {
       .date-grid { grid-template-columns: repeat(4, 1fr); }
@@ -1265,7 +1289,7 @@
 
       <div class="field-group">
         <label>Dirección del servicio</label>
-        <input type="text" id="fAddress" placeholder="Calle, número, urb. — Condado / Miramar / Santurce" autocomplete="street-address">
+        <input type="text" id="fAddress" placeholder="Empieza a escribir tu dirección y selecciona…" autocomplete="street-address">
       </div>
 
       <div class="field-group">
@@ -2321,13 +2345,71 @@ function selectPay(el) {
   }
 }
 
+// /api/config is cached after first fetch. Both Stripe and Google
+// Places init paths use the same response.
+let configCache = null;
+async function loadConfig() {
+  if (configCache) return configCache;
+  const res = await fetch(CONFIG_URL);
+  if (!res.ok) throw new Error('Could not fetch config');
+  configCache = await res.json();
+  return configCache;
+}
+
+// ── Google Places address autocomplete ────────────────────────
+let placesReady = false;
+let placesScriptPromise = null;
+function loadGoogleMapsScript(key) {
+  if (window.google && window.google.maps && window.google.maps.places) {
+    return Promise.resolve();
+  }
+  if (placesScriptPromise) return placesScriptPromise;
+  placesScriptPromise = new Promise((resolve, reject) => {
+    const cbName = '__gmaps_loaded_' + Math.random().toString(36).slice(2);
+    window[cbName] = () => { delete window[cbName]; resolve(); };
+    const script = document.createElement('script');
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key)
+               + '&libraries=places&loading=async&callback=' + cbName;
+    script.async = true;
+    script.defer = true;
+    script.onerror = () => { delete window[cbName]; placesScriptPromise = null; reject(new Error('maps script failed')); };
+    document.head.appendChild(script);
+  });
+  return placesScriptPromise;
+}
+
+async function initPlacesIfNeeded() {
+  if (placesReady) return;
+  let cfg;
+  try { cfg = await loadConfig(); }
+  catch { return; } // config endpoint down → silently skip autocomplete
+  if (!cfg.googlePlacesApiKey) return; // not configured → degrade gracefully
+
+  try { await loadGoogleMapsScript(cfg.googlePlacesApiKey); }
+  catch (e) { console.error('Places autocomplete failed to load', e); return; }
+
+  const input = document.getElementById('fAddress');
+  if (!input) return;
+  const ac = new google.maps.places.Autocomplete(input, {
+    fields: ['formatted_address'],
+    componentRestrictions: { country: 'pr' },
+    types: ['address'],
+  });
+  ac.addListener('place_changed', () => {
+    const place = ac.getPlace();
+    if (place && place.formatted_address) {
+      input.value = place.formatted_address;
+      state.address = place.formatted_address;
+    }
+  });
+  placesReady = true;
+}
+
 async function initStripeIfNeeded() {
   if (stripeReady) return;
   if (typeof Stripe === 'undefined') throw new Error('Stripe.js not loaded');
 
-  const res = await fetch(CONFIG_URL);
-  if (!res.ok) throw new Error('Could not fetch config');
-  const cfg = await res.json();
+  const cfg = await loadConfig();
   if (!cfg.stripePublishableKey) throw new Error('Stripe is not configured');
 
   stripeInstance = Stripe(cfg.stripePublishableKey);
@@ -2433,6 +2515,9 @@ function showStep(n) {
   document.querySelectorAll('.step-panel').forEach((p, i) => {
     p.classList.toggle('visible', i + 1 === n);
   });
+
+  // Lazy-load Google Places once the customer reaches the address field.
+  if (n === 4) initPlacesIfNeeded();
 
   document.getElementById('progressTitle').textContent = STEP_TITLES[n];
   document.getElementById('stepBackBtn').classList.toggle('hidden', n === 1);
