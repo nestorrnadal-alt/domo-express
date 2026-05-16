@@ -12,16 +12,17 @@
 //                            "Places API (New)" must be enabled
 // ============================================================
 
-// Hardcoded business identity. Lat/lng come from the Google Maps
-// listing URL the user shared. We text-search with a tight location
-// bias to deterministically resolve to this business.
+// Hardcoded business identity. The actual Google listing title is
+// just "Domo" — too generic for text search to disambiguate from
+// other Domo entities worldwide. We include the phone number in the
+// query so the New Places API matches the listing uniquely (phone
+// numbers are globally unique in Google's business graph), with the
+// SJ-metro location bias as a backstop.
 //
-// The query can be overridden with the GOOGLE_REVIEWS_QUERY env var
-// so you can adjust without a redeploy if Google's search isn't
-// resolving correctly (e.g., "Domo Your Home", "DomoYourHome",
-// "Domo handyman San Juan"). Default is intentionally more specific
-// than just "Domo" since that returns the wrong listing.
-const BUSINESS_QUERY    = process.env.GOOGLE_REVIEWS_QUERY || 'Domo Your Home';
+// Override with GOOGLE_REVIEWS_QUERY in Netlify env vars if Google's
+// search resolution drifts (e.g., set to the exact listing title or
+// to a Place ID resource name).
+const BUSINESS_QUERY    = process.env.GOOGLE_REVIEWS_QUERY || 'Domo (787) 419-0300 San Juan';
 const BUSINESS_LAT      = 18.3076466;
 const BUSINESS_LNG      = -66.0050436;
 const BUSINESS_RADIUS_M = 3000;
