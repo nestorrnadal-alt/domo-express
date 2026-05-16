@@ -4,55 +4,36 @@
 // Fetches the latest reviews for the Domo business from Google's
 // Places API (New) and serves them to the frontend testimonial
 // carousel. Response is cached at the Netlify edge for 24 hours
-// (s-maxage=86400) with a 7-day stale-while-revalidate so we don't
-// hammer Google on every page load.
+// (s-maxage=86400) with a 7-day stale-while-revalidate.
+//
+// Resolution strategy: try a list of text queries in priority
+// order, returning the first one that matches. Falls back to a
+// pure phone-number search if nothing else hits.
 //
 // Required env vars:
 //   GOOGLE_PLACES_API_KEY    same key used for client autocomplete;
 //                            "Places API (New)" must be enabled
+// Optional env vars:
+//   GOOGLE_REVIEWS_QUERY     manual override — used first if set,
+//                            so you can pin the exact query if
+//                            Google's index drifts
 // ============================================================
-
-// Hardcoded business identity. The actual Google listing title is
-// just "Domo" — too generic for text search to disambiguate from
-// other Domo entities worldwide. We include the phone number in the
-// query so the New Places API matches the listing uniquely (phone
-// numbers are globally unique in Google's business graph), with the
-// SJ-metro location bias as a backstop.
-//
-// Override with GOOGLE_REVIEWS_QUERY in Netlify env vars if Google's
-// search resolution drifts (e.g., set to the exact listing title or
-// to a Place ID resource name).
-const BUSINESS_QUERY    = process.env.GOOGLE_REVIEWS_QUERY || 'Domo (787) 419-0300 San Juan';
-const BUSINESS_LAT      = 18.3076466;
-const BUSINESS_LNG      = -66.0050436;
-const BUSINESS_RADIUS_M = 3000;
 
 let cachedPlaceId      = null;
 let cachedPlaceIdMs    = 0;
 const PLACE_ID_TTL_MS  = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-async function resolvePlaceId(apiKey) {
-  if (cachedPlaceId && (Date.now() - cachedPlaceIdMs) < PLACE_ID_TTL_MS) {
-    return cachedPlaceId;
-  }
+async function searchText(query, apiKey, opts) {
+  const body = { textQuery: query, maxResultCount: 1, languageCode: 'es' };
+  if (opts && opts.locationBias) body.locationBias = opts.locationBias;
   const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
     method: 'POST',
     headers: {
-      'Content-Type':         'application/json',
-      'X-Goog-Api-Key':       apiKey,
-      'X-Goog-FieldMask':     'places.id,places.displayName',
+      'Content-Type':     'application/json',
+      'X-Goog-Api-Key':   apiKey,
+      'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress',
     },
-    body: JSON.stringify({
-      textQuery: BUSINESS_QUERY,
-      locationBias: {
-        circle: {
-          center: { latitude: BUSINESS_LAT, longitude: BUSINESS_LNG },
-          radius: BUSINESS_RADIUS_M,
-        },
-      },
-      maxResultCount: 1,
-      languageCode: 'es',
-    }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
@@ -60,10 +41,40 @@ async function resolvePlaceId(apiKey) {
   }
   const data = await res.json();
   const first = (data.places || [])[0];
-  if (!first || !first.id) throw new Error('no_place_match');
-  cachedPlaceId   = first.id;
-  cachedPlaceIdMs = Date.now();
-  return cachedPlaceId;
+  return first || null;
+}
+
+async function resolvePlaceId(apiKey) {
+  if (cachedPlaceId && (Date.now() - cachedPlaceIdMs) < PLACE_ID_TTL_MS) {
+    return cachedPlaceId;
+  }
+
+  // Try queries in order, stopping on first match. Most-specific first.
+  const candidates = [
+    process.env.GOOGLE_REVIEWS_QUERY,
+    'Domo home help service agency Puerto Rico',
+    'domoyourhome.com',
+    'Domo handyman Puerto Rico',
+    'Domo +17874190300',
+    '+17874190300',
+  ].filter(Boolean);
+
+  let lastErr = null;
+  for (const q of candidates) {
+    try {
+      const place = await searchText(q, apiKey);
+      if (place && place.id) {
+        cachedPlaceId   = place.id;
+        cachedPlaceIdMs = Date.now();
+        console.log('google-reviews: resolved via query', JSON.stringify(q), '->', place.displayName && place.displayName.text);
+        return cachedPlaceId;
+      }
+    } catch (e) {
+      lastErr = e;
+      console.log('google-reviews: query failed', JSON.stringify(q), e.message);
+    }
+  }
+  throw lastErr || new Error('no_place_match');
 }
 
 async function fetchPlaceDetails(apiKey, placeId) {
@@ -73,7 +84,7 @@ async function fetchPlaceDetails(apiKey, placeId) {
     {
       headers: {
         'X-Goog-Api-Key':   apiKey,
-        'X-Goog-FieldMask': 'reviews,rating,userRatingCount,displayName',
+        'X-Goog-FieldMask': 'reviews,rating,userRatingCount,displayName,formattedAddress',
       },
     },
   );
@@ -97,11 +108,16 @@ exports.handler = async (event) => {
     };
   }
 
+  // The `debug=1` query param bypasses the resolved-place-id cache so
+  // we can iterate on the query without redeploying.
+  if ((event.queryStringParameters || {}).debug) {
+    cachedPlaceId = null;
+  }
+
   try {
     const placeId = await resolvePlaceId(apiKey);
     const details = await fetchPlaceDetails(apiKey, placeId);
 
-    // Reduce Google's verbose review objects to just what the carousel needs.
     const reviews = (details.reviews || []).slice(0, 5).map(r => ({
       author:   r.authorAttribution && r.authorAttribution.displayName ? r.authorAttribution.displayName : 'Cliente',
       photo:    r.authorAttribution && r.authorAttribution.photoUri ? r.authorAttribution.photoUri : null,
@@ -114,14 +130,13 @@ exports.handler = async (event) => {
       statusCode: 200,
       headers: {
         'Content-Type':  'application/json',
-        // Netlify edge caches the response for 24 hours; serves stale
-        // for a week while a background refresh runs in the background.
         'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
       },
       body: JSON.stringify({
         rating:  details.rating || null,
         total:   details.userRatingCount || null,
         place:   (details.displayName && details.displayName.text) || null,
+        address: details.formattedAddress || null,
         reviews,
       }),
     };
