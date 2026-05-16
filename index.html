@@ -256,6 +256,72 @@
       .trust-strip { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 14px 8px; }
     }
 
+    .reviews-block {
+      margin: 0 0 22px;
+      padding: 16px 18px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .reviews-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .reviews-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .reviews-rating {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .reviews-rating .stars { color: #F0B400; letter-spacing: 1px; margin-right: 4px; }
+    .reviews-rating .total { color: var(--muted); font-weight: 600; margin-left: 4px; }
+    .reviews-track {
+      position: relative;
+      min-height: 110px;
+    }
+    .review-item {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity .35s ease;
+      pointer-events: none;
+    }
+    .review-item.visible { opacity: 1; pointer-events: auto; }
+    .review-quote {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .review-quote::before { content: "“"; color: var(--periwinkle); font-size: 22px; margin-right: 2px; }
+    .review-byline {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .review-byline strong { color: var(--navy); font-weight: 700; }
+    .review-stars { color: #F0B400; letter-spacing: 1px; margin-right: 6px; font-size: 12px; }
+    .reviews-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .reviews-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background .2s, width .2s;
+    }
+    .reviews-dot.active { background: var(--blue); width: 18px; border-radius: 3px; }
+
     .intro-pricing-tags {
       display: flex; flex-wrap: wrap; gap: 8px;
       margin-top: 16px;
@@ -1056,6 +1122,30 @@
     .wa-bubble:hover { transform: scale(1.06); box-shadow: 0 8px 20px rgba(0,0,0,.22); }
     .wa-bubble svg { width: 30px; height: 30px; fill: #fff; display: block; }
 
+    /* ── Google Places autocomplete dropdown ── */
+    .pac-container {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      border-radius: 10px !important;
+      border: 1px solid var(--border) !important;
+      box-shadow: 0 6px 20px rgba(20, 37, 67, .12) !important;
+      margin-top: 4px;
+      overflow: hidden;
+      z-index: 10000 !important;
+    }
+    .pac-item {
+      padding: 9px 12px !important;
+      color: var(--text) !important;
+      font-size: 13px !important;
+      cursor: pointer !important;
+      border-top: 1px solid var(--bluelt) !important;
+    }
+    .pac-item:first-child { border-top: none !important; }
+    .pac-item:hover { background: var(--bluelt) !important; }
+    .pac-item-query { color: var(--navy) !important; font-weight: 700 !important; }
+    .pac-matched { color: var(--blue) !important; }
+    .pac-icon { display: none !important; }
+    .pac-logo:after { margin: 6px 8px !important; opacity: 0.55; }
+
     /* ── Mobile ── */
     @media (max-width: 480px) {
       .date-grid { grid-template-columns: repeat(4, 1fr); }
@@ -1170,6 +1260,17 @@
         </div>
       </div>
 
+      <!-- Google reviews carousel — populated by JS on load. Hidden until
+           reviews actually arrive so we don't render an empty section. -->
+      <div class="reviews-block" id="reviewsBlock" style="display:none;">
+        <div class="reviews-header">
+          <div class="reviews-label">Lo que dicen en Google</div>
+          <div class="reviews-rating" id="reviewsRating"></div>
+        </div>
+        <div class="reviews-track" id="reviewsTrack"></div>
+        <div class="reviews-dots" id="reviewsDots"></div>
+      </div>
+
       <div class="btn-row">
         <button class="btn-next" onclick="nextStep(1)">Reservar ahora &rarr;</button>
       </div>
@@ -1265,7 +1366,7 @@
 
       <div class="field-group">
         <label>Dirección del servicio</label>
-        <input type="text" id="fAddress" placeholder="Calle, número, urb. — Condado / Miramar / Santurce" autocomplete="street-address">
+        <input type="text" id="fAddress" placeholder="Empieza a escribir tu dirección y selecciona…" autocomplete="street-address">
       </div>
 
       <div class="field-group">
@@ -1985,7 +2086,91 @@ let availabilityState = 'idle'; // 'idle' | 'loading' | 'ready' | 'error'
 (function init() {
   renderTaskGrid();
   loadAvailability();
+  loadReviews();
 })();
+
+// ── Google reviews carousel ───────────────────────────────────
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+let reviewsIdx = 0;
+let reviewsRotateTimer = null;
+
+async function loadReviews() {
+  let data;
+  try {
+    const res = await fetch('/api/google-reviews');
+    if (!res.ok) return;
+    data = await res.json();
+  } catch { return; }
+  if (!data || !Array.isArray(data.reviews) || data.reviews.length === 0) return;
+
+  const block  = document.getElementById('reviewsBlock');
+  const track  = document.getElementById('reviewsTrack');
+  const dots   = document.getElementById('reviewsDots');
+  const rating = document.getElementById('reviewsRating');
+  if (!block || !track) return;
+
+  if (data.rating) {
+    const full   = Math.round(data.rating);
+    const stars  = '★'.repeat(full) + '☆'.repeat(5 - full);
+    const totalS = data.total ? ` <span class="total">(${data.total})</span>` : '';
+    rating.innerHTML = `<span class="stars">${stars}</span>${data.rating.toFixed(1)}${totalS}`;
+  }
+
+  track.innerHTML = data.reviews.map((r, i) => {
+    const stars = '★'.repeat(Math.max(1, Math.round(r.rating || 5)));
+    const byline = `<strong>${escapeHtml(r.author)}</strong>${r.relative ? ' · ' + escapeHtml(r.relative) : ''}`;
+    return `<div class="review-item${i === 0 ? ' visible' : ''}" data-idx="${i}">
+      <div class="review-quote">${escapeHtml(r.text)}</div>
+      <div class="review-byline"><span class="review-stars">${stars}</span>${byline}</div>
+    </div>`;
+  }).join('');
+
+  // Track needs a min-height equal to the tallest review so the
+  // absolutely-positioned items don't collapse. Set after layout.
+  setTimeout(() => {
+    const items = track.querySelectorAll('.review-item');
+    let max = 0;
+    items.forEach(el => {
+      el.classList.add('visible');
+      max = Math.max(max, el.getBoundingClientRect().height);
+      el.classList.remove('visible');
+    });
+    items[0]?.classList.add('visible');
+    track.style.minHeight = (max + 4) + 'px';
+  }, 0);
+
+  dots.innerHTML = data.reviews.map((_, i) =>
+    `<div class="reviews-dot${i === 0 ? ' active' : ''}" data-idx="${i}" onclick="showReview(${i})"></div>`
+  ).join('');
+
+  block.style.display = 'block';
+  if (data.reviews.length > 1) startReviewsRotation(data.reviews.length);
+}
+
+function showReview(idx) {
+  const items = document.querySelectorAll('#reviewsTrack .review-item');
+  const dots  = document.querySelectorAll('#reviewsDots .reviews-dot');
+  if (!items.length) return;
+  reviewsIdx = ((idx % items.length) + items.length) % items.length;
+  items.forEach((el, i) => el.classList.toggle('visible', i === reviewsIdx));
+  dots.forEach((el, i)  => el.classList.toggle('active',  i === reviewsIdx));
+}
+
+function startReviewsRotation(total) {
+  if (reviewsRotateTimer) clearInterval(reviewsRotateTimer);
+  reviewsRotateTimer = setInterval(() => showReview(reviewsIdx + 1), 6000);
+  // Pause on hover for desktop users reading a longer quote.
+  const block = document.getElementById('reviewsBlock');
+  if (block) {
+    block.addEventListener('mouseenter', () => { if (reviewsRotateTimer) { clearInterval(reviewsRotateTimer); reviewsRotateTimer = null; } });
+    block.addEventListener('mouseleave', () => { if (!reviewsRotateTimer) reviewsRotateTimer = setInterval(() => showReview(reviewsIdx + 1), 6000); });
+  }
+}
 
 function renderTaskGrid() {
   const grid = document.getElementById('taskGrid');
@@ -2321,13 +2506,71 @@ function selectPay(el) {
   }
 }
 
+// /api/config is cached after first fetch. Both Stripe and Google
+// Places init paths use the same response.
+let configCache = null;
+async function loadConfig() {
+  if (configCache) return configCache;
+  const res = await fetch(CONFIG_URL);
+  if (!res.ok) throw new Error('Could not fetch config');
+  configCache = await res.json();
+  return configCache;
+}
+
+// ── Google Places address autocomplete ────────────────────────
+let placesReady = false;
+let placesScriptPromise = null;
+function loadGoogleMapsScript(key) {
+  if (window.google && window.google.maps && window.google.maps.places) {
+    return Promise.resolve();
+  }
+  if (placesScriptPromise) return placesScriptPromise;
+  placesScriptPromise = new Promise((resolve, reject) => {
+    const cbName = '__gmaps_loaded_' + Math.random().toString(36).slice(2);
+    window[cbName] = () => { delete window[cbName]; resolve(); };
+    const script = document.createElement('script');
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key)
+               + '&libraries=places&loading=async&callback=' + cbName;
+    script.async = true;
+    script.defer = true;
+    script.onerror = () => { delete window[cbName]; placesScriptPromise = null; reject(new Error('maps script failed')); };
+    document.head.appendChild(script);
+  });
+  return placesScriptPromise;
+}
+
+async function initPlacesIfNeeded() {
+  if (placesReady) return;
+  let cfg;
+  try { cfg = await loadConfig(); }
+  catch { return; } // config endpoint down → silently skip autocomplete
+  if (!cfg.googlePlacesApiKey) return; // not configured → degrade gracefully
+
+  try { await loadGoogleMapsScript(cfg.googlePlacesApiKey); }
+  catch (e) { console.error('Places autocomplete failed to load', e); return; }
+
+  const input = document.getElementById('fAddress');
+  if (!input) return;
+  const ac = new google.maps.places.Autocomplete(input, {
+    fields: ['formatted_address'],
+    componentRestrictions: { country: 'pr' },
+    types: ['address'],
+  });
+  ac.addListener('place_changed', () => {
+    const place = ac.getPlace();
+    if (place && place.formatted_address) {
+      input.value = place.formatted_address;
+      state.address = place.formatted_address;
+    }
+  });
+  placesReady = true;
+}
+
 async function initStripeIfNeeded() {
   if (stripeReady) return;
   if (typeof Stripe === 'undefined') throw new Error('Stripe.js not loaded');
 
-  const res = await fetch(CONFIG_URL);
-  if (!res.ok) throw new Error('Could not fetch config');
-  const cfg = await res.json();
+  const cfg = await loadConfig();
   if (!cfg.stripePublishableKey) throw new Error('Stripe is not configured');
 
   stripeInstance = Stripe(cfg.stripePublishableKey);
@@ -2433,6 +2676,9 @@ function showStep(n) {
   document.querySelectorAll('.step-panel').forEach((p, i) => {
     p.classList.toggle('visible', i + 1 === n);
   });
+
+  // Lazy-load Google Places once the customer reaches the address field.
+  if (n === 4) initPlacesIfNeeded();
 
   document.getElementById('progressTitle').textContent = STEP_TITLES[n];
   document.getElementById('stepBackBtn').classList.toggle('hidden', n === 1);
