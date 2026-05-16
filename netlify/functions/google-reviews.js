@@ -2,30 +2,60 @@
 // GET /api/google-reviews
 //
 // Fetches the latest reviews for the Domo business from Google's
-// Places API (New) and serves them to the frontend testimonial
-// carousel. Response is cached at the Netlify edge for 24 hours
+// Places API (New). Response cached at the Netlify edge for 24h
 // (s-maxage=86400) with a 7-day stale-while-revalidate.
 //
-// Resolution strategy: try a list of text queries in priority
-// order, returning the first one that matches. Falls back to a
-// pure phone-number search if nothing else hits.
-//
-// Required env vars:
-//   GOOGLE_PLACES_API_KEY    same key used for client autocomplete;
-//                            "Places API (New)" must be enabled
-// Optional env vars:
-//   GOOGLE_REVIEWS_QUERY     manual override — used first if set,
-//                            so you can pin the exact query if
-//                            Google's index drifts
+// Resolution strategy (in order):
+//   1. GOOGLE_REVIEWS_PLACE_ID env var (manual override — paste
+//      a ChIJ... Place ID once you have one).
+//   2. CID-redirect lookup. The CID is the trailing hex in the
+//      FTID from the Google Maps URL the user shared:
+//      0x8c1efe8650d0b9ad:0xd99a22ecab0a558b → CID 0xd99a22ecab0a558b.
+//      https://www.google.com/maps?cid=<decimal> redirects to a
+//      Google Maps URL that contains the ChIJ... Place ID; we
+//      parse it out of the response.
+//   3. Text-search fallback (kept as a last resort if the redirect
+//      method breaks).
 // ============================================================
 
-let cachedPlaceId      = null;
-let cachedPlaceIdMs    = 0;
-const PLACE_ID_TTL_MS  = 30 * 24 * 60 * 60 * 1000; // 30 days
+// The trailing hex of the FTID from the user's Google Maps URL,
+// converted to decimal via BigInt (the raw value overflows Number).
+const FTID_CID_HEX  = '0xd99a22ecab0a558b';
+const FTID_CID_DEC  = BigInt(FTID_CID_HEX).toString();
 
-async function searchText(query, apiKey, opts) {
-  const body = { textQuery: query, maxResultCount: 1, languageCode: 'es' };
-  if (opts && opts.locationBias) body.locationBias = opts.locationBias;
+let cachedPlaceId   = null;
+let cachedPlaceIdMs = 0;
+const PLACE_ID_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+function cachePlaceId(id) {
+  cachedPlaceId = id;
+  cachedPlaceIdMs = Date.now();
+  return id;
+}
+
+async function placeIdFromCid() {
+  // Follow the Google Maps CID redirect and pull the ChIJ Place ID
+  // out of the final URL. Works without an API key because it's just
+  // a public Maps URL — but we run it server-side so the response
+  // body (small HTML) doesn't go to the browser.
+  const res = await fetch('https://www.google.com/maps?cid=' + FTID_CID_DEC, {
+    redirect: 'follow',
+    headers: { 'User-Agent': 'Mozilla/5.0' },
+  });
+  const finalUrl = res.url || '';
+  // Match patterns like "!1s0x...:0xChIJ..." or "!1sChIJ..." or "/place/.../@.../data=...!1sChIJ..."
+  let m = finalUrl.match(/[!\/\?&]1s(ChIJ[A-Za-z0-9_-]+)/);
+  if (m) return m[1];
+  // Sometimes the redirect lands at a URL with no ChIJ; the HTML
+  // body of /maps?cid=... usually contains a meta or script tag
+  // with the Place ID. Cheap regex over the body as a last resort.
+  let html = '';
+  try { html = await res.text(); } catch {}
+  m = html.match(/\b(ChIJ[A-Za-z0-9_-]{10,})\b/);
+  return m ? m[1] : null;
+}
+
+async function searchText(query, apiKey) {
   const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
     method: 'POST',
     headers: {
@@ -33,15 +63,14 @@ async function searchText(query, apiKey, opts) {
       'X-Goog-Api-Key':   apiKey,
       'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress',
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ textQuery: query, maxResultCount: 1, languageCode: 'es' }),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error('text-search ' + res.status + ': ' + text);
   }
   const data = await res.json();
-  const first = (data.places || [])[0];
-  return first || null;
+  return (data.places || [])[0] || null;
 }
 
 async function resolvePlaceId(apiKey) {
@@ -49,32 +78,43 @@ async function resolvePlaceId(apiKey) {
     return cachedPlaceId;
   }
 
-  // Try queries in order, stopping on first match. Most-specific first.
+  // 1. Manual override
+  if (process.env.GOOGLE_REVIEWS_PLACE_ID) {
+    return cachePlaceId(process.env.GOOGLE_REVIEWS_PLACE_ID);
+  }
+
+  // 2. CID redirect (deterministic; uses the FTID from the Maps URL)
+  try {
+    const id = await placeIdFromCid();
+    if (id) {
+      console.log('google-reviews: resolved via CID redirect ->', id);
+      return cachePlaceId(id);
+    }
+  } catch (e) {
+    console.log('google-reviews: cid redirect failed', e.message);
+  }
+
+  // 3. Text-search fallback
   const candidates = [
     process.env.GOOGLE_REVIEWS_QUERY,
     'Domo home help service agency Puerto Rico',
     'domoyourhome.com',
     'Domo handyman Puerto Rico',
-    'Domo +17874190300',
     '+17874190300',
   ].filter(Boolean);
 
-  let lastErr = null;
   for (const q of candidates) {
     try {
       const place = await searchText(q, apiKey);
       if (place && place.id) {
-        cachedPlaceId   = place.id;
-        cachedPlaceIdMs = Date.now();
         console.log('google-reviews: resolved via query', JSON.stringify(q), '->', place.displayName && place.displayName.text);
-        return cachedPlaceId;
+        return cachePlaceId(place.id);
       }
     } catch (e) {
-      lastErr = e;
       console.log('google-reviews: query failed', JSON.stringify(q), e.message);
     }
   }
-  throw lastErr || new Error('no_place_match');
+  throw new Error('no_place_match');
 }
 
 async function fetchPlaceDetails(apiKey, placeId) {
@@ -108,8 +148,6 @@ exports.handler = async (event) => {
     };
   }
 
-  // The `debug=1` query param bypasses the resolved-place-id cache so
-  // we can iterate on the query without redeploying.
   if ((event.queryStringParameters || {}).debug) {
     cachedPlaceId = null;
   }
@@ -133,10 +171,11 @@ exports.handler = async (event) => {
         'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
       },
       body: JSON.stringify({
-        rating:  details.rating || null,
-        total:   details.userRatingCount || null,
-        place:   (details.displayName && details.displayName.text) || null,
-        address: details.formattedAddress || null,
+        rating:    details.rating || null,
+        total:     details.userRatingCount || null,
+        place:     (details.displayName && details.displayName.text) || null,
+        address:   details.formattedAddress || null,
+        place_id:  placeId,
         reviews,
       }),
     };
