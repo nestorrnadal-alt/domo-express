@@ -13,13 +13,18 @@
 // ============================================================
 
 // Hardcoded business identity. Lat/lng come from the Google Maps
-// listing URL the user shared. We text-search "Domo" with a tight
-// location bias to deterministically resolve to this business
-// (instead of any other "Domo" in the world).
-const BUSINESS_QUERY = 'Domo';
-const BUSINESS_LAT   = 18.3076466;
-const BUSINESS_LNG   = -66.0050436;
-const BUSINESS_RADIUS_M = 1000;
+// listing URL the user shared. We text-search with a tight location
+// bias to deterministically resolve to this business.
+//
+// The query can be overridden with the GOOGLE_REVIEWS_QUERY env var
+// so you can adjust without a redeploy if Google's search isn't
+// resolving correctly (e.g., "Domo Your Home", "DomoYourHome",
+// "Domo handyman San Juan"). Default is intentionally more specific
+// than just "Domo" since that returns the wrong listing.
+const BUSINESS_QUERY    = process.env.GOOGLE_REVIEWS_QUERY || 'Domo Your Home';
+const BUSINESS_LAT      = 18.3076466;
+const BUSINESS_LNG      = -66.0050436;
+const BUSINESS_RADIUS_M = 3000;
 
 let cachedPlaceId      = null;
 let cachedPlaceIdMs    = 0;
