@@ -2127,7 +2127,11 @@ async function loadReviews() {
     if (!res.ok) return;
     data = await res.json();
   } catch { return; }
-  if (!data || !Array.isArray(data.reviews) || data.reviews.length === 0) return;
+  if (!data) return;
+
+  const hasReviews = Array.isArray(data.reviews) && data.reviews.length > 0;
+  const hasRating  = typeof data.rating === 'number' && data.rating > 0;
+  if (!hasReviews && !hasRating) return; // nothing to show
 
   const block  = document.getElementById('reviewsBlock');
   const track  = document.getElementById('reviewsTrack');
@@ -2135,11 +2139,20 @@ async function loadReviews() {
   const rating = document.getElementById('reviewsRating');
   if (!block || !track) return;
 
-  if (data.rating) {
+  if (hasRating) {
     const full   = Math.round(data.rating);
     const stars  = '★'.repeat(full) + '☆'.repeat(5 - full);
     const totalS = data.total ? ` <span class="total">(${data.total})</span>` : '';
     rating.innerHTML = `<span class="stars">${stars}</span>${data.rating.toFixed(1)}${totalS}`;
+  }
+
+  if (!hasReviews) {
+    // No review text yet — just surface the rating header.
+    track.innerHTML = '';
+    track.style.minHeight = '0';
+    dots.innerHTML = '';
+    block.style.display = 'block';
+    return;
   }
 
   track.innerHTML = data.reviews.map((r, i) => {
