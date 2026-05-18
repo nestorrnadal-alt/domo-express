@@ -21,13 +21,24 @@ const USE_API = false;
 const HARDCODED_RATING = 5.0;
 const HARDCODED_TOTAL  = 11;
 const HARDCODED_REVIEWS = [
-  // Format:
-  // {
-  //   author:   'María L.',
-  //   rating:   5,
-  //   text:     'Excelente servicio. Llegaron a tiempo y arreglaron todo perfectamente.',
-  //   relative: 'hace 2 meses',
-  // },
+  {
+    author:   'Lourdes Cardona',
+    rating:   5,
+    text:     '¡Excelente servicio! 100% recomendado.',
+    relative: 'hace 4 semanas',
+  },
+  {
+    author:   'Marta Aponte',
+    rating:   5,
+    text:     'Se comunicaron el día antes para confirmar qué trabajo se iban a realizar y orientarme sobre qué materiales debía…',
+    relative: 'hace 3 meses',
+  },
+  {
+    author:   'Ángel',
+    rating:   5,
+    text:     'Extraordinary.',
+    relative: 'hace 7 semanas',
+  },
 ];
 
 // ----- below this line: API path, kept for the eventual swap -----
