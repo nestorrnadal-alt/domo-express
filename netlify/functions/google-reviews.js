@@ -1,25 +1,37 @@
 // ============================================================
 // GET /api/google-reviews
 //
-// Fetches the latest reviews for the Domo business from Google's
-// Places API (New). Response cached at the Netlify edge for 24h
-// (s-maxage=86400) with a 7-day stale-while-revalidate.
+// Currently serves a HARDCODED rating + review snapshot for the
+// Domo Google Business listing because the Places API resolution
+// from the FTID / text search has not been reliable for this
+// listing. The numbers reflect the snapshot from Néstor's GBP
+// dashboard on 2026-05-18 (5.0 stars, 11 reviews).
 //
-// Resolution strategy (in order):
-//   1. GOOGLE_REVIEWS_PLACE_ID env var (manual override — paste
-//      a ChIJ... Place ID once you have one).
-//   2. CID-redirect lookup. The CID is the trailing hex in the
-//      FTID from the Google Maps URL the user shared:
-//      0x8c1efe8650d0b9ad:0xd99a22ecab0a558b → CID 0xd99a22ecab0a558b.
-//      https://www.google.com/maps?cid=<decimal> redirects to a
-//      Google Maps URL that contains the ChIJ... Place ID; we
-//      parse it out of the response.
-//   3. Text-search fallback (kept as a last resort if the redirect
-//      method breaks).
+// To add real review text later: paste 3-5 reviews into the
+// HARDCODED_REVIEWS array below as { author, rating, text,
+// relative } objects. The frontend already renders them
+// identically to API-sourced reviews.
+//
+// When/if the Places API path becomes reliable (we get a working
+// Place ID), we can flip USE_API back to true.
 // ============================================================
 
-// The trailing hex of the FTID from the user's Google Maps URL,
-// converted to decimal via BigInt (the raw value overflows Number).
+const USE_API = false;
+
+const HARDCODED_RATING = 5.0;
+const HARDCODED_TOTAL  = 11;
+const HARDCODED_REVIEWS = [
+  // Format:
+  // {
+  //   author:   'María L.',
+  //   rating:   5,
+  //   text:     'Excelente servicio. Llegaron a tiempo y arreglaron todo perfectamente.',
+  //   relative: 'hace 2 meses',
+  // },
+];
+
+// ----- below this line: API path, kept for the eventual swap -----
+
 const FTID_CID_HEX  = '0xd99a22ecab0a558b';
 const FTID_CID_DEC  = BigInt(FTID_CID_HEX).toString();
 
@@ -34,21 +46,13 @@ function cachePlaceId(id) {
 }
 
 async function placeIdFromCid() {
-  // Follow the Google Maps CID redirect and pull the ChIJ Place ID
-  // out of the final URL. Works without an API key because it's just
-  // a public Maps URL — but we run it server-side so the response
-  // body (small HTML) doesn't go to the browser.
   const res = await fetch('https://www.google.com/maps?cid=' + FTID_CID_DEC, {
     redirect: 'follow',
     headers: { 'User-Agent': 'Mozilla/5.0' },
   });
   const finalUrl = res.url || '';
-  // Match patterns like "!1s0x...:0xChIJ..." or "!1sChIJ..." or "/place/.../@.../data=...!1sChIJ..."
   let m = finalUrl.match(/[!\/\?&]1s(ChIJ[A-Za-z0-9_-]+)/);
   if (m) return m[1];
-  // Sometimes the redirect lands at a URL with no ChIJ; the HTML
-  // body of /maps?cid=... usually contains a meta or script tag
-  // with the Place ID. Cheap regex over the body as a last resort.
   let html = '';
   try { html = await res.text(); } catch {}
   m = html.match(/\b(ChIJ[A-Za-z0-9_-]{10,})\b/);
@@ -74,117 +78,84 @@ async function searchText(query, apiKey) {
 }
 
 async function resolvePlaceId(apiKey) {
-  if (cachedPlaceId && (Date.now() - cachedPlaceIdMs) < PLACE_ID_TTL_MS) {
-    return cachedPlaceId;
-  }
-
-  // 1. Manual override
-  if (process.env.GOOGLE_REVIEWS_PLACE_ID) {
-    return cachePlaceId(process.env.GOOGLE_REVIEWS_PLACE_ID);
-  }
-
-  // 2. CID redirect (deterministic; uses the FTID from the Maps URL)
+  if (cachedPlaceId && (Date.now() - cachedPlaceIdMs) < PLACE_ID_TTL_MS) return cachedPlaceId;
+  if (process.env.GOOGLE_REVIEWS_PLACE_ID) return cachePlaceId(process.env.GOOGLE_REVIEWS_PLACE_ID);
   try {
     const id = await placeIdFromCid();
-    if (id) {
-      console.log('google-reviews: resolved via CID redirect ->', id);
-      return cachePlaceId(id);
-    }
-  } catch (e) {
-    console.log('google-reviews: cid redirect failed', e.message);
-  }
-
-  // 3. Text-search fallback
+    if (id) return cachePlaceId(id);
+  } catch {}
   const candidates = [
     process.env.GOOGLE_REVIEWS_QUERY,
     'Domo home help service agency Puerto Rico',
     'domoyourhome.com',
-    'Domo handyman Puerto Rico',
     '+17874190300',
   ].filter(Boolean);
-
   for (const q of candidates) {
-    try {
-      const place = await searchText(q, apiKey);
-      if (place && place.id) {
-        console.log('google-reviews: resolved via query', JSON.stringify(q), '->', place.displayName && place.displayName.text);
-        return cachePlaceId(place.id);
-      }
-    } catch (e) {
-      console.log('google-reviews: query failed', JSON.stringify(q), e.message);
-    }
+    try { const place = await searchText(q, apiKey); if (place && place.id) return cachePlaceId(place.id); }
+    catch {}
   }
   throw new Error('no_place_match');
 }
 
 async function fetchPlaceDetails(apiKey, placeId) {
   const res = await fetch(
-    'https://places.googleapis.com/v1/places/' + encodeURIComponent(placeId)
-    + '?languageCode=es',
-    {
-      headers: {
-        'X-Goog-Api-Key':   apiKey,
-        'X-Goog-FieldMask': 'reviews,rating,userRatingCount,displayName,formattedAddress',
-      },
-    },
+    'https://places.googleapis.com/v1/places/' + encodeURIComponent(placeId) + '?languageCode=es',
+    { headers: { 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': 'reviews,rating,userRatingCount,displayName,formattedAddress' } },
   );
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error('place-details ' + res.status + ': ' + text);
-  }
+  if (!res.ok) throw new Error('place-details ' + res.status);
   return res.json();
 }
 
 exports.handler = async (event) => {
-  if (event.httpMethod !== 'GET') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
-  if (!apiKey) {
+  if (event.httpMethod !== 'GET') return { statusCode: 405, body: 'Method Not Allowed' };
+
+  if (!USE_API) {
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-      body: JSON.stringify({ reviews: [], configured: false }),
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' },
+      body: JSON.stringify({
+        rating:  HARDCODED_RATING,
+        total:   HARDCODED_TOTAL,
+        place:   'Domo',
+        reviews: HARDCODED_REVIEWS,
+        source:  'hardcoded',
+      }),
     };
   }
 
-  if ((event.queryStringParameters || {}).debug) {
-    cachedPlaceId = null;
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  if (!apiKey) {
+    return { statusCode: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, body: JSON.stringify({ reviews: [], configured: false }) };
   }
+  if ((event.queryStringParameters || {}).debug) cachedPlaceId = null;
 
   try {
     const placeId = await resolvePlaceId(apiKey);
     const details = await fetchPlaceDetails(apiKey, placeId);
-
     const reviews = (details.reviews || []).slice(0, 5).map(r => ({
       author:   r.authorAttribution && r.authorAttribution.displayName ? r.authorAttribution.displayName : 'Cliente',
-      photo:    r.authorAttribution && r.authorAttribution.photoUri ? r.authorAttribution.photoUri : null,
       rating:   r.rating || 5,
       text:     (r.text && r.text.text) || (r.originalText && r.originalText.text) || '',
       relative: r.relativePublishTimeDescription || '',
     })).filter(r => r.text);
-
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type':  'application/json',
-        'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
-      },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' },
       body: JSON.stringify({
-        rating:    details.rating || null,
-        total:     details.userRatingCount || null,
-        place:     (details.displayName && details.displayName.text) || null,
-        address:   details.formattedAddress || null,
+        rating:    details.rating || HARDCODED_RATING,
+        total:     details.userRatingCount || HARDCODED_TOTAL,
+        place:     (details.displayName && details.displayName.text) || 'Domo',
         place_id:  placeId,
         reviews,
+        source:    'api',
       }),
     };
   } catch (e) {
-    console.error('google-reviews failed', e.message);
+    console.error('google-reviews api fallback', e.message);
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-      body: JSON.stringify({ reviews: [], error: e.message }),
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, s-maxage=3600' },
+      body: JSON.stringify({ rating: HARDCODED_RATING, total: HARDCODED_TOTAL, place: 'Domo', reviews: HARDCODED_REVIEWS, source: 'hardcoded-fallback', error: e.message }),
     };
   }
 };
