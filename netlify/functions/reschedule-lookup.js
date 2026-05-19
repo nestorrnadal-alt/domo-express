@@ -22,7 +22,7 @@ const supabase = createClient(
 );
 
 const PR_OFFSET_HOURS = -4;
-const SLOTS = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','1:00 PM'];
+const SLOTS = ['8:00 AM','11:00 AM','2:00 PM'];
 
 function slotHour24(slot) {
   const [time, period] = slot.split(' ');

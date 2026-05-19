@@ -569,7 +569,10 @@
 // Hours displayed in the weekly grid. We list 8 AM → 1 PM so Janet can
 // see (or manually slot) any booking in the standard window; the booking
 // form itself still only offers 8/9/10/11/13 to customers.
-const HOURS = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM'];
+// Standard customer slots are 8 AM / 11 AM / 2 PM. The off-hours
+// rows in between stay in the grid so Janet can manually adjust
+// or see non-standard times that landed via the admin or BK side.
+const HOURS = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM'];
 const DAY_LONG    = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const DAY_SHORT   = ['dom','lun','mar','mié','jue','vie','sáb'];
 const MONTH_LONG  = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
