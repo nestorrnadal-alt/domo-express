@@ -27,9 +27,11 @@ const PR_OFFSET_HOURS = -4;
 const LEAD_TIME_MS    = 24 * 60 * 60 * 1000;
 const WINDOW_DAYS     = 14;
 
+// Three non-overlapping 2.5h windows so a single handyman can
+// physically do all three on the same day (8-10:30, 11-1:30,
+// 2-4:30) without time conflicts.
 const SLOTS = [
-  '8:00 AM','9:00 AM','10:00 AM','11:00 AM',
-  '1:00 PM',
+  '8:00 AM','11:00 AM','2:00 PM',
 ];
 
 function slotHour24(slot) {

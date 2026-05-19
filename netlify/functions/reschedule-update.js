@@ -22,7 +22,7 @@ const FROM   = process.env.RESEND_FROM || 'Domo <onboarding@resend.dev>';
 const SITE_URL = process.env.SITE_URL || 'https://book.domoyourhome.com';
 
 const PR_OFFSET_HOURS = -4;
-const VALID_SLOTS = new Set(['8:00 AM','9:00 AM','10:00 AM','11:00 AM','1:00 PM']);
+const VALID_SLOTS = new Set(['8:00 AM','11:00 AM','2:00 PM']);
 
 const DAY_LONG   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MONTH_LONG = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
