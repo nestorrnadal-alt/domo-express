@@ -20,11 +20,14 @@
 
 const { createClient } = require('@supabase/supabase-js');
 const { requireSession } = require('./_admin-auth');
+const ga4 = require('./_ga4');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY,
 );
+
+const SITE_HOSTNAME = 'book.domoyourhome.com';
 
 const PR_OFFSET_HOURS = -4;
 
@@ -219,11 +222,44 @@ exports.handler = async (event) => {
     dowCounts[dow]++;
   });
 
+  // ---------- GA4 sessions (last 30 days) ----------
+  // Wrapped in try/catch so a Data API failure (missing creds, quota,
+  // network) doesn't poison the rest of the dashboard. Frontend will
+  // show "—" in the sessions cell if this comes back null.
+  let sessions30  = null;
+  let topSources  = null;
+  if (ga4.isConfigured()) {
+    try {
+      const sessionsResp = await ga4.fetchHostnameMetrics({
+        startDate: from30,
+        endDate:   today,
+        hostname:  SITE_HOSTNAME,
+      });
+      sessions30 = (sessionsResp.rows || []).reduce((s, r) => s + Number((r.metricValues || [])[0]?.value || 0), 0);
+    } catch (e) {
+      console.error('admin-metrics: GA4 sessions fetch failed', e.message);
+    }
+    try {
+      const sourcesResp = await ga4.fetchSourceMetrics({
+        startDate: from30,
+        endDate:   today,
+        hostname:  SITE_HOSTNAME,
+      });
+      topSources = (sourcesResp.rows || []).slice(0, 8).map(r => ({
+        source:   (r.dimensionValues || [])[0]?.value || '(unknown)',
+        sessions: Number((r.metricValues || [])[0]?.value || 0),
+      }));
+    } catch (e) {
+      console.error('admin-metrics: GA4 sources fetch failed', e.message);
+    }
+  }
+
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     body: JSON.stringify({
       range: { from: from30, to: today },
+      ga4_configured: ga4.isConfigured(),
       headline: {
         bookings:     { now: count7,      prior: countPrior7 },
         revenue:      { now: revenue7,    prior: revenuePrior7 },
@@ -231,11 +267,12 @@ exports.handler = async (event) => {
         noShowRate:   { now: noShowRate7, count: noShow7 },
       },
       funnel: {
-        sessions:  null, // GA4 — to be filled when Data API integration ships
+        sessions:  sessions30,
         partials:  partialCount30,
         confirmed: confirmedCount30,
         charged:   chargedCount30,
       },
+      topSources,
       daily,
       revenue: {
         thisMonth:     revenueMonth,
