@@ -205,6 +205,17 @@
       position: relative;
     }
     .funnel-step.placeholder { background: #FAFBFE; opacity: .55; }
+    a.funnel-link {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      opacity: 1;
+      background: var(--white);
+    }
+    a.funnel-link:hover { border-color: var(--blue); background: var(--bluelt); }
+    a.funnel-link .funnel-value { color: var(--blue); }
+    a.funnel-link .funnel-rate { color: var(--blue); font-weight: 700; }
     .funnel-step .funnel-label {
       font-size: 11px;
       color: var(--muted);
@@ -730,7 +741,7 @@
 
         <h3 class="metrics-section-title">Embudo (últimos 30 días)</h3>
         <div class="funnel-grid" id="funnelGrid"></div>
-        <p class="ga4-note">⚠️ Sesiones (visitantes únicos) requieren conectar Google Analytics 4 Data API. Por ahora se mide desde el primer paso del formulario.</p>
+        <p class="ga4-note">⚠️ Sesiones (visitantes únicos) requieren acceso de servicio a GA4. Mientras lo activamos, haz clic en la primera celda para ver el tráfico directamente en Google Analytics. El resto del embudo abajo se mide desde Supabase.</p>
 
         <h3 class="metrics-section-title">Reservas por día (30 días)</h3>
         <div class="chart-wrap"><canvas id="dailyChart" height="120"></canvas></div>
@@ -1389,17 +1400,22 @@ function renderHeadline(h) {
 function renderFunnel(f) {
   const rate = (numerator, denominator) =>
     !denominator ? '—' : fmtPct(numerator / denominator);
+  // GA4 property; falls back to placeholder card that deep-links to
+  // GA4 Traffic Acquisition when the Data API isn't connected.
+  const GA4_PROP = '404184552';
+  const ga4Url = 'https://analytics.google.com/analytics/web/#/p' + GA4_PROP
+               + '/reports/explorer?params=_u..nav%3Dmaui&r=acquisition-traffic-acquisition&collectionId=lifecycle';
   const sessionsCell = f.sessions !== null && f.sessions !== undefined
     ? `<div class="funnel-step">
          <div class="funnel-label">Sesiones</div>
          <div class="funnel-value">${f.sessions}</div>
          <div class="funnel-rate">visitantes únicos (GA4)</div>
        </div>`
-    : `<div class="funnel-step placeholder">
-         <div class="funnel-label">Sesiones (GA4)</div>
-         <div class="funnel-value">—</div>
-         <div class="funnel-rate">conectar GA4</div>
-       </div>`;
+    : `<a class="funnel-step placeholder funnel-link" href="${ga4Url}" target="_blank" rel="noopener">
+         <div class="funnel-label">Sesiones</div>
+         <div class="funnel-value">↗</div>
+         <div class="funnel-rate">Ver en GA4</div>
+       </a>`;
   document.getElementById('funnelGrid').innerHTML = `
     ${sessionsCell}
     <div class="funnel-step">
