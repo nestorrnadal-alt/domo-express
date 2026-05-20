@@ -111,6 +111,174 @@
     .login-msg.ok   { background: #E6F4EC; border: 1px solid #A6D6BB; color: var(--green); }
     .login-msg.err  { background: #FEF0EE; border: 1px solid #F8B4AC; color: var(--red); }
 
+    /* ── View tabs ── */
+    .view-tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 18px;
+    }
+    .view-tab {
+      background: transparent;
+      border: none;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active { color: var(--navy); border-bottom-color: var(--blue); }
+
+    /* ── Metrics dashboard ── */
+    .metrics-loading {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .metrics-section-title {
+      font-size: 12px; font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin: 22px 0 10px;
+    }
+    .metrics-section-title:first-child { margin-top: 4px; }
+    .ga4-note {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: -4px;
+      margin-bottom: 14px;
+      padding: 6px 10px;
+      background: #FFF9E6;
+      border: 1px solid #F0D060;
+      border-radius: 6px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+    }
+    .kpi {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .kpi .kpi-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .kpi .kpi-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-top: 4px;
+      line-height: 1.1;
+    }
+    .kpi .kpi-delta {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .kpi .kpi-delta.up   { color: var(--green); }
+    .kpi .kpi-delta.down { color: var(--red); }
+
+    .funnel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    .funnel-step {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      position: relative;
+    }
+    .funnel-step.placeholder { background: #FAFBFE; opacity: .55; }
+    .funnel-step .funnel-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .funnel-step .funnel-value {
+      font-size: 22px; font-weight: 800;
+      color: var(--navy);
+      margin-top: 2px;
+    }
+    .funnel-step .funnel-rate {
+      font-size: 11px; color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .chart-wrap {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+    }
+    .pipeline-cell {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .pipeline-cell .pl-label {
+      font-size: 10.5px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .pipeline-cell .pl-value {
+      font-size: 17px; font-weight: 700;
+      color: var(--navy);
+      margin-top: 2px;
+    }
+
+    .metrics-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 700px) {
+      .metrics-cols { grid-template-columns: 1fr; }
+    }
+
+    table.metrics-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .metrics-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .metrics-table tr:last-child td { border-bottom: none; }
+    .metrics-table td:first-child  { color: var(--text); }
+    .metrics-table td:last-child   { text-align: right; font-weight: 700; color: var(--navy); width: 60px; }
+
     /* ── Day list ── */
     .toolbar {
       display: flex;
@@ -474,6 +642,9 @@
       cursor: pointer;
     }
   </style>
+  <!-- Chart.js for the metrics dashboard. Loaded from CDN; only used on the
+       Métricas tab so the calendar view doesn't pay for it. -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
 
@@ -500,8 +671,16 @@
     </div>
   </section>
 
-  <!-- Weekly calendar -->
+  <!-- Admin screen — tabs over multiple views -->
   <section id="adminScreen" style="display:none;">
+
+    <div class="view-tabs">
+      <button class="view-tab active" id="vtCalendar" onclick="switchView('calendar')">Calendario</button>
+      <button class="view-tab" id="vtMetrics" onclick="switchView('metrics')">Métricas</button>
+    </div>
+
+    <!-- View: calendar (existing weekly grid) -->
+    <div class="view-pane" id="viewCalendar">
     <div class="toolbar">
       <button onclick="prevWeek()" aria-label="Semana anterior">←</button>
       <button onclick="thisWeek()">Hoy</button>
@@ -539,6 +718,48 @@
     <div class="week-wrap">
       <div id="weekGrid"></div>
     </div>
+    </div><!-- /viewCalendar -->
+
+    <!-- View: metrics -->
+    <div class="view-pane" id="viewMetrics" style="display:none;">
+      <div class="metrics-loading" id="metricsLoading">Cargando métricas…</div>
+      <div class="metrics-content" id="metricsContent" style="display:none;">
+
+        <h3 class="metrics-section-title">Últimos 7 días</h3>
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <h3 class="metrics-section-title">Embudo (últimos 30 días)</h3>
+        <div class="funnel-grid" id="funnelGrid"></div>
+        <p class="ga4-note">⚠️ Sesiones (visitantes únicos) requieren conectar Google Analytics 4 Data API. Por ahora se mide desde el primer paso del formulario.</p>
+
+        <h3 class="metrics-section-title">Reservas por día (30 días)</h3>
+        <div class="chart-wrap"><canvas id="dailyChart" height="120"></canvas></div>
+
+        <h3 class="metrics-section-title">Ingresos</h3>
+        <div class="kpi-grid" id="revenueGrid"></div>
+
+        <h3 class="metrics-section-title">Pipeline operacional</h3>
+        <div class="pipeline-grid" id="pipelineGrid"></div>
+
+        <h3 class="metrics-section-title">Recuperación de carros abandonados</h3>
+        <div class="kpi-grid" id="recoveryGrid"></div>
+
+        <div class="metrics-cols">
+          <div>
+            <h3 class="metrics-section-title">Tareas más reservadas</h3>
+            <table class="metrics-table" id="topTasksTable"></table>
+          </div>
+          <div>
+            <h3 class="metrics-section-title">Horarios populares</h3>
+            <table class="metrics-table" id="topSlotsTable"></table>
+            <h3 class="metrics-section-title" style="margin-top:24px;">Días populares</h3>
+            <table class="metrics-table" id="topDaysTable"></table>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /viewMetrics -->
+
   </section>
 
 </main>
@@ -1081,6 +1302,179 @@ async function runBulk() {
   // Refresh the week so colors update.
   await fetchWeek();
   renderWeek();
+}
+
+// ── Métricas view ──────────────────────────────────────────
+let metricsLoaded = false;
+let dailyChart    = null;
+
+function switchView(which) {
+  const calBtn  = document.getElementById('vtCalendar');
+  const metBtn  = document.getElementById('vtMetrics');
+  const calPane = document.getElementById('viewCalendar');
+  const metPane = document.getElementById('viewMetrics');
+  if (which === 'metrics') {
+    calBtn.classList.remove('active'); metBtn.classList.add('active');
+    calPane.style.display = 'none';    metPane.style.display = 'block';
+    loadMetrics();
+  } else {
+    metBtn.classList.remove('active'); calBtn.classList.add('active');
+    metPane.style.display = 'none';    calPane.style.display = 'block';
+  }
+}
+
+async function loadMetrics() {
+  const loading = document.getElementById('metricsLoading');
+  const content = document.getElementById('metricsContent');
+  // Always re-fetch so numbers stay fresh, but show stale immediately if we have any.
+  if (!metricsLoaded) { loading.style.display = 'block'; content.style.display = 'none'; }
+
+  let data;
+  try {
+    const res = await fetch('/api/admin/metrics');
+    if (res.status === 401) { showLogin(); return; }
+    if (!res.ok) throw new Error('http ' + res.status);
+    data = await res.json();
+  } catch (e) {
+    loading.textContent = 'No pudimos cargar las métricas. Recarga la página.';
+    return;
+  }
+
+  renderHeadline(data.headline);
+  renderFunnel(data.funnel);
+  renderDaily(data.daily);
+  renderRevenue(data.revenue);
+  renderPipeline(data.pipeline);
+  renderRecovery(data.recovery);
+  renderTopTasks(data.topTasks);
+  renderTopSlots(data.topSlots);
+  renderTopDays(data.topDays);
+
+  loading.style.display = 'none';
+  content.style.display = 'block';
+  metricsLoaded = true;
+}
+
+function fmtMoney(cents) {
+  return '$' + ((cents || 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function fmtPct(n) { return (n * 100).toFixed(1) + '%'; }
+function deltaTag(now, prior) {
+  if (prior === 0) return now > 0 ? `<span class="kpi-delta up">↑ nuevo</span>` : '';
+  const pct = ((now - prior) / prior) * 100;
+  const cls = pct > 0 ? 'up' : (pct < 0 ? 'down' : '');
+  const arrow = pct > 0 ? '↑' : (pct < 0 ? '↓' : '–');
+  return `<span class="kpi-delta ${cls}">${arrow} ${Math.abs(pct).toFixed(0)}% vs. semana anterior</span>`;
+}
+
+function renderHeadline(h) {
+  document.getElementById('kpiGrid').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Reservaciones</div><div class="kpi-value">${h.bookings.now}</div>${deltaTag(h.bookings.now, h.bookings.prior)}</div>
+    <div class="kpi"><div class="kpi-label">Ingresos cobrados</div><div class="kpi-value">${fmtMoney(h.revenue.now)}</div>${deltaTag(h.revenue.now, h.revenue.prior)}</div>
+    <div class="kpi"><div class="kpi-label">Tasa de cancelación</div><div class="kpi-value">${fmtPct(h.cancelRate.now)}</div><div class="kpi-delta">${h.cancelRate.count} reservas</div></div>
+    <div class="kpi"><div class="kpi-label">Tasa de no-show</div><div class="kpi-value">${fmtPct(h.noShowRate.now)}</div><div class="kpi-delta">${h.noShowRate.count} reservas</div></div>
+  `;
+}
+
+function renderFunnel(f) {
+  const rate = (numerator, denominator) =>
+    !denominator ? '—' : fmtPct(numerator / denominator);
+  document.getElementById('funnelGrid').innerHTML = `
+    <div class="funnel-step placeholder">
+      <div class="funnel-label">Sesiones (GA4)</div>
+      <div class="funnel-value">—</div>
+      <div class="funnel-rate">conectar GA4</div>
+    </div>
+    <div class="funnel-step">
+      <div class="funnel-label">Llegaron al review</div>
+      <div class="funnel-value">${f.partials}</div>
+      <div class="funnel-rate">paso 5 alcanzado</div>
+    </div>
+    <div class="funnel-step">
+      <div class="funnel-label">Reservas confirmadas</div>
+      <div class="funnel-value">${f.confirmed}</div>
+      <div class="funnel-rate">${rate(f.confirmed, f.partials)} desde review</div>
+    </div>
+    <div class="funnel-step">
+      <div class="funnel-label">Cobradas</div>
+      <div class="funnel-value">${f.charged}</div>
+      <div class="funnel-rate">${rate(f.charged, f.confirmed)} desde reserva</div>
+    </div>
+  `;
+}
+
+function renderDaily(daily) {
+  const ctx = document.getElementById('dailyChart');
+  if (!ctx || typeof Chart === 'undefined') return;
+  const labels   = daily.map(d => d.date.slice(5)); // MM-DD
+  const counts   = daily.map(d => d.count);
+  const revenues = daily.map(d => (d.revenue || 0) / 100);
+  if (dailyChart) dailyChart.destroy();
+  dailyChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Reservas',  data: counts,   backgroundColor: '#80A2F9', yAxisID: 'y',  borderRadius: 4 },
+        { label: 'Ingresos $', data: revenues, type: 'line', borderColor: '#1A7A4A', backgroundColor: 'rgba(26,122,74,0.08)', tension: .3, yAxisID: 'y1', pointRadius: 2 },
+      ],
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+      scales: {
+        x:  { ticks: { font: { size: 10 }, maxRotation: 0 } },
+        y:  { beginAtZero: true, position: 'left',  ticks: { stepSize: 1, font: { size: 10 } }, title: { display: true, text: 'Reservas', font: { size: 11 } } },
+        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: v => '$' + v, font: { size: 10 } }, title: { display: true, text: 'Ingresos', font: { size: 11 } } },
+      },
+    },
+  });
+}
+
+function renderRevenue(r) {
+  document.getElementById('revenueGrid').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Cobrado este mes</div><div class="kpi-value">${fmtMoney(r.thisMonth)}</div>${deltaTag(r.thisMonth, r.lastMonth)}</div>
+    <div class="kpi"><div class="kpi-label">Pendiente de cobro</div><div class="kpi-value">${fmtMoney(r.pendingCharge)}</div><div class="kpi-delta">servicios completados sin cobrar</div></div>
+    <div class="kpi"><div class="kpi-label">Ticket promedio</div><div class="kpi-value">${fmtMoney(r.avgTicket)}</div></div>
+    <div class="kpi"><div class="kpi-label">Mes anterior</div><div class="kpi-value">${fmtMoney(r.lastMonth)}</div></div>
+  `;
+}
+
+function renderPipeline(p) {
+  document.getElementById('pipelineGrid').innerHTML = `
+    <div class="pipeline-cell"><div class="pl-label">Próximas 24h</div><div class="pl-value">${p.next24h}</div></div>
+    <div class="pipeline-cell"><div class="pl-label">Próximos 7 días</div><div class="pl-value">${p.next7d}</div></div>
+    <div class="pipeline-cell"><div class="pl-label">Sin asignar</div><div class="pl-value">${p.unassigned}</div></div>
+    <div class="pipeline-cell"><div class="pl-label">Listas p/cobrar</div><div class="pl-value">${p.readyToCharge}</div></div>
+    <div class="pipeline-cell"><div class="pl-label">Reprogramadas (30d)</div><div class="pl-value">${p.rescheduled}</div></div>
+    <div class="pipeline-cell"><div class="pl-label">Canceladas (30d)</div><div class="pl-value">${p.cancelled30}</div></div>
+  `;
+}
+
+function renderRecovery(rec) {
+  document.getElementById('recoveryGrid').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Carros abandonados (30d)</div><div class="kpi-value">${rec.total}</div></div>
+    <div class="kpi"><div class="kpi-label">Recuperados</div><div class="kpi-value">${rec.recovered}</div><div class="kpi-delta">${rec.total > 0 ? fmtPct(rec.rate) : '—'} de recuperación</div></div>
+  `;
+}
+
+function renderTopTasks(rows) {
+  const el = document.getElementById('topTasksTable');
+  if (!rows.length) { el.innerHTML = '<tr><td>(sin datos en 30 días)</td><td></td></tr>'; return; }
+  el.innerHTML = rows.map(r => `<tr><td>${escapeHtml(r.task)}</td><td>${r.count}</td></tr>`).join('');
+}
+
+function renderTopSlots(rows) {
+  const el = document.getElementById('topSlotsTable');
+  if (!rows.length) { el.innerHTML = '<tr><td>(sin datos en 30 días)</td><td></td></tr>'; return; }
+  el.innerHTML = rows.map(r => `<tr><td>${escapeHtml(r.slot)}</td><td>${r.count}</td></tr>`).join('');
+}
+
+function renderTopDays(rows) {
+  document.getElementById('topDaysTable').innerHTML = rows.map(r =>
+    `<tr><td>${r.label}</td><td>${r.count}</td></tr>`
+  ).join('');
 }
 
 // ── Helpers ────────────────────────────────────────────────
