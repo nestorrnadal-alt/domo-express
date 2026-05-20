@@ -744,6 +744,11 @@
         <h3 class="metrics-section-title">Recuperación de carros abandonados</h3>
         <div class="kpi-grid" id="recoveryGrid"></div>
 
+        <div id="sourcesSection" style="display:none;">
+          <h3 class="metrics-section-title">Top fuentes de tráfico (GA4, 30 días)</h3>
+          <table class="metrics-table" id="topSourcesTable"></table>
+        </div>
+
         <div class="metrics-cols">
           <div>
             <h3 class="metrics-section-title">Tareas más reservadas</h3>
@@ -1346,9 +1351,14 @@ async function loadMetrics() {
   renderRevenue(data.revenue);
   renderPipeline(data.pipeline);
   renderRecovery(data.recovery);
+  renderTopSources(data.topSources);
   renderTopTasks(data.topTasks);
   renderTopSlots(data.topSlots);
   renderTopDays(data.topDays);
+
+  // Hide the "conectar GA4" amber banner once sessions are flowing.
+  const ga4Note = document.querySelector('.ga4-note');
+  if (ga4Note) ga4Note.style.display = data.funnel.sessions != null ? 'none' : 'block';
 
   loading.style.display = 'none';
   content.style.display = 'block';
@@ -1379,16 +1389,23 @@ function renderHeadline(h) {
 function renderFunnel(f) {
   const rate = (numerator, denominator) =>
     !denominator ? '—' : fmtPct(numerator / denominator);
+  const sessionsCell = f.sessions !== null && f.sessions !== undefined
+    ? `<div class="funnel-step">
+         <div class="funnel-label">Sesiones</div>
+         <div class="funnel-value">${f.sessions}</div>
+         <div class="funnel-rate">visitantes únicos (GA4)</div>
+       </div>`
+    : `<div class="funnel-step placeholder">
+         <div class="funnel-label">Sesiones (GA4)</div>
+         <div class="funnel-value">—</div>
+         <div class="funnel-rate">conectar GA4</div>
+       </div>`;
   document.getElementById('funnelGrid').innerHTML = `
-    <div class="funnel-step placeholder">
-      <div class="funnel-label">Sesiones (GA4)</div>
-      <div class="funnel-value">—</div>
-      <div class="funnel-rate">conectar GA4</div>
-    </div>
+    ${sessionsCell}
     <div class="funnel-step">
       <div class="funnel-label">Llegaron al review</div>
       <div class="funnel-value">${f.partials}</div>
-      <div class="funnel-rate">paso 5 alcanzado</div>
+      <div class="funnel-rate">${f.sessions ? rate(f.partials, f.sessions) + ' de sesiones' : 'paso 5 alcanzado'}</div>
     </div>
     <div class="funnel-step">
       <div class="funnel-label">Reservas confirmadas</div>
@@ -1401,6 +1418,16 @@ function renderFunnel(f) {
       <div class="funnel-rate">${rate(f.charged, f.confirmed)} desde reserva</div>
     </div>
   `;
+}
+
+function renderTopSources(rows) {
+  const wrap = document.getElementById('sourcesSection');
+  if (!wrap) return;
+  if (!rows || rows.length === 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  document.getElementById('topSourcesTable').innerHTML = rows.map(r =>
+    `<tr><td>${escapeHtml(r.source)}</td><td>${r.sessions}</td></tr>`
+  ).join('');
 }
 
 function renderDaily(daily) {
