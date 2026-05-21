@@ -56,24 +56,14 @@ exports.handler = async (event) => {
     ops_notified_at:     null,
   };
 
+  // Upsert against the plain customer_email unique index. The email
+  // is already lowercased in `row` above so the conflict resolution
+  // is case-insensitive.
   const { error } = await supabase
     .from('express_partial_bookings')
     .upsert(row, { onConflict: 'customer_email', ignoreDuplicates: false });
 
   if (error) {
-    // Some Postgres deployments index by lower(email); if upsert
-    // can't match the constraint, fall back to update-by-email.
-    if (error.code === '42P10' || /no unique/i.test(error.message || '')) {
-      const { error: updErr } = await supabase
-        .from('express_partial_bookings')
-        .update(row)
-        .ilike('customer_email', email);
-      if (updErr) {
-        console.error('track-partial: update fallback failed', updErr);
-        return { statusCode: 500, body: JSON.stringify({ error: 'db_error' }) };
-      }
-      return { statusCode: 200, body: JSON.stringify({ ok: true, mode: 'updated' }) };
-    }
     console.error('track-partial: upsert failed', error);
     return { statusCode: 500, body: JSON.stringify({ error: 'db_error', detail: error.message }) };
   }
