@@ -2108,6 +2108,7 @@ let availabilityState = 'idle'; // 'idle' | 'loading' | 'ready' | 'error'
   renderTaskGrid();
   loadAvailability();
   loadReviews();
+  wireStep4PartialListeners();
 })();
 
 // ── Google reviews carousel ───────────────────────────────────
@@ -2662,10 +2663,43 @@ function nextStep(from) {
   // When the customer crosses 4 -> 5, we've collected enough info
   // (email + phone + name + tasks + slot) to re-engage if they bail
   // on the review step. Fire-and-forget — failure is invisible.
-  if (from === 4) trackPartial();
+  if (from === 4) trackPartial('step4_to_5');
 }
 
-function trackPartial() {
+// Also fires as the customer is FILLING step 4 (debounced 1.5s after
+// they stop typing) — catches anyone who bails mid-step-4 without
+// clicking Revisar. The track-partial endpoint upserts on email so
+// multiple fires from the same person just overwrite the latest data.
+let _partialFireTimer = null;
+function maybeFirePartialOnStep4Edit() {
+  if (state.step !== 4) return;
+  const name  = document.getElementById('fName')?.value.trim()     || '';
+  const last  = document.getElementById('fLastName')?.value.trim() || '';
+  const phone = document.getElementById('fPhone')?.value.trim()    || '';
+  const email = document.getElementById('fEmail')?.value.trim()    || '';
+  const addr  = document.getElementById('fAddress')?.value.trim()  || '';
+  if (!email || !email.includes('@')) return;
+  if (!phone || !name) return;
+  // Snapshot the in-flight form values into state so trackPartial
+  // serializes the right payload.
+  state.customerName  = `${name} ${last}`.trim();
+  state.customerPhone = phone;
+  state.customerEmail = email;
+  if (addr) state.address = addr;
+  if (_partialFireTimer) clearTimeout(_partialFireTimer);
+  _partialFireTimer = setTimeout(() => trackPartial('step4_idle'), 1500);
+}
+
+function wireStep4PartialListeners() {
+  ['fName', 'fLastName', 'fPhone', 'fEmail', 'fAddress'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', maybeFirePartialOnStep4Edit);
+    el.addEventListener('blur',  maybeFirePartialOnStep4Edit);
+  });
+}
+
+function trackPartial(reason) {
   if (!state.customerEmail || !state.customerEmail.includes('@')) return;
   const base  = 17500;
   const total = state.materialsRequested ? base + 2500 : base;
@@ -2684,19 +2718,20 @@ function trackPartial() {
     materials_detail:    state.materialsDetail || null,
     total_amount:        total,
   };
-  // Use sendBeacon when available so the request still goes out if the
-  // user closes the tab right after stepping into review.
+  // fetch with keepalive (~64KB max, plenty for our payload) is more
+  // reliable across browsers than sendBeacon with a Blob — sendBeacon
+  // can silently drop requests when the Content-Type or queue state
+  // doesn't match what the browser expects, and it gives us no
+  // feedback on success/failure.
   try {
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon('/api/track-partial', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
-    } else {
-      fetch('/api/track-partial', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(payload),
-        keepalive: true,
-      }).catch(() => {});
-    }
+    fetch('/api/track-partial', {
+      method:    'POST',
+      headers:   { 'Content-Type': 'application/json' },
+      body:      JSON.stringify(payload),
+      keepalive: true,
+    })
+    .then(r => { if (!r.ok) console.warn('track-partial', reason, r.status); })
+    .catch(e => console.warn('track-partial', reason, e.message));
   } catch (e) { /* swallow */ }
 }
 
