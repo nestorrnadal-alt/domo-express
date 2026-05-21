@@ -2900,6 +2900,9 @@ async function submitBooking() {
 
     // Success — fire conversion events
     if (typeof gtag === 'function') {
+      // Standard `purchase` event — used by Google Ads / Meta Ads for
+      // optimization. Generic, will mix with any other site purchases
+      // that report into the same GA4 property.
       gtag('event', 'purchase', {
         transaction_id: data.booking_id,
         value:    total / 100,
@@ -2910,13 +2913,37 @@ async function submitBooking() {
           quantity:  1,
         })),
       });
+      // Express-specific event so we can filter Domo Express bookings
+      // separately from WordPress/BK purchases in GA4 reports. Mark
+      // this as a Key event in GA4 admin to count it as a conversion.
+      gtag('event', 'express_booking_completed', {
+        transaction_id: data.booking_id,
+        value:    total / 100,
+        currency: 'USD',
+        booking_id:     data.booking_id,
+        booking_date:   state.selectedDate?.iso || null,
+        booking_time:   state.selectedTime,
+        payment_method: state.paymentMethod,
+        materials:      state.materialsRequested,
+      });
     }
     if (typeof fbq === 'function') {
+      // Standard `Purchase` event for Meta Ads optimization.
       fbq('track', 'Purchase', {
         value:    total / 100,
         currency: 'USD',
         content_ids:  [data.booking_id],
         content_type: 'service',
+      });
+      // Express-specific custom event (Meta calls these "custom events").
+      // Useful for breaking out Express conversions in Events Manager
+      // and for building Express-only Custom Audiences.
+      fbq('trackCustom', 'ExpressBookingCompleted', {
+        value:    total / 100,
+        currency: 'USD',
+        booking_id:   data.booking_id,
+        booking_date: state.selectedDate?.iso || null,
+        booking_time: state.selectedTime,
       });
     }
     document.getElementById('loadingOverlay').classList.remove('visible');
