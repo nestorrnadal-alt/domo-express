@@ -3066,6 +3066,11 @@ async function submitBooking() {
     document.getElementById('bookingCard').style.display  = 'none';
     document.getElementById('confirmCard').style.display  = 'block';
     document.getElementById('confirmId').textContent = data.booking_id;
+    // Add a URL fingerprint so Meta Custom Conversions / GA4 goals /
+    // any URL-based analytics rule has a stable thing to match on.
+    // The form is otherwise SPA — this is the only point where the
+    // path changes.
+    try { history.replaceState(null, '', '/?confirmed=1'); } catch (e) { /* ignore */ }
     document.getElementById('confirmDate').textContent = state.selectedDate?.label || '';
     document.getElementById('confirmTime').textContent = state.selectedTime
       ? slotRangeLabel(state.selectedTime)
@@ -3108,6 +3113,9 @@ function resetForm() {
     address: '', paymentMethod: null,
     materialsRequested: false, materialsDetail: '',
   });
+  // Reset the URL fingerprint back to root so a "Hacer otra reservación"
+  // session starts clean (and analytics doesn't re-count it).
+  try { history.replaceState(null, '', '/'); } catch (e) { /* ignore */ }
   document.getElementById('confirmCard').style.display = 'none';
   document.getElementById('bookingCard').style.display = 'block';
   renderTaskGrid();
