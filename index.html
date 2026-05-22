@@ -220,6 +220,64 @@
       margin-top: 16px;
       width: 100%;
     }
+
+    /* ── Tier ladder ── */
+    .tier-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 18px 0 22px;
+    }
+    .tier-card {
+      display: flex;
+      flex-direction: column;
+      padding: 12px 12px 10px;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color .15s, background .15s, transform .12s;
+    }
+    a.tier-card:hover { border-color: var(--blue); background: var(--bluelt); transform: translateY(-1px); }
+    .tier-card.tier-current {
+      background: linear-gradient(180deg, var(--bluelt) 0%, var(--white) 100%);
+      border-color: var(--blue);
+    }
+    .tier-card .tier-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 2px;
+    }
+    .tier-card.tier-current .tier-name { color: var(--blue); }
+    .tier-card .tier-price {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.1;
+    }
+    .tier-card .tier-detail {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.35;
+      margin-top: 4px;
+      flex: 1;
+    }
+    .tier-card .tier-flag,
+    .tier-card .tier-link {
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+    .tier-card .tier-flag { color: var(--blue); }
+    .tier-card .tier-link { color: var(--muted); }
+    a.tier-card:hover .tier-link { color: var(--blue); }
+    @media (max-width: 480px) {
+      .tier-strip { grid-template-columns: 1fr; gap: 6px; }
+    }
     .intro-pricing-eyebrow {
       font-size: 12px; font-weight: 700;
       color: var(--blue);
@@ -1243,6 +1301,29 @@
           <span class="intro-tag">SJ metro</span>
         </div>
         <button class="btn-next btn-pricing-cta" onclick="nextStep(1)">Reservar ahora &rarr;</button>
+      </div>
+
+      <!-- Tier ladder — Express anchored as the "fast/small" entry point;
+           upsell paths for bigger jobs link out to the WP service pages. -->
+      <div class="tier-strip">
+        <div class="tier-card tier-current">
+          <div class="tier-name">Express</div>
+          <div class="tier-price">$175</div>
+          <div class="tier-detail">2 tareas · 2.5 h</div>
+          <div class="tier-flag">✓ Estás aquí</div>
+        </div>
+        <a class="tier-card" href="https://domoyourhome.com/booknow/handyman-new-flow" target="_blank" rel="noopener">
+          <div class="tier-name">Básico</div>
+          <div class="tier-price">$285</div>
+          <div class="tier-detail">Día completo · tareas básicas</div>
+          <div class="tier-link">Ver más →</div>
+        </a>
+        <a class="tier-card" href="https://domoyourhome.com/booknow/handyman-new-flow" target="_blank" rel="noopener">
+          <div class="tier-name">Completo</div>
+          <div class="tier-price">$385</div>
+          <div class="tier-detail">Día completo · incluye plomería, eléctrica y empañetar</div>
+          <div class="tier-link">Ver más →</div>
+        </a>
       </div>
 
       <div class="intro-bullets">
