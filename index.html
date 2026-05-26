@@ -2830,6 +2830,22 @@ function showStep(n) {
   // Lazy-load Google Places once the customer reaches the address field.
   if (n === 4) initPlacesIfNeeded();
 
+  // Fire GA4 + Meta events per step so we can build a real funnel
+  // and see exactly where visitors drop off.
+  const stepNames = { 1: 'intro', 2: 'tasks', 3: 'datetime', 4: 'contact', 5: 'review' };
+  if (typeof gtag === 'function') {
+    gtag('event', 'express_step_' + n, {
+      step_number: n,
+      step_name:   stepNames[n] || 'unknown',
+    });
+  }
+  if (typeof fbq === 'function' && n > 1) {
+    fbq('trackCustom', 'ExpressStep', {
+      step_number: n,
+      step_name:   stepNames[n] || 'unknown',
+    });
+  }
+
   document.getElementById('progressTitle').textContent = STEP_TITLES[n];
   document.getElementById('stepBackBtn').classList.toggle('hidden', n === 1);
 
