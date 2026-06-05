@@ -398,17 +398,19 @@
     .rec-alt-sub   { font-size: 11px; color: var(--muted); font-weight: 500; }
     .rec-alt-link:hover .rec-alt-sub { color: var(--blue); }
 
-    /* Keep the recommendation card always visible on narrow viewports
-       so the customer can hit Continuar without scrolling through the
-       chip grid. Desktop keeps it inline (the grid is short enough). */
-    @media (max-width: 720px) {
-      .rec-card {
-        position: sticky;
-        bottom: 8px;
-        margin: 18px 0 12px;
-        box-shadow: 0 6px 18px rgba(20, 37, 67, .12);
-        z-index: 20;
-      }
+    /* Keep the recommendation card always visible — it's the "I'm
+       done picking, take me to checkout" signal. Sticky-bottom across
+       all viewport widths so the customer never has to scroll past
+       the chip grid to find the Continuar button. */
+    .rec-card {
+      position: sticky;
+      bottom: 8px;
+      box-shadow: 0 6px 18px rgba(20, 37, 67, .12);
+      z-index: 20;
+    }
+    .rec-card .rec-cta {
+      font-size: 15px;
+      padding: 12px 14px;
     }
 
     /* ── Tier ladder ── */
