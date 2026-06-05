@@ -278,6 +278,44 @@
     @media (max-width: 480px) {
       .tier-strip { grid-template-columns: 1fr; gap: 6px; }
     }
+
+    /* Cotizar — separate "alternative path" callout for complex / unsure
+       jobs. Visually distinct from the productized tier strip above. */
+    .tier-cotizar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      margin-bottom: 22px;
+      background: var(--white);
+      border: 1.5px dashed var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color .15s, background .15s;
+    }
+    .tier-cotizar:hover { border-color: var(--blue); border-style: solid; background: var(--bluelt); }
+    .tier-cotizar .cotizar-icon { font-size: 22px; line-height: 1; flex: 0 0 auto; }
+    .tier-cotizar .cotizar-body { flex: 1; min-width: 0; }
+    .tier-cotizar .cotizar-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.3;
+    }
+    .tier-cotizar .cotizar-sub {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+    .tier-cotizar .cotizar-sub strong { color: var(--navy); font-weight: 700; }
+    .tier-cotizar .cotizar-arrow {
+      font-size: 18px;
+      color: var(--blue);
+      font-weight: 700;
+      flex: 0 0 auto;
+    }
     .intro-pricing-eyebrow {
       font-size: 12px; font-weight: 700;
       color: var(--blue);
@@ -579,6 +617,14 @@
       font-family: inherit;
     }
     .other-input-wrap input:focus { border-color: var(--blue); }
+    .other-cotizar-hint {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .other-cotizar-hint a { color: var(--blue); font-weight: 700; text-decoration: none; }
+    .other-cotizar-hint a:hover { text-decoration: underline; }
 
     /* ── Date picker ── */
     .date-grid {
@@ -1304,7 +1350,9 @@
       </div>
 
       <!-- Tier ladder — Express anchored as the "fast/small" entry point;
-           upsell paths for bigger jobs link out to the WP service pages. -->
+           upsell paths for bigger jobs link out to the WP service pages.
+           Cotizar is the "complex single task / unsure" alternative — pay
+           $125 for an evaluation, fully applied to the project. -->
       <div class="tier-strip">
         <div class="tier-card tier-current">
           <div class="tier-name">Express</div>
@@ -1312,19 +1360,28 @@
           <div class="tier-detail">2 tareas · 2.5 h</div>
           <div class="tier-flag">✓ Estás aquí</div>
         </div>
-        <a class="tier-card" href="https://domoyourhome.com/booknow/handyman-new-flow" target="_blank" rel="noopener">
+        <a class="tier-card" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
           <div class="tier-name">Básico</div>
           <div class="tier-price">$285</div>
           <div class="tier-detail">Día completo · tareas básicas</div>
           <div class="tier-link">Ver más →</div>
         </a>
-        <a class="tier-card" href="https://domoyourhome.com/booknow/handyman-new-flow" target="_blank" rel="noopener">
+        <a class="tier-card" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
           <div class="tier-name">Completo</div>
           <div class="tier-price">$385</div>
           <div class="tier-detail">Día completo · incluye plomería, eléctrica y empañetar</div>
           <div class="tier-link">Ver más →</div>
         </a>
       </div>
+
+      <a class="tier-cotizar" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
+        <div class="cotizar-icon" aria-hidden="true">📋</div>
+        <div class="cotizar-body">
+          <div class="cotizar-title">¿No estás seguro qué necesitas? Pide una cotización</div>
+          <div class="cotizar-sub"><strong>$125</strong> · Aplicado al costo total del trabajo si nos contratas</div>
+        </div>
+        <div class="cotizar-arrow">→</div>
+      </a>
 
       <div class="intro-bullets">
         <ul>
@@ -1406,6 +1463,10 @@
       <div class="other-input-wrap" id="otherInputWrap" style="display:none;">
         <label for="otherInput">Describe la tarea adicional</label>
         <input type="text" id="otherInput" placeholder="Ej: instalar repisa flotante de 1.5 m">
+        <div class="other-cotizar-hint">
+          ¿Tu tarea es compleja o no estás seguro si entra en Express?
+          <a href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">Pide una cotización por $125 →</a> (aplicado al trabajo).
+        </div>
       </div>
 
       <div class="btn-row">
