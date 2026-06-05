@@ -50,6 +50,7 @@ exports.handler = async (event) => {
     payment_method:      body.payment_method || null,
     materials_requested: body.materials_requested || false,
     materials_detail:    body.materials_detail || null,
+    helper_requested:    body.helper_requested || false,
     total_amount:        Number.isFinite(body.total_amount) ? Math.round(body.total_amount) : null,
     updated_at:          new Date().toISOString(),
     // Reset notification timestamps on upsert: if they re-enter the

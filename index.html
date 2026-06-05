@@ -323,10 +323,18 @@
       padding: 10px 0 4px;
     }
 
-    .rec-evaluation-link {
+    .rec-alt-paths {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 0 0 22px;
+    }
+    @media (max-width: 480px) {
+      .rec-alt-paths { grid-template-columns: 1fr; }
+    }
+    .rec-alt-link {
       display: block;
       width: 100%;
-      margin: 0 0 22px;
       padding: 10px 14px;
       background: transparent;
       border: 1.5px dashed var(--border);
@@ -335,9 +343,11 @@
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
+      text-align: center;
+      text-decoration: none;
       transition: border-color .15s, color .15s;
     }
-    .rec-evaluation-link:hover {
+    .rec-alt-link:hover {
       border-color: var(--blue);
       color: var(--blue);
     }
@@ -1502,11 +1512,21 @@
            price, and the next-step CTA. -->
       <div class="rec-card" id="recCard"><!-- populated by JS --></div>
 
-      <!-- Alternative path: customer doesn't know what they need / job
-           requires evaluation. Toggles wantsEvaluation → Domo Proyecto. -->
-      <button type="button" class="rec-evaluation-link" id="recEvalBtn" onclick="toggleEvaluationMode()">
-        No estoy seguro · Quiero una evaluación →
-      </button>
+      <!-- Alternative paths below the rec card. Side-by-side dashed
+           buttons for the two shortcut routes:
+             • "Evaluación" toggles wantsEvaluation → Domo Proyecto.
+             • "Día completo" links out to domoyourhome.com/booknow for
+               customers who already know they need Completo and don't
+               want to walk through the picker. In-flow Completo
+               booking lands in a follow-up commit. -->
+      <div class="rec-alt-paths">
+        <button type="button" class="rec-alt-link" id="recEvalBtn" onclick="toggleEvaluationMode()">
+          No estoy seguro · Quiero una evaluación →
+        </button>
+        <a class="rec-alt-link" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
+          Ya sé que necesito día completo →
+        </a>
+      </div>
 
       <div class="trust-strip">
         <div class="trust-item">
@@ -1653,10 +1673,22 @@
         </div>
       </div>
 
+      <!-- Helper opt-in. Same UX shape as the materials toggle. -->
+      <div class="materials-row" id="helperRow" onclick="toggleHelper()" style="margin-top:10px;">
+        <div class="materials-toggle">
+          <div class="toggle-box" id="helperToggle"></div>
+        </div>
+        <div class="materials-info">
+          <div class="mat-title">Necesito un ayudante (+$200)</div>
+          <div class="mat-sub">Para tareas que requieren dos personas: TVs grandes, levantar muebles, abanicos de techo, etc.</div>
+        </div>
+      </div>
+
       <!-- Price box -->
       <div class="price-box">
         <div class="price-row"><span class="pr-label">Servicio Express (2 tareas)</span><span class="pr-val" id="prBase">$175.00</span></div>
-        <div id="prMatRow" class="price-row" style="display:none"><span class="pr-label">Gestión de materiales</span><span class="pr-val">$25.00</span></div>
+        <div id="prMatRow"    class="price-row" style="display:none"><span class="pr-label">Gestión de materiales</span><span class="pr-val">$25.00</span></div>
+        <div id="prHelperRow" class="price-row" style="display:none"><span class="pr-label">Ayudante</span><span class="pr-val">$200.00</span></div>
         <div class="price-row"><span class="pr-label">IVU (11.5%)</span><span class="pr-val" id="prIva">$20.13</span></div>
         <hr class="price-divider">
         <div class="price-total">
@@ -2443,6 +2475,7 @@ const state = {
   paymentMethod: null,   // 'ath_movil' | 'credit_card'
   materialsRequested: false,
   materialsDetail: '',
+  helperRequested: false,
 };
 
 // ── Step config ───────────────────────────────────────────────
@@ -3084,17 +3117,29 @@ function toggleMaterials() {
   updatePrice();
 }
 
+function toggleHelper() {
+  state.helperRequested = !state.helperRequested;
+  const row = document.getElementById('helperRow');
+  const tog = document.getElementById('helperToggle');
+  row.classList.toggle('selected', state.helperRequested);
+  tog.textContent = state.helperRequested ? '✓' : '';
+  updatePrice();
+}
+
 // PR IVU is 11.5% (10.5% Hacienda + 1% municipal). Customer pays IVU
 // on top of the base + materials gestión fee. We compute in cents to
 // avoid float drift and keep the on-screen total in lock-step with
 // the cents value posted to track-partial and book.js.
-const IVU_RATE = 0.115;
-const BASE_CENTS    = 17500;
-const MAT_FEE_CENTS = 2500;
+const IVU_RATE         = 0.115;
+const BASE_CENTS       = 17500;
+const MAT_FEE_CENTS    = 2500;
+const HELPER_FEE_CENTS = 20000;
 
 function computeAmounts() {
-  const subtotalCents = BASE_CENTS + (state.materialsRequested ? MAT_FEE_CENTS : 0);
-  const ivaCents      = Math.round(subtotalCents * IVU_RATE);
+  const subtotalCents = BASE_CENTS
+    + (state.materialsRequested ? MAT_FEE_CENTS    : 0)
+    + (state.helperRequested    ? HELPER_FEE_CENTS : 0);
+  const ivaCents = Math.round(subtotalCents * IVU_RATE);
   return { subtotalCents, ivaCents, totalCents: subtotalCents + ivaCents };
 }
 
@@ -3104,6 +3149,9 @@ function updatePrice() {
   document.getElementById('prIva').textContent       = `$${(ivaCents   / 100).toFixed(2)}`;
   document.getElementById('prTotal').textContent     = `$${(totalCents / 100).toFixed(2)}`;
   document.getElementById('reviewTotal').textContent = `$${(totalCents / 100).toFixed(2)}`;
+  // Show/hide the helper line in the step-3 price-box.
+  const helperRow = document.getElementById('prHelperRow');
+  if (helperRow) helperRow.style.display = state.helperRequested ? 'flex' : 'none';
 }
 
 // ── Navigation ────────────────────────────────────────────────
@@ -3173,6 +3221,7 @@ function trackPartial(reason) {
     payment_method:      state.paymentMethod,
     materials_requested: state.materialsRequested,
     materials_detail:    state.materialsDetail || null,
+    helper_requested:    state.helperRequested,
     total_amount:        total,
   };
   // fetch with keepalive (~64KB max, plenty for our payload) is more
@@ -3298,6 +3347,7 @@ function buildReview() {
   const matLabel = state.materialsRequested
     ? `Sí — Domo las consigue${state.materialsDetail ? ': ' + state.materialsDetail : ''}`
     : 'No';
+  const helperLabel = state.helperRequested ? 'Sí (+$200)' : 'No';
 
   const rows = [
     ['Tareas',     `${state.selectedTasks[0]}<br>${state.selectedTasks[1]}`,         1],
@@ -3307,6 +3357,7 @@ function buildReview() {
     ['Contacto',   `${state.customerName}<br>${state.customerPhone}<br>${state.customerEmail}`, 3],
     ['Pago',       payLabel + ' — después del servicio',                               3],
     ['Materiales', matLabel,                                                           3],
+    ['Ayudante',   helperLabel,                                                        3],
   ];
 
   const tbody = document.getElementById('reviewTable');
@@ -3346,6 +3397,7 @@ async function submitBooking() {
     payment_method:      state.paymentMethod,
     materials_requested: state.materialsRequested,
     materials_detail:    state.materialsDetail || null,
+    helper_requested:    state.helperRequested,
     total_amount:        total,
   };
 
@@ -3507,6 +3559,7 @@ function resetForm() {
     customerName: '', customerPhone: '', customerEmail: '',
     address: '', paymentMethod: null,
     materialsRequested: false, materialsDetail: '',
+    helperRequested: false,
   });
   // Reset the URL fingerprint back to root so a "Hacer otra reservación"
   // session starts clean (and analytics doesn't re-count it).

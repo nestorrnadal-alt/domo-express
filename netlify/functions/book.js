@@ -50,25 +50,28 @@ function validate(body) {
   if (!['ath_movil','credit_card'].includes(body.payment_method)) {
     return 'Invalid payment_method. Must be ath_movil or credit_card.';
   }
-  // Tier defaults to 'express' for backwards compat. Per-tier totals
-  // (IVU-inclusive, cents):
-  //   express      → 19513 ($175 + IVU) or 22300 ($175 + $25 materials + IVU)
-  //   basico       → 31778 ($285 + IVU)
-  //   completo     → 42928 ($385 + IVU)
-  //   proyecto     → 13938 ($125 + IVU acreditable)
+  // Tier defaults to 'express' for backwards compat. Total is derived
+  // server-side from tier + add-ons so the client can't fudge it.
+  //   base_cents:    express 17500 / basico 28500 / completo 38500 / proyecto 12500
+  //   materials_fee: $25 (express only)
+  //   helper_fee:    $200 (when helper_requested)
+  //   IVU:           11.5 % on (base + add-ons), rounded to whole cents
   const tier = body.tier || 'express';
   const ALLOWED_TIERS = ['express', 'basico', 'completo', 'proyecto'];
   if (!ALLOWED_TIERS.includes(tier)) {
     return 'Invalid tier. Must be one of: ' + ALLOWED_TIERS.join(', ');
   }
-  const ALLOWED_TOTALS_BY_TIER = {
-    express:  [19513, 22300],
-    basico:   [31778],
-    completo: [42928],
-    proyecto: [13938],
-  };
-  if (!ALLOWED_TOTALS_BY_TIER[tier].includes(Number(body.total_amount))) {
-    return `Invalid total_amount for tier=${tier}. Allowed: ${ALLOWED_TOTALS_BY_TIER[tier].join(', ')} (cents, IVU incl.).`;
+  const BASE_BY_TIER  = { express: 17500, basico: 28500, completo: 38500, proyecto: 12500 };
+  const MAT_FEE_CENTS    = 2500;
+  const HELPER_FEE_CENTS = 20000;
+  const IVU_RATE = 0.115;
+  const baseCents   = BASE_BY_TIER[tier];
+  const matCents    = (tier === 'express' && body.materials_requested) ? MAT_FEE_CENTS : 0;
+  const helperCents = body.helper_requested ? HELPER_FEE_CENTS : 0;
+  const subtotal    = baseCents + matCents + helperCents;
+  const expectedTotal = subtotal + Math.round(subtotal * IVU_RATE);
+  if (Number(body.total_amount) !== expectedTotal) {
+    return `Invalid total_amount for tier=${tier} materials=${!!body.materials_requested} helper=${!!body.helper_requested}. Expected ${expectedTotal} (cents, IVU incl.).`;
   }
   if (body.payment_method === 'credit_card') {
     if (!body.stripe_customer_id || !body.stripe_payment_method_id) {
@@ -207,6 +210,7 @@ exports.handler = async (event) => {
       payment_method:           body.payment_method,
       materials_requested:      body.materials_requested || false,
       materials_detail:         body.materials_detail    || null,
+      helper_requested:         body.helper_requested    || false,
       total_amount:             Number(body.total_amount),
       notes:                    body.notes               || null,
       stripe_customer_id:       body.stripe_customer_id       || null,
