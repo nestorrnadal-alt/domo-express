@@ -237,6 +237,45 @@
       line-height: 1.4;
     }
 
+    /* Selected-task pills above the search bar */
+    .selected-pills {
+      display: none;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 0 0 12px;
+    }
+    .selected-pills.has-pills { display: flex; }
+    .task-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 4px 5px 10px;
+      background: var(--bluelt);
+      border: 1px solid var(--blue);
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--navy);
+      line-height: 1.2;
+    }
+    .task-pill-label { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .task-pill-x {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px; height: 20px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--blue);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background .12s;
+    }
+    .task-pill-x:hover { background: rgba(0, 110, 255, .12); }
+
     /* Live recommendation card under the chip grid. Updates as the
        customer toggles chips. Border color shifts per tier so it reads
        as a result, not as a static promo. */
@@ -333,7 +372,11 @@
       .rec-alt-paths { grid-template-columns: 1fr; }
     }
     .rec-alt-link {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
       width: 100%;
       padding: 10px 14px;
       background: transparent;
@@ -350,6 +393,22 @@
     .rec-alt-link:hover {
       border-color: var(--blue);
       color: var(--blue);
+    }
+    .rec-alt-title { font-size: 13px; font-weight: 700; }
+    .rec-alt-sub   { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .rec-alt-link:hover .rec-alt-sub { color: var(--blue); }
+
+    /* Keep the recommendation card always visible on narrow viewports
+       so the customer can hit Continuar without scrolling through the
+       chip grid. Desktop keeps it inline (the grid is short enough). */
+    @media (max-width: 720px) {
+      .rec-card {
+        position: sticky;
+        bottom: 8px;
+        margin: 18px 0 12px;
+        box-shadow: 0 6px 18px rgba(20, 37, 67, .12);
+        z-index: 20;
+      }
     }
 
     /* ── Tier ladder ── */
@@ -1452,7 +1511,6 @@
     <a class="site-logo" href="https://domoyourhome.com" aria-label="Domo">
       <span class="logo-word">domo<span class="logo-dot">.</span></span>
     </a>
-    <span class="badge">Express</span>
     <a class="header-back" href="https://domoyourhome.com">&larr; Home</a>
   </div>
 </header>
@@ -1484,11 +1542,15 @@
          domoyourhome.com pending the per-tier flows in follow-ups. -->
     <div class="step-panel visible" id="step1">
       <div class="scope-intro">
-        <h1 class="scope-title">¿Qué necesitas que hagamos?</h1>
-        <p class="scope-sub">Escoge las tareas y te recomendamos el plan correcto.</p>
+        <h1 class="scope-title">¿Qué tareas necesitas?</h1>
       </div>
 
       <div class="step-error" id="err1">Por favor selecciona al menos una tarea para continuar.</div>
+
+      <!-- Selected-task pills — populated by renderSelectedPills().
+           Sits above the search bar so the customer always sees what's
+           in their cart, with an inline × to remove. -->
+      <div class="selected-pills" id="selectedPills"></div>
 
       <div class="task-search-wrap">
         <input type="search" id="taskSearch" class="task-search" placeholder="Buscar tarea (ej: repisa, manilla, pintura…)" oninput="filterTasks()" autocomplete="off">
@@ -1524,7 +1586,8 @@
           No estoy seguro · Quiero una evaluación →
         </button>
         <a class="rec-alt-link" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
-          Ya sé que necesito día completo →
+          <span class="rec-alt-title">Necesito un handyman 8 AM - 3 PM →</span>
+          <span class="rec-alt-sub">Día completo · no importa las tareas</span>
         </a>
       </div>
 
@@ -2479,7 +2542,7 @@ const state = {
 };
 
 // ── Step config ───────────────────────────────────────────────
-const STEP_TITLES = ['', '¿Qué necesitas?', 'Elige fecha y hora', 'Tus datos', 'Revisa y confirma'];
+const STEP_TITLES = ['', '¿Qué tareas necesitas?', 'Elige fecha y hora', 'Tus datos', 'Revisa y confirma'];
 
 // ── Availability cache (filled by /api/availability) ──────────
 let availability = null; // [{iso, slots: [...]}, ...]
@@ -2488,6 +2551,8 @@ let availabilityState = 'idle'; // 'idle' | 'loading' | 'ready' | 'error'
 // ── Init ──────────────────────────────────────────────────────
 (function init() {
   renderTaskGrid();
+  renderSelectedPills();
+  initSelectedPillsHandler();
   renderRecommendation();
   loadAvailability();
   loadReviews();
@@ -2875,7 +2940,52 @@ function toggleTask(el, taskLabel) {
   // concrete tasks, route based on them rather than the Proyecto path.
   if (state.wantsEvaluation) state.wantsEvaluation = false;
 
+  renderSelectedPills();
   renderRecommendation();
+}
+
+// ── Selected-task pills (step 1) ──────────────────────────────
+// Shows the customer's in-cart tasks above the search bar so they
+// always see what they've picked, with an × to remove. OTHER_TOKEN
+// is excluded because the customer already sees the typed text in
+// the textarea below the chip grid.
+function renderSelectedPills() {
+  const wrap = document.getElementById('selectedPills');
+  if (!wrap) return;
+  const pillTasks = state.selectedTasks.filter(t => t && t !== OTHER_TOKEN);
+  wrap.classList.toggle('has-pills', pillTasks.length > 0);
+  wrap.innerHTML = pillTasks.map(label => `
+    <span class="task-pill" data-task="${escapeHtml(label)}">
+      <span class="task-pill-label">${escapeHtml(label)}</span>
+      <button type="button" class="task-pill-x" aria-label="Quitar tarea">×</button>
+    </span>
+  `).join('');
+}
+
+function removeTask(label) {
+  // Toggle the chip element off so the grid stays in sync with state.
+  const chip = document.querySelector(`.task-chip[data-task="${CSS.escape(label)}"]`);
+  if (chip) {
+    toggleTask(chip, label);
+  } else {
+    // Fallback: state-only cleanup if the chip isn't in the DOM
+    // (shouldn't happen, but keeps things safe).
+    state.selectedTasks = state.selectedTasks.filter(t => t !== label);
+    renderSelectedPills();
+    renderRecommendation();
+  }
+}
+
+function initSelectedPillsHandler() {
+  const wrap = document.getElementById('selectedPills');
+  if (!wrap) return;
+  wrap.addEventListener('click', e => {
+    const x = e.target.closest('.task-pill-x');
+    if (!x) return;
+    const pill = x.closest('.task-pill');
+    const label = pill && pill.dataset.task;
+    if (label) removeTask(label);
+  });
 }
 
 // ── Recommendation card (step 1) ──────────────────────────────
