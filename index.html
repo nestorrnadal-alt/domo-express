@@ -262,6 +262,18 @@
     .rec-card-completo { border-color: #c0653a; background: #fef3ed; }
     .rec-card-proyecto { border-color: #6c63b0; background: #f4f2fb; }
     .rec-card .rec-header { margin-bottom: 8px; }
+    .rec-card .rec-multiday-badge {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 3px 8px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: .02em;
+    }
     .rec-card .rec-tier-label {
       font-size: 10.5px;
       font-weight: 700;
@@ -2315,27 +2327,77 @@ const TASK_TIER_OVERRIDES = {
   'Instalar abanico de techo':      ['basico', 'completo'],
 };
 
+// Estimated handyman minutes per task. Drives the hour-budget routing
+// (Básico = ~7h effective; Completo multi-day above that). Unknown
+// tasks default to 60 min — conservative for Express budget.
+//
+// Draft v1 — review and adjust:
+const TASK_DURATION_MIN = {
+  // Montaje y colgado
+  'Montaje de TV':                              45,
+  'Instalar tablillas (hasta 2)':               45,
+  'Colgar espejos o cuadros (hasta 3)':         30,
+  'Instalar barra de cortinas (1 ventana)':     30,
+  'Accesorios de baño: toallero, gancho (hasta 3)': 30,
+  // Plomería menor
+  'Cambio de pluma (cocina o baño)':            45,
+  'Cambio de cabezal de ducha':                 15,
+  'Reparar válvula de inodoro':                 45,
+  'Cambio de asiento de inodoro':               20,
+  'Reparar fuga bajo el fregadero':             90,
+  // Eléctrico menor (sin panel)
+  'Reemplazar toma o interruptor (hasta 3)':    60,
+  'Cambio de luminaria (caja existente)':       30,
+  'Instalar abanico de techo':                  120,
+  'Instalar dimmer (hasta 2)':                  40,
+  // Puertas y ventanas
+  'Ajuste de bisagra o alineación de puerta':   30,
+  'Cambio de cerradura, pomo o manilla':        30,
+  'Instalar cerrojo':                           45,
+  'Instalar burlete o door sweep':              30,
+  // Ensamblaje de muebles
+  'Armar mueble flat-pack':                     90,
+  'Desarmar mueble flat-pack':                  45,
+  // Reparaciones menores
+  'Parchar hoyo en pared (hasta 3)':            45,
+  'Caulking / sellado (1 área)':                30,
+  'Ajustar bisagra de gabinete (hasta 4)':      30,
+  'Instalar barra de apoyo (1–2)':              45,
+};
+const DEFAULT_DURATION_MIN = 60;
+// Effective task minutes per Básico day (8 h minus setup/lunch/cleanup).
+// Exceeding this triggers a multi-day Completo recommendation.
+const BASICO_DAY_BUDGET_MIN = 420;
+
+function taskDurationMin(taskLabel) {
+  return TASK_DURATION_MIN[taskLabel] || DEFAULT_DURATION_MIN;
+}
+function totalDurationMin(tasks) {
+  return tasks.reduce((sum, t) => sum + taskDurationMin(t), 0);
+}
+
 function tiersForTask(taskLabel) {
   return TASK_TIER_OVERRIDES[taskLabel] || TIER_ORDER.slice();
 }
 
-// routeTier(selectedTasks, opts) → { tier, reason }
+// routeTier(selectedTasks, opts) → { tier, reason, isMultiDay, totalMin, daysEstimated }
 //
 // Rules, applied in order:
-//   1. opts.wantsEvaluation         → 'proyecto'
-//   2. Intersect tier-eligibility across all selected tasks. If any
-//      task is Completo-only and others are universal, the cart routes
-//      to Completo (the only tier that covers everything).
-//   3. >2 tasks → exclude Express (doesn't fit the 2.5 h slot).
-//   4. Pick the cheapest remaining eligible tier.
+//   1. opts.wantsEvaluation               → 'proyecto'
+//   2. Intersect tier-eligibility. If any task is Completo-only and
+//      others are universal, the cart routes to Completo.
+//   3. >2 tasks → exclude Express (keeps Express to its 2-task spec).
+//   4. Sum of task durations > 1 Básico day → force Completo, set
+//      isMultiDay = true, daysEstimated = ceil(min / day budget).
+//   5. Pick the cheapest remaining eligible tier.
 function routeTier(selectedTasks, opts) {
   opts = opts || {};
   if (opts.wantsEvaluation) {
-    return { tier: 'proyecto', reason: 'user_requested_evaluation' };
+    return { tier: 'proyecto', reason: 'user_requested_evaluation', isMultiDay: false, totalMin: 0, daysEstimated: 1 };
   }
   const tasks = (selectedTasks || []).filter(t => t && t !== OTHER_TOKEN);
   if (tasks.length === 0) {
-    return { tier: 'express', reason: 'default' };
+    return { tier: 'express', reason: 'default', isMultiDay: false, totalMin: 0, daysEstimated: 1 };
   }
   let eligible = TIER_ORDER.slice();
   for (const t of tasks) {
@@ -2343,18 +2405,27 @@ function routeTier(selectedTasks, opts) {
     eligible = eligible.filter(x => allowed.indexOf(x) >= 0);
   }
   if (eligible.length === 0) {
-    return { tier: 'completo', reason: 'fallback_specialty' };
+    return { tier: 'completo', reason: 'fallback_specialty', isMultiDay: false, totalMin: totalDurationMin(tasks), daysEstimated: 1 };
   }
   if (tasks.length > 2 && eligible.indexOf('basico') >= 0) {
     eligible = eligible.filter(x => x !== 'express');
   }
+  const totalMin = totalDurationMin(tasks);
+  const isMultiDay = totalMin > BASICO_DAY_BUDGET_MIN;
+  const daysEstimated = isMultiDay ? Math.ceil(totalMin / BASICO_DAY_BUDGET_MIN) : 1;
+  if (isMultiDay && eligible.indexOf('completo') >= 0) {
+    eligible = ['completo'];
+  }
   for (const tier of TIER_ORDER) {
     if (eligible.indexOf(tier) >= 0) {
-      const reason = tasks.length > 2 ? 'more_than_two_tasks' : 'minimum_viable';
-      return { tier, reason };
+      let reason;
+      if (isMultiDay)               reason = 'multi_day';
+      else if (tasks.length > 2)    reason = 'more_than_two_tasks';
+      else                          reason = 'minimum_viable';
+      return { tier, reason, isMultiDay, totalMin, daysEstimated };
     }
   }
-  return { tier: 'completo', reason: 'fallback' };
+  return { tier: 'completo', reason: 'fallback', isMultiDay, totalMin, daysEstimated };
 }
 
 // ── State ─────────────────────────────────────────────────────
@@ -2788,8 +2859,11 @@ function dollars(cents) {
   return '$' + (cents / 100).toFixed(2);
 }
 
-function recReasonText(tier, reason, taskCount) {
+function recReasonText(tier, reason, taskCount, daysEstimated) {
   if (tier === 'proyecto') return 'Te visitamos, evaluamos, y el $125 + IVU se acredita al trabajo si nos contratas.';
+  if (reason === 'multi_day') {
+    return `Tu lista estimamos ${daysEstimated} días de trabajo — Domo Completo en días múltiples (ops coordina contigo).`;
+  }
   if (reason === 'more_than_two_tasks') {
     return `Con ${taskCount} tareas no entras en el slot de 2.5 h de Express — Básico es día completo.`;
   }
@@ -2806,10 +2880,10 @@ function renderRecommendation() {
   if (!card) return;
   const tasks = state.selectedTasks.filter(t => t && t !== OTHER_TOKEN);
   const opts = { wantsEvaluation: state.wantsEvaluation };
-  const { tier, reason } = routeTier(state.selectedTasks, opts);
+  const { tier, reason, isMultiDay, daysEstimated } = routeTier(state.selectedTasks, opts);
   const cfg = TIERS[tier];
   const totalCents = ivuTotalCents(cfg.baseCents);
-  const reasonText = recReasonText(tier, reason, state.selectedTasks.length);
+  const reasonText = recReasonText(tier, reason, state.selectedTasks.length, daysEstimated);
 
   // Keep the evaluation-link label in sync with the toggle state.
   const evalBtn = document.getElementById('recEvalBtn');
@@ -2844,15 +2918,26 @@ function renderRecommendation() {
     ctaHtml = `<a class="btn-next rec-cta rec-cta-external" href="${EXTERNAL_BOOKNOW_URL}" target="_blank" rel="noopener">Continuar en domoyourhome.com →</a>`;
   }
 
-  card.className = `rec-card rec-card-${tier}`;
+  // Single-day price shown even when isMultiDay — multi-day pricing is
+  // coordinated by ops (not yet productized as a self-serve N-day
+  // booking). The reason text discloses the day estimate.
+  const multiDayBadge = isMultiDay
+    ? `<div class="rec-multiday-badge">× ${daysEstimated} días estimados</div>`
+    : '';
+  const priceDetail = isMultiDay
+    ? `IVU incluido · por día · ${daysEstimated} días`
+    : `IVU incluido · ${cfg.hours}`;
+
+  card.className = `rec-card rec-card-${tier}${isMultiDay ? ' rec-card-multiday' : ''}`;
   card.innerHTML = `
     <div class="rec-header">
       <div class="rec-tier-label">Tu plan recomendado</div>
       <div class="rec-tier-name">${cfg.label}</div>
+      ${multiDayBadge}
     </div>
     <div class="rec-price-row">
       <div class="rec-price">${dollars(totalCents)}</div>
-      <div class="rec-price-detail">IVU incluido · ${cfg.hours}</div>
+      <div class="rec-price-detail">${priceDetail}</div>
     </div>
     <div class="rec-reason">${reasonText}</div>
     ${ctaHtml}
