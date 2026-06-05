@@ -50,8 +50,10 @@ function validate(body) {
   if (!['ath_movil','credit_card'].includes(body.payment_method)) {
     return 'Invalid payment_method. Must be ath_movil or credit_card.';
   }
-  if (![17500, 20000].includes(Number(body.total_amount))) {
-    return 'Invalid total_amount. Must be 17500 or 20000 (cents).';
+  // IVU-inclusive totals: $175 base × 1.115 = $195.13 (19513¢);
+  // $200 with-materials × 1.115 = $223.00 (22300¢).
+  if (![19513, 22300].includes(Number(body.total_amount))) {
+    return 'Invalid total_amount. Must be 19513 or 22300 (cents, IVU incl.).';
   }
   if (body.payment_method === 'credit_card') {
     if (!body.stripe_customer_id || !body.stripe_payment_method_id) {

@@ -1596,12 +1596,13 @@
 
       <!-- Price box -->
       <div class="price-box">
-        <div class="price-row"><span class="pr-label">Servicio Express (2 tareas)</span><span class="pr-val" id="prBase">$175</span></div>
-        <div id="prMatRow" class="price-row" style="display:none"><span class="pr-label">Gestión de materiales</span><span class="pr-val">$25</span></div>
+        <div class="price-row"><span class="pr-label">Servicio Express (2 tareas)</span><span class="pr-val" id="prBase">$175.00</span></div>
+        <div id="prMatRow" class="price-row" style="display:none"><span class="pr-label">Gestión de materiales</span><span class="pr-val">$25.00</span></div>
+        <div class="price-row"><span class="pr-label">IVU (11.5%)</span><span class="pr-val" id="prIva">$20.13</span></div>
         <hr class="price-divider">
         <div class="price-total">
           <span class="pt-label">Total</span>
-          <span class="pt-val" id="prTotal">$175</span>
+          <span class="pt-val" id="prTotal">$195.13</span>
         </div>
         <div class="price-note" id="prNote">Más materiales al costo si aplica. Se cobra después del servicio.</div>
       </div>
@@ -1624,8 +1625,8 @@
       </table>
 
       <div class="review-price">
-        <span class="rp-label">Total a pagar después del servicio</span>
-        <span class="rp-val" id="reviewTotal">$175</span>
+        <span class="rp-label">Total a pagar después del servicio (IVU incluido)</span>
+        <span class="rp-val" id="reviewTotal">$195.13</span>
       </div>
 
       <div class="review-note">
@@ -2799,12 +2800,26 @@ function toggleMaterials() {
   updatePrice();
 }
 
+// PR IVU is 11.5% (10.5% Hacienda + 1% municipal). Customer pays IVU
+// on top of the base + materials gestión fee. We compute in cents to
+// avoid float drift and keep the on-screen total in lock-step with
+// the cents value posted to track-partial and book.js.
+const IVU_RATE = 0.115;
+const BASE_CENTS    = 17500;
+const MAT_FEE_CENTS = 2500;
+
+function computeAmounts() {
+  const subtotalCents = BASE_CENTS + (state.materialsRequested ? MAT_FEE_CENTS : 0);
+  const ivaCents      = Math.round(subtotalCents * IVU_RATE);
+  return { subtotalCents, ivaCents, totalCents: subtotalCents + ivaCents };
+}
+
 function updatePrice() {
-  const base  = 175;
-  const matFee = state.materialsRequested ? 25 : 0;
-  const total = base + matFee;
-  document.getElementById('prTotal').textContent = `$${total}`;
-  document.getElementById('reviewTotal').textContent = `$${total}`;
+  const { ivaCents, totalCents } = computeAmounts();
+  state.totalCents = totalCents;
+  document.getElementById('prIva').textContent       = `$${(ivaCents   / 100).toFixed(2)}`;
+  document.getElementById('prTotal').textContent     = `$${(totalCents / 100).toFixed(2)}`;
+  document.getElementById('reviewTotal').textContent = `$${(totalCents / 100).toFixed(2)}`;
 }
 
 // ── Navigation ────────────────────────────────────────────────
@@ -2857,8 +2872,7 @@ function wireStep4PartialListeners() {
 
 function trackPartial(reason) {
   if (!state.customerEmail || !state.customerEmail.includes('@')) return;
-  const base  = 17500;
-  const total = state.materialsRequested ? base + 2500 : base;
+  const { totalCents: total } = computeAmounts();
   const payload = {
     customer_name:       state.customerName,
     customer_phone:      state.customerPhone,
@@ -3026,8 +3040,7 @@ async function submitBooking() {
   document.getElementById('loadingOverlay').classList.add('visible');
   document.getElementById('btnSubmit').disabled = true;
 
-  const base  = 17500;
-  const total = state.materialsRequested ? base + 2500 : base;
+  const { totalCents: total } = computeAmounts();
 
   const payload = {
     customer_name:       state.customerName,
