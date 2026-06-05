@@ -2237,6 +2237,79 @@ const TASK_CATEGORIES = [
 ];
 const OTHER_TOKEN = '__other__';
 
+// ── Tier configuration ─────────────────────────────────────────
+// The 4 Domo products. Express + Básico + Completo are productized
+// fixed-price tiers; Proyecto is an evaluation visit (the $125 credit
+// applies to whatever job results from the evaluation).
+const TIERS = {
+  express:  { label: 'Domo Express',  baseCents: 17500, hours: '2.5 h' },
+  basico:   { label: 'Domo Básico',   baseCents: 28500, hours: 'día completo' },
+  completo: { label: 'Domo Completo', baseCents: 38500, hours: 'día completo' },
+  proyecto: { label: 'Domo Proyecto', baseCents: 12500, hours: 'visita de evaluación' },
+};
+// Order cheap → expensive. The routing engine returns the cheapest
+// tier that can accommodate the selected scope.
+const TIER_ORDER = ['express', 'basico', 'completo'];
+
+// Default eligibility for any task in TASK_CATEGORIES is all 3 productized
+// tiers. Override here for tasks that should NOT fit in a 2.5 h Express
+// slot or that require specialty-trade time/skills.
+//
+// Draft v1 — review and adjust:
+//   • "Reparar fuga bajo el fregadero" — leak diagnosis is variable in
+//     time (could be a washer change, could be a pipe replacement).
+//     Excluded from Express to set expectations honestly.
+//   • "Instalar abanico de techo" — ceiling fans need joist support,
+//     wiring + balancing. Typically eats most of a half-day and the
+//     handyman has to bring the right blade-locking tool. Excluded
+//     from Express.
+const TASK_TIER_OVERRIDES = {
+  'Reparar fuga bajo el fregadero': ['basico', 'completo'],
+  'Instalar abanico de techo':      ['basico', 'completo'],
+};
+
+function tiersForTask(taskLabel) {
+  return TASK_TIER_OVERRIDES[taskLabel] || TIER_ORDER.slice();
+}
+
+// routeTier(selectedTasks, opts) → { tier, reason }
+//
+// Rules, applied in order:
+//   1. opts.wantsEvaluation         → 'proyecto'
+//   2. Intersect tier-eligibility across all selected tasks. If any
+//      task is Completo-only and others are universal, the cart routes
+//      to Completo (the only tier that covers everything).
+//   3. >2 tasks → exclude Express (doesn't fit the 2.5 h slot).
+//   4. Pick the cheapest remaining eligible tier.
+function routeTier(selectedTasks, opts) {
+  opts = opts || {};
+  if (opts.wantsEvaluation) {
+    return { tier: 'proyecto', reason: 'user_requested_evaluation' };
+  }
+  const tasks = (selectedTasks || []).filter(t => t && t !== OTHER_TOKEN);
+  if (tasks.length === 0) {
+    return { tier: 'express', reason: 'default' };
+  }
+  let eligible = TIER_ORDER.slice();
+  for (const t of tasks) {
+    const allowed = tiersForTask(t);
+    eligible = eligible.filter(x => allowed.indexOf(x) >= 0);
+  }
+  if (eligible.length === 0) {
+    return { tier: 'completo', reason: 'fallback_specialty' };
+  }
+  if (tasks.length > 2 && eligible.indexOf('basico') >= 0) {
+    eligible = eligible.filter(x => x !== 'express');
+  }
+  for (const tier of TIER_ORDER) {
+    if (eligible.indexOf(tier) >= 0) {
+      const reason = tasks.length > 2 ? 'more_than_two_tasks' : 'minimum_viable';
+      return { tier, reason };
+    }
+  }
+  return { tier: 'completo', reason: 'fallback' };
+}
+
 // ── State ─────────────────────────────────────────────────────
 const state = {
   step: 1,
