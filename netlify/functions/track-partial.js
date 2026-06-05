@@ -34,11 +34,14 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'email_required' }) };
   }
 
+  const ALLOWED_TIERS = ['express', 'basico', 'completo', 'proyecto'];
+  const tier = ALLOWED_TIERS.includes(body.tier) ? body.tier : 'express';
   const row = {
     customer_email:      email,
     customer_phone:      body.customer_phone || null,
     customer_name:       body.customer_name || null,
     address:             body.address || null,
+    tier:                tier,
     task_1:              body.task_1 || null,
     task_2:              body.task_2 || null,
     booking_date:        body.booking_date || null,
