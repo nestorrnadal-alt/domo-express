@@ -259,6 +259,12 @@
       color: var(--navy);
       line-height: 1.1;
     }
+    .tier-card .tier-iva {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .02em;
+    }
     .tier-card .tier-detail {
       font-size: 11px;
       color: var(--muted);
@@ -279,8 +285,9 @@
       .tier-strip { grid-template-columns: 1fr; gap: 6px; }
     }
 
-    /* Cotizar — separate "alternative path" callout for complex / unsure
-       jobs. Visually distinct from the productized tier strip above. */
+    /* Domo Proyecto — separate "alternative path" callout for complex /
+       unsure jobs. $125 + IVU acreditable al trabajo si contratas.
+       Visually distinct from the productized tier strip above. */
     .tier-cotizar {
       display: flex;
       align-items: center;
@@ -1351,8 +1358,8 @@
 
       <!-- Tier ladder — Express anchored as the "fast/small" entry point;
            upsell paths for bigger jobs link out to the WP service pages.
-           Cotizar is the "complex single task / unsure" alternative — pay
-           $125 for an evaluation, fully applied to the project. -->
+           Domo Proyecto is the "complex single task / unsure" alternative —
+           $125 + IVU acreditable al trabajo si nos contratas. -->
       <div class="tier-strip">
         <div class="tier-card tier-current">
           <div class="tier-name">Express</div>
@@ -1362,13 +1369,13 @@
         </div>
         <a class="tier-card" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
           <div class="tier-name">Básico</div>
-          <div class="tier-price">$285</div>
+          <div class="tier-price">$285 <span class="tier-iva">+ IVU</span></div>
           <div class="tier-detail">Día completo · tareas básicas</div>
           <div class="tier-link">Ver más →</div>
         </a>
         <a class="tier-card" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
           <div class="tier-name">Completo</div>
-          <div class="tier-price">$385</div>
+          <div class="tier-price">$385 <span class="tier-iva">+ IVU</span></div>
           <div class="tier-detail">Día completo · incluye plomería, eléctrica y empañetar</div>
           <div class="tier-link">Ver más →</div>
         </a>
@@ -1377,8 +1384,8 @@
       <a class="tier-cotizar" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
         <div class="cotizar-icon" aria-hidden="true">📋</div>
         <div class="cotizar-body">
-          <div class="cotizar-title">¿No estás seguro qué necesitas? Pide una cotización</div>
-          <div class="cotizar-sub"><strong>$125</strong> · Aplicado al costo total del trabajo si nos contratas</div>
+          <div class="cotizar-title">¿Proyecto más grande o no estás seguro? Domo Proyecto</div>
+          <div class="cotizar-sub"><strong>$125 + IVU</strong> · Acreditable al costo del trabajo si nos contratas</div>
         </div>
         <div class="cotizar-arrow">→</div>
       </a>
@@ -1465,7 +1472,7 @@
         <input type="text" id="otherInput" placeholder="Ej: instalar repisa flotante de 1.5 m">
         <div class="other-cotizar-hint">
           ¿Tu tarea es compleja o no estás seguro si entra en Express?
-          <a href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">Pide una cotización por $125 →</a> (aplicado al trabajo).
+          <a href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">Domo Proyecto · $125 + IVU →</a> (acreditable al trabajo).
         </div>
       </div>
 
