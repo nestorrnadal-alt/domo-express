@@ -221,6 +221,115 @@
       width: 100%;
     }
 
+    /* ── Step 1 scope picker ── */
+    .scope-intro { margin-bottom: 14px; }
+    .scope-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy);
+      margin: 0 0 4px;
+      line-height: 1.2;
+    }
+    .scope-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    /* Live recommendation card under the chip grid. Updates as the
+       customer toggles chips. Border color shifts per tier so it reads
+       as a result, not as a static promo. */
+    .rec-card {
+      border-radius: 12px;
+      padding: 16px 16px 14px;
+      margin: 18px 0 12px;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      transition: border-color .2s, background .2s;
+    }
+    .rec-card-empty {
+      border-style: dashed;
+      text-align: center;
+    }
+    .rec-card-empty .rec-empty {
+      font-size: 13px;
+      color: var(--muted);
+      padding: 6px 0;
+    }
+    .rec-card-express  { border-color: var(--blue); background: var(--bluelt); }
+    .rec-card-basico   { border-color: #d4a73c; background: #fffaee; }
+    .rec-card-completo { border-color: #c0653a; background: #fef3ed; }
+    .rec-card-proyecto { border-color: #6c63b0; background: #f4f2fb; }
+    .rec-card .rec-header { margin-bottom: 8px; }
+    .rec-card .rec-tier-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .rec-card .rec-tier-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-top: 2px;
+    }
+    .rec-card .rec-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .rec-card .rec-price {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1;
+    }
+    .rec-card .rec-price-detail {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .rec-card .rec-reason {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+    .rec-card .rec-cta { width: 100%; }
+    .rec-card .rec-cta-external {
+      display: inline-block;
+      text-align: center;
+      text-decoration: none;
+    }
+    .rec-card .rec-cta-hint {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+      padding: 10px 0 4px;
+    }
+
+    .rec-evaluation-link {
+      display: block;
+      width: 100%;
+      margin: 0 0 22px;
+      padding: 10px 14px;
+      background: transparent;
+      border: 1.5px dashed var(--border);
+      border-radius: 10px;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .rec-evaluation-link:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
     /* ── Tier ladder ── */
     .tier-strip {
       display: grid;
@@ -1344,67 +1453,48 @@
         <span class="progress-dot" id="pstep2" onclick="goToStep(2)"></span>
         <span class="progress-dot" id="pstep3" onclick="goToStep(3)"></span>
         <span class="progress-dot" id="pstep4" onclick="goToStep(4)"></span>
-        <span class="progress-dot" id="pstep5" onclick="goToStep(5)"></span>
       </div>
     </div>
 
-    <!-- Step 1: Intro / pricing -->
+    <!-- Step 1: Scope picker — customer picks task chips, system routes
+         to the right tier (Express / Básico / Completo / Proyecto). For
+         non-Express tiers the rec card currently links out to
+         domoyourhome.com pending the per-tier flows in follow-ups. -->
     <div class="step-panel visible" id="step1">
-      <div class="intro-pricing-card">
-        <div class="intro-pricing-eyebrow">DOMO EXPRESS</div>
-        <div class="intro-pricing-amount">$175 <span class="intro-pricing-iva">+ IVU</span></div>
-        <div class="intro-pricing-tagline">Dos tareas. Dos horas. Listo.</div>
-        <div class="intro-pricing-tags">
-          <span class="intro-tag">2 tareas</span>
-          <span class="intro-tag">~2 horas</span>
-          <span class="intro-tag">24h anticipo</span>
-          <span class="intro-tag">SJ metro</span>
-        </div>
-        <button class="btn-next btn-pricing-cta" onclick="nextStep(1)">Reservar ahora &rarr;</button>
+      <div class="scope-intro">
+        <h1 class="scope-title">¿Qué necesitas que hagamos?</h1>
+        <p class="scope-sub">Escoge las tareas y te recomendamos el plan correcto.</p>
       </div>
 
-      <!-- Tier ladder — Express anchored as the "fast/small" entry point;
-           upsell paths for bigger jobs link out to the WP service pages.
-           Domo Proyecto is the "complex single task / unsure" alternative —
-           $125 + IVU acreditable al trabajo si nos contratas. -->
-      <div class="tier-strip">
-        <div class="tier-card tier-current">
-          <div class="tier-name">Express</div>
-          <div class="tier-price">$175 <span class="tier-iva">+ IVU</span></div>
-          <div class="tier-detail">2 tareas · 2.5 h</div>
-          <div class="tier-flag">✓ Estás aquí</div>
-        </div>
-        <a class="tier-card" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
-          <div class="tier-name">Básico</div>
-          <div class="tier-price">$285 <span class="tier-iva">+ IVU</span></div>
-          <div class="tier-detail">Día completo · tareas básicas</div>
-          <div class="tier-link">Ver más →</div>
-        </a>
-        <a class="tier-card" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
-          <div class="tier-name">Completo</div>
-          <div class="tier-price">$385 <span class="tier-iva">+ IVU</span></div>
-          <div class="tier-detail">Día completo · incluye plomería, eléctrica y empañetar</div>
-          <div class="tier-link">Ver más →</div>
-        </a>
+      <div class="step-error" id="err1">Por favor selecciona al menos una tarea para continuar.</div>
+
+      <div class="task-search-wrap">
+        <input type="search" id="taskSearch" class="task-search" placeholder="Buscar tarea (ej: repisa, manilla, pintura…)" oninput="filterTasks()" autocomplete="off">
+        <button type="button" class="task-search-clear" id="taskSearchClear" onclick="clearTaskSearch()" aria-label="Limpiar búsqueda">×</button>
       </div>
 
-      <a class="tier-cotizar" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
-        <div class="cotizar-icon" aria-hidden="true">📋</div>
-        <div class="cotizar-body">
-          <div class="cotizar-title">¿Proyecto más grande o no estás seguro? Domo Proyecto</div>
-          <div class="cotizar-sub"><strong>$125 + IVU</strong> · Acreditable al costo del trabajo si nos contratas</div>
-        </div>
-        <div class="cotizar-arrow">→</div>
-      </a>
+      <div id="taskGrid"><!-- populated by JS as categorized chips --></div>
 
-      <div class="intro-bullets">
-        <ul>
-          <li>Materiales por ti &mdash; o te los buscamos (+$25)</li>
-          <li>Se cobra despu&eacute;s del servicio</li>
-          <li>ATH M&oacute;vil o tarjeta de cr&eacute;dito</li>
-          <li>Cancelaci&oacute;n gratis con 24h de anticipo</li>
-        </ul>
+      <div class="task-empty" id="taskEmpty" style="display:none;">
+        <p>No encontramos tareas con ese término.</p>
+        <p>Si tu tarea no aparece en la lista, escógela como <strong>"Otra tarea"</strong> y descríbela.</p>
       </div>
+
+      <div class="other-input-wrap" id="otherInputWrap" style="display:none;">
+        <label for="otherInput">Describe la tarea adicional</label>
+        <input type="text" id="otherInput" placeholder="Ej: instalar repisa flotante de 1.5 m">
+      </div>
+
+      <!-- Live recommendation card — renderRecommendation() populates this
+           whenever chips change. Shows the routed tier, IVU-inclusive
+           price, and the next-step CTA. -->
+      <div class="rec-card" id="recCard"><!-- populated by JS --></div>
+
+      <!-- Alternative path: customer doesn't know what they need / job
+           requires evaluation. Toggles wantsEvaluation → Domo Proyecto. -->
+      <button type="button" class="rec-evaluation-link" id="recEvalBtn" onclick="toggleEvaluationMode()">
+        No estoy seguro · Quiero una evaluación →
+      </button>
 
       <div class="trust-strip">
         <div class="trust-item">
@@ -1443,58 +1533,15 @@
         <div class="reviews-track" id="reviewsTrack"></div>
         <div class="reviews-dots" id="reviewsDots"></div>
       </div>
-
-      <div class="btn-row">
-        <button class="btn-next" onclick="nextStep(1)">Reservar ahora &rarr;</button>
-      </div>
-
-      <div class="intro-secondary">
-        <a href="https://domoyourhome.com/booknow/handyman-new-flow" class="day-completo-link">&iquest;Tienes m&aacute;s de 2 tareas? Ver d&iacute;a completo &rarr;</a>
-      </div>
     </div>
 
+    <!-- Step 2: Date & Time -->
     <div class="step-panel" id="step2">
-      <div class="step-error" id="err2">Por favor selecciona 2 tareas para continuar.</div>
-
-      <div class="task-count-bar">
-        <span>Tareas seleccionadas</span>
-        <span class="task-count-num"><span id="selCount">0</span> / 2</span>
-        <button class="btn-next btn-next-inline" onclick="nextStep(2)" id="btnNext2Top" disabled>Siguiente &rarr;</button>
-      </div>
-
-      <div class="task-search-wrap">
-        <input type="search" id="taskSearch" class="task-search" placeholder="Buscar tarea (ej: repisa, manilla, pintura…)" oninput="filterTasks()" autocomplete="off">
-        <button type="button" class="task-search-clear" id="taskSearchClear" onclick="clearTaskSearch()" aria-label="Limpiar búsqueda">×</button>
-      </div>
-
-      <div id="taskGrid"><!-- populated by JS as categorized chips --></div>
-
-      <div class="task-empty" id="taskEmpty" style="display:none;">
-        <p>No encontramos tareas con ese término.</p>
-        <p>Si tu tarea no aparece en la lista, escógela como <strong>"Otra tarea"</strong> y descríbela.</p>
-      </div>
-
-      <div class="other-input-wrap" id="otherInputWrap" style="display:none;">
-        <label for="otherInput">Describe la tarea adicional</label>
-        <input type="text" id="otherInput" placeholder="Ej: instalar repisa flotante de 1.5 m">
-        <div class="other-cotizar-hint">
-          ¿Tu tarea es compleja o no estás seguro si entra en Express?
-          <a href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">Domo Proyecto · $125 + IVU →</a> (acreditable al trabajo).
-        </div>
-      </div>
-
-      <div class="btn-row">
-        <button class="btn-next" onclick="nextStep(2)" id="btnNext2">Siguiente &rarr;</button>
-      </div>
-    </div>
-
-    <!-- Step 3: Date & Time -->
-    <div class="step-panel" id="step3">
       <div class="step-intro">
         <h2>¿Cuándo te viene bien?</h2>
         <p>Disponibilidad de lunes a viernes para los próximos 14 días. Reserva con al menos 24h de anticipo.</p>
       </div>
-      <div class="step-error" id="err3">Por favor selecciona fecha y hora.</div>
+      <div class="step-error" id="err2">Por favor selecciona fecha y hora.</div>
 
       <div class="schedule-state" id="scheduleLoading">Cargando disponibilidad…</div>
       <div class="schedule-state schedule-empty" id="scheduleEmpty" style="display:none;">
@@ -1508,17 +1555,17 @@
       <div class="time-grid" id="timeGrid"><!-- populated by JS per selected date --></div>
 
       <div class="btn-row">
-        <button class="btn-next" onclick="nextStep(3)">Siguiente →</button>
+        <button class="btn-next" onclick="nextStep(2)">Siguiente →</button>
       </div>
     </div>
 
-    <!-- Step 4: Customer info -->
-    <div class="step-panel" id="step4">
+    <!-- Step 3: Customer info -->
+    <div class="step-panel" id="step3">
       <div class="step-intro">
         <h2>Tus datos de contacto</h2>
         <p>Para confirmarte la reservación y coordinar la llegada del handyman.</p>
       </div>
-      <div class="step-error" id="err4"></div>
+      <div class="step-error" id="err3"></div>
 
       <div class="field-row">
         <div class="field-group">
@@ -1608,17 +1655,17 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn-next" onclick="nextStep(4)">Revisar reservación →</button>
+        <button class="btn-next" onclick="nextStep(3)">Revisar reservación →</button>
       </div>
     </div>
 
-    <!-- Step 5: Review & confirm -->
-    <div class="step-panel" id="step5">
+    <!-- Step 4: Review & confirm -->
+    <div class="step-panel" id="step4">
       <div class="step-intro">
         <h2>Revisa y confirma</h2>
         <p>Verifica los detalles antes de enviar tu reservación.</p>
       </div>
-      <div class="step-error" id="err5"></div>
+      <div class="step-error" id="err4"></div>
 
       <table class="review-table" id="reviewTable">
         <!-- populated by JS -->
@@ -2315,6 +2362,7 @@ const state = {
   step: 1,
   selectedTasks: [],     // array of task labels
   otherTask: '',
+  wantsEvaluation: false, // true → routeTier forces 'proyecto'
   selectedDate: null,    // { label, iso }
   selectedTime: null,
   customerName: '',
@@ -2327,7 +2375,7 @@ const state = {
 };
 
 // ── Step config ───────────────────────────────────────────────
-const STEP_TITLES = ['', 'Domo Express', 'Escoge 2 tareas', 'Elige fecha y hora', 'Tus datos', 'Revisa y confirma'];
+const STEP_TITLES = ['', '¿Qué necesitas?', 'Elige fecha y hora', 'Tus datos', 'Revisa y confirma'];
 
 // ── Availability cache (filled by /api/availability) ──────────
 let availability = null; // [{iso, slots: [...]}, ...]
@@ -2336,9 +2384,10 @@ let availabilityState = 'idle'; // 'idle' | 'loading' | 'ready' | 'error'
 // ── Init ──────────────────────────────────────────────────────
 (function init() {
   renderTaskGrid();
+  renderRecommendation();
   loadAvailability();
   loadReviews();
-  wireStep4PartialListeners();
+  wireContactPartialListeners();
 })();
 
 // ── Google reviews carousel ───────────────────────────────────
@@ -2705,7 +2754,6 @@ function toggleTask(el, taskLabel) {
       state.selectedTasks = state.selectedTasks.filter(t => t !== taskLabel);
     }
   } else {
-    if (state.selectedTasks.length >= 2) return;
     if (isOther) {
       // Mark this Otro selected; remove any previously selected Otro chip
       document.querySelectorAll('.task-other-chip.selected').forEach(c => c.classList.remove('selected'));
@@ -2719,23 +2767,101 @@ function toggleTask(el, taskLabel) {
     }
   }
 
-  // Disable unchosen chips when 2 are selected
-  const max = state.selectedTasks.length >= 2;
-  document.querySelectorAll('.task-chip').forEach(c => {
-    const isThisOther = c.classList.contains('task-other-chip');
-    const otherSelected = state.selectedTasks.includes(OTHER_TOKEN);
-    const isThisSelected = c.classList.contains('selected');
-    // An "Otro…" chip stays clickable if any Otro is selected (so user can switch which category)
-    const stillEnabled = isThisSelected || (isThisOther && otherSelected) || !max;
-    c.classList.toggle('disabled', !stillEnabled);
-  });
-  updateSelCount();
+  // Picking a chip exits evaluation mode — customer is now signaling
+  // concrete tasks, route based on them rather than the Proyecto path.
+  if (state.wantsEvaluation) state.wantsEvaluation = false;
+
+  renderRecommendation();
 }
 
-function updateSelCount() {
-  const n = state.selectedTasks.length;
-  document.getElementById('selCount').textContent = n;
-  document.getElementById('btnNext2Top').disabled = n < 2;
+// ── Recommendation card (step 1) ──────────────────────────────
+// Reads state.selectedTasks + state.wantsEvaluation, calls routeTier,
+// renders the result. Non-Express tiers are link-out (to WP) for now;
+// follow-up commits will land per-tier slot logic + in-flow booking
+// for Básico / Completo / Proyecto.
+const EXTERNAL_BOOKNOW_URL = 'https://domoyourhome.com/booknow';
+
+function ivuTotalCents(baseCents) {
+  return baseCents + Math.round(baseCents * IVU_RATE);
+}
+function dollars(cents) {
+  return '$' + (cents / 100).toFixed(2);
+}
+
+function recReasonText(tier, reason, taskCount) {
+  if (tier === 'proyecto') return 'Te visitamos, evaluamos, y el $125 + IVU se acredita al trabajo si nos contratas.';
+  if (reason === 'more_than_two_tasks') {
+    return `Con ${taskCount} tareas no entras en el slot de 2.5 h de Express — Básico es día completo.`;
+  }
+  if (reason === 'fallback_specialty' || (tier === 'completo' && reason === 'minimum_viable')) {
+    return 'Una de tus tareas requiere herramientas y skills de día completo.';
+  }
+  if (tier === 'express') return 'Tus tareas entran en una sola visita de 2.5 h.';
+  if (tier === 'basico')  return 'Día completo de tareas pequeñas.';
+  return '';
+}
+
+function renderRecommendation() {
+  const card = document.getElementById('recCard');
+  if (!card) return;
+  const tasks = state.selectedTasks.filter(t => t && t !== OTHER_TOKEN);
+  const opts = { wantsEvaluation: state.wantsEvaluation };
+  const { tier, reason } = routeTier(state.selectedTasks, opts);
+  const cfg = TIERS[tier];
+  const totalCents = ivuTotalCents(cfg.baseCents);
+  const reasonText = recReasonText(tier, reason, state.selectedTasks.length);
+
+  // Keep the evaluation-link label in sync with the toggle state.
+  const evalBtn = document.getElementById('recEvalBtn');
+  if (evalBtn) {
+    evalBtn.textContent = state.wantsEvaluation
+      ? '← Volver a escoger tareas'
+      : 'No estoy seguro · Quiero una evaluación →';
+  }
+
+  // Empty cart + no evaluation mode → blank/hint card (no premature
+  // tier commitment).
+  if (tasks.length === 0 && !state.wantsEvaluation) {
+    card.className = 'rec-card rec-card-empty';
+    card.innerHTML = `
+      <div class="rec-empty">
+        Selecciona tus tareas arriba y te recomendamos el plan correcto.
+      </div>`;
+    return;
+  }
+
+  const isExpress = tier === 'express';
+  // Express books 2 tasks per slot (back-end contract). With only 1
+  // selected, show a hint instead of an active CTA so the customer
+  // doesn't bounce off a validation error.
+  const expressNeedsMore = isExpress && tasks.length < 2;
+  let ctaHtml;
+  if (expressNeedsMore) {
+    ctaHtml = `<div class="rec-cta-hint">Selecciona una tarea más para continuar.</div>`;
+  } else if (isExpress) {
+    ctaHtml = `<button type="button" class="btn-next rec-cta" onclick="nextStep(1)">Continuar con Express →</button>`;
+  } else {
+    ctaHtml = `<a class="btn-next rec-cta rec-cta-external" href="${EXTERNAL_BOOKNOW_URL}" target="_blank" rel="noopener">Continuar en domoyourhome.com →</a>`;
+  }
+
+  card.className = `rec-card rec-card-${tier}`;
+  card.innerHTML = `
+    <div class="rec-header">
+      <div class="rec-tier-label">Tu plan recomendado</div>
+      <div class="rec-tier-name">${cfg.label}</div>
+    </div>
+    <div class="rec-price-row">
+      <div class="rec-price">${dollars(totalCents)}</div>
+      <div class="rec-price-detail">IVU incluido · ${cfg.hours}</div>
+    </div>
+    <div class="rec-reason">${reasonText}</div>
+    ${ctaHtml}
+  `;
+}
+
+function toggleEvaluationMode() {
+  state.wantsEvaluation = !state.wantsEvaluation;
+  renderRecommendation();
 }
 
 // ── Date / time ───────────────────────────────────────────────
@@ -2907,16 +3033,19 @@ function nextStep(from) {
   // When the customer crosses 4 -> 5, we've collected enough info
   // (email + phone + name + tasks + slot) to re-engage if they bail
   // on the review step. Fire-and-forget — failure is invisible.
-  if (from === 4) trackPartial('step4_to_5');
+  // Contact step (3) → review (4): we have enough info to re-engage if
+  // they bail on review. Fire-and-forget.
+  if (from === 3) trackPartial('contact_to_review');
 }
 
-// Also fires as the customer is FILLING step 4 (debounced 1.5s after
-// they stop typing) — catches anyone who bails mid-step-4 without
-// clicking Revisar. The track-partial endpoint upserts on email so
-// multiple fires from the same person just overwrite the latest data.
+// Also fires as the customer is FILLING the contact step (3),
+// debounced 1.5s after they stop typing — catches anyone who bails
+// mid-contact without clicking Revisar. The track-partial endpoint
+// upserts on email so multiple fires from the same person just
+// overwrite the latest data.
 let _partialFireTimer = null;
-function maybeFirePartialOnStep4Edit() {
-  if (state.step !== 4) return;
+function maybeFirePartialOnContactEdit() {
+  if (state.step !== 3) return;
   const name  = document.getElementById('fName')?.value.trim()     || '';
   const last  = document.getElementById('fLastName')?.value.trim() || '';
   const phone = document.getElementById('fPhone')?.value.trim()    || '';
@@ -2931,15 +3060,15 @@ function maybeFirePartialOnStep4Edit() {
   state.customerEmail = email;
   if (addr) state.address = addr;
   if (_partialFireTimer) clearTimeout(_partialFireTimer);
-  _partialFireTimer = setTimeout(() => trackPartial('step4_idle'), 1500);
+  _partialFireTimer = setTimeout(() => trackPartial('contact_idle'), 1500);
 }
 
-function wireStep4PartialListeners() {
+function wireContactPartialListeners() {
   ['fName', 'fLastName', 'fPhone', 'fEmail', 'fAddress'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('input', maybeFirePartialOnStep4Edit);
-    el.addEventListener('blur',  maybeFirePartialOnStep4Edit);
+    el.addEventListener('input', maybeFirePartialOnContactEdit);
+    el.addEventListener('blur',  maybeFirePartialOnContactEdit);
   });
 }
 
@@ -2990,11 +3119,11 @@ function showStep(n) {
   });
 
   // Lazy-load Google Places once the customer reaches the address field.
-  if (n === 4) initPlacesIfNeeded();
+  if (n === 3) initPlacesIfNeeded();
 
   // Fire GA4 + Meta events per step so we can build a real funnel
   // and see exactly where visitors drop off.
-  const stepNames = { 1: 'intro', 2: 'tasks', 3: 'datetime', 4: 'contact', 5: 'review' };
+  const stepNames = { 1: 'tasks', 2: 'datetime', 3: 'contact', 4: 'review' };
   if (typeof gtag === 'function') {
     gtag('event', 'express_step_' + n, {
       step_number: n,
@@ -3011,13 +3140,13 @@ function showStep(n) {
   document.getElementById('progressTitle').textContent = STEP_TITLES[n];
   document.getElementById('stepBackBtn').classList.toggle('hidden', n === 1);
 
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 4; i++) {
     const el = document.getElementById(`pstep${i}`);
     el.classList.toggle('active', i === n);
     el.classList.toggle('done', i < n);
   }
 
-  if (n === 5) buildReview();
+  if (n === 4) buildReview();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -3026,23 +3155,27 @@ function showStep(n) {
 function validateStep(n) {
   hideErr(n);
   if (n === 1) {
-    return true; // intro / pricing - nothing to validate
-  }
-  if (n === 2) {
-    if (state.selectedTasks.length < 2) { showErr(2, 'Por favor selecciona 2 tareas para continuar.'); return false; }
+    // Express route requires exactly 2 tasks (today's only in-flow tier).
+    // Non-Express tiers are link-out from the rec card; we don't reach
+    // validateStep(1) for those paths.
+    if (state.selectedTasks.length < 2) {
+      showErr(1, 'Por favor selecciona 2 tareas para continuar.');
+      return false;
+    }
     if (state.selectedTasks.includes(OTHER_TOKEN) && !document.getElementById('otherInput').value.trim()) {
-      showErr(2, 'Por favor describe la tarea adicional.'); return false;
+      showErr(1, 'Por favor describe la tarea adicional.');
+      return false;
     }
     if (state.selectedTasks.includes(OTHER_TOKEN)) {
       const idx = state.selectedTasks.indexOf(OTHER_TOKEN);
       state.selectedTasks[idx] = document.getElementById('otherInput').value.trim();
     }
   }
-  if (n === 3) {
-    if (!state.selectedDate) { showErr(3, 'Por favor selecciona una fecha.'); return false; }
-    if (!state.selectedTime) { showErr(3, 'Por favor selecciona una hora.'); return false; }
+  if (n === 2) {
+    if (!state.selectedDate) { showErr(2, 'Por favor selecciona una fecha.'); return false; }
+    if (!state.selectedTime) { showErr(2, 'Por favor selecciona una hora.'); return false; }
   }
-  if (n === 4) {
+  if (n === 3) {
     const name  = document.getElementById('fName').value.trim();
     const last  = document.getElementById('fLastName').value.trim();
     const phone = document.getElementById('fPhone').value.trim();
@@ -3050,11 +3183,11 @@ function validateStep(n) {
     const addr  = document.getElementById('fAddress').value.trim();
     const pay   = state.paymentMethod;
 
-    if (!name)  { showErr(4, 'Por favor ingresa tu nombre.'); return false; }
-    if (!phone) { showErr(4, 'Por favor ingresa tu teléfono.'); return false; }
-    if (!email || !email.includes('@')) { showErr(4, 'Por favor ingresa un correo electrónico válido.'); return false; }
-    if (!addr)  { showErr(4, 'Por favor ingresa la dirección del servicio.'); return false; }
-    if (!pay)   { showErr(4, 'Por favor selecciona un método de pago.'); return false; }
+    if (!name)  { showErr(3, 'Por favor ingresa tu nombre.'); return false; }
+    if (!phone) { showErr(3, 'Por favor ingresa tu teléfono.'); return false; }
+    if (!email || !email.includes('@')) { showErr(3, 'Por favor ingresa un correo electrónico válido.'); return false; }
+    if (!addr)  { showErr(3, 'Por favor ingresa la dirección del servicio.'); return false; }
+    if (!pay)   { showErr(3, 'Por favor selecciona un método de pago.'); return false; }
 
     state.customerName  = `${name} ${last}`.trim();
     state.customerPhone = phone;
@@ -3082,13 +3215,13 @@ function buildReview() {
     : 'No';
 
   const rows = [
-    ['Tareas',     `${state.selectedTasks[0]}<br>${state.selectedTasks[1]}`,         2],
-    ['Fecha',      state.selectedDate?.label || '',                                    3],
-    ['Hora',       slotRangeLabel(state.selectedTime),                                 3],
-    ['Dirección',  state.address,                                                      4],
-    ['Contacto',   `${state.customerName}<br>${state.customerPhone}<br>${state.customerEmail}`, 4],
-    ['Pago',       payLabel + ' — después del servicio',                               4],
-    ['Materiales', matLabel,                                                           4],
+    ['Tareas',     `${state.selectedTasks[0]}<br>${state.selectedTasks[1]}`,         1],
+    ['Fecha',      state.selectedDate?.label || '',                                    2],
+    ['Hora',       slotRangeLabel(state.selectedTime),                                 2],
+    ['Dirección',  state.address,                                                      3],
+    ['Contacto',   `${state.customerName}<br>${state.customerPhone}<br>${state.customerEmail}`, 3],
+    ['Pago',       payLabel + ' — después del servicio',                               3],
+    ['Materiales', matLabel,                                                           3],
   ];
 
   const tbody = document.getElementById('reviewTable');
@@ -3106,7 +3239,7 @@ function buildReview() {
 // ── Submit ────────────────────────────────────────────────────
 async function submitBooking() {
   if (!document.getElementById('termsAccept').checked) {
-    showErr(5, 'Por favor acepta los términos y la política de cancelación antes de continuar.');
+    showErr(4, 'Por favor acepta los términos y la política de cancelación antes de continuar.');
     return;
   }
 
@@ -3182,8 +3315,8 @@ async function submitBooking() {
       document.getElementById('btnSubmit').disabled = false;
       state.selectedTime = null;
       await loadAvailability();
-      showStep(3);
-      showErr(3, data.error);
+      showStep(2);
+      showErr(2, data.error);
       return;
     }
 
@@ -3277,14 +3410,14 @@ async function submitBooking() {
   } catch (err) {
     document.getElementById('loadingOverlay').classList.remove('visible');
     document.getElementById('btnSubmit').disabled = false;
-    showErr(5, `No pudimos procesar tu reservación: ${err.message}. Por favor intenta de nuevo o llama al (787) 419-0300.`);
+    showErr(4, `No pudimos procesar tu reservación: ${err.message}. Por favor intenta de nuevo o llama al (787) 419-0300.`);
   }
 }
 
 // ── Reset ─────────────────────────────────────────────────────
 function resetForm() {
   Object.assign(state, {
-    step: 1, selectedTasks: [], otherTask: '',
+    step: 1, selectedTasks: [], otherTask: '', wantsEvaluation: false,
     selectedDate: null, selectedTime: null,
     customerName: '', customerPhone: '', customerEmail: '',
     address: '', paymentMethod: null,
@@ -3296,6 +3429,7 @@ function resetForm() {
   document.getElementById('confirmCard').style.display = 'none';
   document.getElementById('bookingCard').style.display = 'block';
   renderTaskGrid();
+  renderRecommendation();
   clearTaskSearch();
   // Re-fetch availability in case it changed while the user was on the confirmation screen.
   loadAvailability();
