@@ -1,0 +1,101 @@
+name: Deploy preview to GitHub Pages
+
+on:
+  push:
+    branches:
+      - claude/continue-build-3FU1i
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assemble site
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp index.html admin.html cancelacion.html reschedule.html favicon.svg og-image.png og-image.svg _site/
+
+          # The site is served from /domo-express/ on Pages, so absolute paths
+          # like /favicon.svg would 404. Rewrite them to be relative.
+          sed -i 's|href="/favicon\.svg"|href="favicon.svg"|g' _site/index.html
+          sed -i 's|href="/cancelacion\.html"|href="cancelacion.html"|g' _site/index.html
+
+          # Stub the /api/* fetches so the preview is clickable end-to-end
+          # without a backend. Returns mock availability and quiet successes
+          # for tracking endpoints.
+          STUB=$(cat <<'STUB_EOF'
+          <script>
+          (function(){
+            const realFetch = window.fetch.bind(window);
+            const json = (body, status) => Promise.resolve(new Response(
+              JSON.stringify(body),
+              { status: status || 200, headers: { 'content-type': 'application/json' } }
+            ));
+            const mockAvailability = () => {
+              const SLOTS = ['8:00 AM','10:30 AM','1:00 PM','3:30 PM','6:00 PM'];
+              const dates = [];
+              const today = new Date();
+              for (let i = 1; i <= 21; i++) {
+                const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+                if (d.getDay() === 0) continue; // closed Sundays
+                const iso = d.toISOString().slice(0,10);
+                const skip = (i % 5 === 0) ? 2 : 0; // some scarcity for realism
+                dates.push({ iso, slots: SLOTS.slice(0, SLOTS.length - skip) });
+              }
+              return { dates };
+            };
+            window.fetch = function(input, init) {
+              const url = typeof input === 'string' ? input : (input && input.url) || '';
+              if (url.startsWith('/api/availability')) return json(mockAvailability());
+              if (url.startsWith('/api/google-reviews')) return json({ reviews: [] });
+              if (url.startsWith('/api/track-partial')) return json({ ok: true });
+              if (url.startsWith('/api/')) return json({ ok: true, preview: true });
+              return realFetch(input, init);
+            };
+            console.info('[preview] /api/* requests are stubbed — no backend in this build.');
+          })();
+          </script>
+          STUB_EOF
+          )
+          # Inject the stub immediately after <head> so it runs before any
+          # page script that might call fetch.
+          python3 - "$STUB" <<'PY'
+          import sys, pathlib
+          stub = sys.argv[1]
+          p = pathlib.Path('_site/index.html')
+          html = p.read_text()
+          html = html.replace('<head>', '<head>\n' + stub, 1)
+          p.write_text(html)
+          PY
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
