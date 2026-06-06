@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Domo Express — Reserva tu handyman</title>
-  <meta name="description" content="Reserva 2 tareas de handyman en menos de 2 minutos. $175 + IVU. Sin sorpresas.">
+  <meta name="description" content="Reserva hasta 3 tareas de handyman en menos de 2 minutos. $175 + IVU. Sin sorpresas.">
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/favicon.svg">
@@ -13,7 +13,7 @@
   <meta property="og:type"        content="website">
   <meta property="og:site_name"   content="Domo">
   <meta property="og:title"       content="Domo Express — Reserva tu handyman en 2 minutos">
-  <meta property="og:description" content="2 tareas, 2.5 horas, $175 + IVU. Confirma al instante.">
+  <meta property="og:description" content="Hasta 3 tareas, 2.5 horas, $175 + IVU. Confirma al instante.">
   <meta property="og:url"         content="https://book.domoyourhome.com/">
   <meta property="og:locale"      content="es_PR">
   <meta property="og:image"        content="https://book.domoyourhome.com/og-image.png">
@@ -22,7 +22,7 @@
   <meta property="og:image:alt"    content="Domo Express — Mantener tu casa nunca ha sido tan fácil">
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Domo Express — Reserva tu handyman en 2 minutos">
-  <meta name="twitter:description" content="2 tareas, 2.5 horas, $175 + IVU. Confirma al instante.">
+  <meta name="twitter:description" content="Hasta 3 tareas, 2.5 horas, $175 + IVU. Confirma al instante.">
   <meta name="twitter:image"       content="https://book.domoyourhome.com/og-image.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1751,7 +1751,7 @@
 
       <!-- Price box -->
       <div class="price-box">
-        <div class="price-row"><span class="pr-label">Servicio Express (2 tareas)</span><span class="pr-val" id="prBase">$175.00</span></div>
+        <div class="price-row"><span class="pr-label">Servicio Express (hasta 3 tareas)</span><span class="pr-val" id="prBase">$175.00</span></div>
         <div id="prMatRow"    class="price-row" style="display:none"><span class="pr-label">Gestión de materiales</span><span class="pr-val">$25.00</span></div>
         <div id="prHelperRow" class="price-row" style="display:none"><span class="pr-label">Ayudante</span><span class="pr-val">$200.00</span></div>
         <div class="price-row"><span class="pr-label">IVU (11.5%)</span><span class="pr-val" id="prIva">$20.13</span></div>
@@ -2267,7 +2267,7 @@
     <div class="policy-body" id="policyFaq" style="display:none;">
 
       <h3>¿Qué es Domo Express?</h3>
-      <p>Un servicio express de mantenimiento: <strong>2 tareas pequeñas, en una sola visita de hasta 2.5 horas, por una tarifa fija de $175 + IVU</strong>. Lo hace un handyman de Domo. Reserva en línea y confirma al instante.</p>
+      <p>Un servicio express de mantenimiento: <strong>hasta 3 tareas pequeñas, en una sola visita de hasta 2.5 horas, por una tarifa fija de $175 + IVU</strong>. Lo hace un handyman de Domo. Reserva en línea y confirma al instante.</p>
 
       <h3>¿Qué cuenta como "1 tarea"?</h3>
       <p>Una reparación o instalación específica que se pueda hacer en aproximadamente 60–75 minutos: cambiar una manilla, instalar una repisa, sellar una grieta, montar un TV pequeño, ajustar bisagras, cambiar un grifo. Si tu trabajo es más complejo, considera nuestro <strong>servicio de día completo</strong> en domoyourhome.com.</p>
@@ -2477,13 +2477,16 @@ function tiersForTask(taskLabel) {
   return TASK_TIER_OVERRIDES[taskLabel] || TIER_ORDER.slice();
 }
 
+// Express accepts 1–3 tasks per slot (customer-facing change June 2026).
+const EXPRESS_MAX_TASKS = 3;
+
 // routeTier(selectedTasks, opts) → { tier, reason, isMultiDay, totalMin, daysEstimated }
 //
 // Rules, applied in order:
 //   1. opts.wantsEvaluation               → 'proyecto'
 //   2. Intersect tier-eligibility. If any task is Completo-only and
 //      others are universal, the cart routes to Completo.
-//   3. >2 tasks → exclude Express (keeps Express to its 2-task spec).
+//   3. > EXPRESS_MAX_TASKS → exclude Express.
 //   4. Sum of task durations > 1 Básico day → force Completo, set
 //      isMultiDay = true, daysEstimated = ceil(min / day budget).
 //   5. Pick the cheapest remaining eligible tier.
@@ -2504,7 +2507,7 @@ function routeTier(selectedTasks, opts) {
   if (eligible.length === 0) {
     return { tier: 'completo', reason: 'fallback_specialty', isMultiDay: false, totalMin: totalDurationMin(tasks), daysEstimated: 1 };
   }
-  if (tasks.length > 2 && eligible.indexOf('basico') >= 0) {
+  if (tasks.length > EXPRESS_MAX_TASKS && eligible.indexOf('basico') >= 0) {
     eligible = eligible.filter(x => x !== 'express');
   }
   const totalMin = totalDurationMin(tasks);
@@ -2516,9 +2519,9 @@ function routeTier(selectedTasks, opts) {
   for (const tier of TIER_ORDER) {
     if (eligible.indexOf(tier) >= 0) {
       let reason;
-      if (isMultiDay)               reason = 'multi_day';
-      else if (tasks.length > 2)    reason = 'more_than_two_tasks';
-      else                          reason = 'minimum_viable';
+      if (isMultiDay)                              reason = 'multi_day';
+      else if (tasks.length > EXPRESS_MAX_TASKS)   reason = 'too_many_for_express';
+      else                                         reason = 'minimum_viable';
       return { tier, reason, isMultiDay, totalMin, daysEstimated };
     }
   }
@@ -3009,8 +3012,8 @@ function recReasonText(tier, reason, taskCount, daysEstimated) {
   if (reason === 'multi_day') {
     return `Tu lista estimamos ${daysEstimated} días de trabajo — Domo Completo en días múltiples (ops coordina contigo).`;
   }
-  if (reason === 'more_than_two_tasks') {
-    return `Con ${taskCount} tareas no entras en el slot de 2.5 h de Express — Básico es día completo.`;
+  if (reason === 'too_many_for_express') {
+    return `Con ${taskCount} tareas no entras en una visita Express — Básico es día completo.`;
   }
   if (reason === 'fallback_specialty' || (tier === 'completo' && reason === 'minimum_viable')) {
     return 'Una de tus tareas requiere herramientas y skills de día completo.';
@@ -3044,24 +3047,15 @@ function renderRecommendation() {
     card.className = 'rec-card rec-card-empty';
     card.innerHTML = `
       <div class="rec-empty">
-        Selecciona tus tareas arriba y te recomendamos el plan correcto.
+        Selecciona al menos una tarea para continuar (hasta 3 en Express).
       </div>`;
     return;
   }
 
   const isExpress = tier === 'express';
-  // Express books 2 tasks per slot (back-end contract). With only 1
-  // selected, show a hint instead of an active CTA so the customer
-  // doesn't bounce off a validation error.
-  const expressNeedsMore = isExpress && tasks.length < 2;
-  let ctaHtml;
-  if (expressNeedsMore) {
-    ctaHtml = `<div class="rec-cta-hint">Selecciona una tarea más para continuar.</div>`;
-  } else if (isExpress) {
-    ctaHtml = `<button type="button" class="btn-next rec-cta" onclick="nextStep(1)">Continuar con Express →</button>`;
-  } else {
-    ctaHtml = `<a class="btn-next rec-cta rec-cta-external" href="${EXTERNAL_BOOKNOW_URL}" target="_blank" rel="noopener">Continuar en domoyourhome.com →</a>`;
-  }
+  const ctaHtml = isExpress
+    ? `<button type="button" class="btn-next rec-cta" onclick="nextStep(1)">Continuar con Express →</button>`
+    : `<a class="btn-next rec-cta rec-cta-external" href="${EXTERNAL_BOOKNOW_URL}" target="_blank" rel="noopener">Continuar en domoyourhome.com →</a>`;
 
   // Single-day price shown even when isMultiDay — multi-day pricing is
   // coordinated by ops (not yet productized as a self-serve N-day
@@ -3327,6 +3321,7 @@ function trackPartial(reason) {
     address:             state.address,
     task_1:              state.selectedTasks[0] || null,
     task_2:              state.selectedTasks[1] || null,
+    task_3:              state.selectedTasks[2] || null,
     booking_date:        state.selectedDate?.label || null,
     booking_date_iso:    state.selectedDate?.iso   || null,
     booking_time:        state.selectedTime,
@@ -3401,11 +3396,14 @@ function showStep(n) {
 function validateStep(n) {
   hideErr(n);
   if (n === 1) {
-    // Express route requires exactly 2 tasks (today's only in-flow tier).
-    // Non-Express tiers are link-out from the rec card; we don't reach
-    // validateStep(1) for those paths.
-    if (state.selectedTasks.length < 2) {
-      showErr(1, 'Por favor selecciona 2 tareas para continuar.');
+    // Express route requires 1–3 tasks. Non-Express tiers are link-out
+    // from the rec card; we don't reach validateStep(1) for those paths.
+    if (state.selectedTasks.length < 1) {
+      showErr(1, 'Por favor selecciona al menos una tarea para continuar.');
+      return false;
+    }
+    if (state.selectedTasks.length > EXPRESS_MAX_TASKS) {
+      showErr(1, `Express acepta hasta ${EXPRESS_MAX_TASKS} tareas. Para más, escoge Domo Básico.`);
       return false;
     }
     if (state.selectedTasks.includes(OTHER_TOKEN) && !document.getElementById('otherInput').value.trim()) {
@@ -3462,7 +3460,7 @@ function buildReview() {
   const helperLabel = state.helperRequested ? 'Sí (+$200)' : 'No';
 
   const rows = [
-    ['Tareas',     `${state.selectedTasks[0]}<br>${state.selectedTasks[1]}`,         1],
+    ['Tareas',     state.selectedTasks.filter(Boolean).join('<br>'),                   1],
     ['Fecha',      state.selectedDate?.label || '',                                    2],
     ['Hora',       slotRangeLabel(state.selectedTime),                                 2],
     ['Dirección',  state.address,                                                      3],
@@ -3502,7 +3500,8 @@ async function submitBooking() {
     customer_email:      state.customerEmail,
     address:             state.address,
     task_1:              state.selectedTasks[0],
-    task_2:              state.selectedTasks[1],
+    task_2:              state.selectedTasks[1] || null,
+    task_3:              state.selectedTasks[2] || null,
     booking_date:        state.selectedDate?.label,
     booking_date_iso:    state.selectedDate?.iso,
     booking_time:        state.selectedTime,

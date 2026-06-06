@@ -41,7 +41,7 @@ function generateBookingId() {
 function validate(body) {
   const required = [
     'customer_name','customer_phone','customer_email',
-    'address','task_1','task_2',
+    'address','task_1',
     'booking_date','booking_time','payment_method','total_amount',
   ];
   for (const f of required) {
@@ -130,7 +130,7 @@ function buildEmailHtml(data) {
     + '<tr><td style="color:#666;padding:6px 12px">Tel\u00e9fono</td><td style="text-align:right;font-weight:600;padding:6px 12px"><a href="tel:' + (data.customer_phone || '').replace(/\D/g,'') + '" style="color:#3652A5;text-decoration:none">' + data.customer_phone + '</a></td></tr>'
     + '<tr><td style="color:#666;padding:6px 12px">Correo</td><td style="text-align:right;font-weight:600;padding:6px 12px"><a href="mailto:' + data.customer_email + '" style="color:#3652A5;text-decoration:none">' + data.customer_email + '</a></td></tr>'
     + '<tr><td style="color:#666;padding:6px 12px">Direcci\u00f3n</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.address + '</td></tr>'
-    + '<tr><td style="color:#666;padding:6px 12px">Tareas</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.task_1 + '<br>' + data.task_2 + '</td></tr>'
+    + '<tr><td style="color:#666;padding:6px 12px">Tareas</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + [data.task_1, data.task_2, data.task_3].filter(Boolean).join('<br>') + '</td></tr>'
     + '<tr><td style="color:#666;padding:6px 12px">Fecha</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + data.booking_date + '</td></tr>'
     + '<tr><td style="color:#666;padding:6px 12px">Hora</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + slotRange(data.booking_time) + '</td></tr>'
     + '<tr><td style="color:#666;padding:6px 12px">Pago</td><td style="text-align:right;font-weight:600;padding:6px 12px">' + payLbl + ' \u2014 despu\u00e9s del servicio</td></tr>'
@@ -164,7 +164,7 @@ function buildEmailText(data) {
     'Tel\u00e9fono:  ' + data.customer_phone,
     'Correo:    ' + data.customer_email,
     'Direcci\u00f3n: ' + data.address,
-    'Tareas:    ' + data.task_1 + ' / ' + data.task_2,
+    'Tareas:    ' + [data.task_1, data.task_2, data.task_3].filter(Boolean).join(' / '),
     'Fecha:     ' + data.booking_date + ' · ' + slotRange(data.booking_time),
     'Pago:      ' + payLbl + ' (despu\u00e9s del servicio)',
     data.materials_requested ? 'Materiales: Domo los consigue (+$30 gesti\u00f3n + costo real)' : null,
@@ -203,7 +203,8 @@ exports.handler = async (event) => {
       customer_email:      body.customer_email,
       address:             body.address,
       task_1:              body.task_1,
-      task_2:              body.task_2,
+      task_2:              body.task_2 || null,
+      task_3:              body.task_3 || null,
       booking_date:        body.booking_date,
       booking_date_iso:    body.booking_date_iso || null,
       booking_time:        body.booking_time,

@@ -44,6 +44,7 @@ exports.handler = async (event) => {
     tier:                tier,
     task_1:              body.task_1 || null,
     task_2:              body.task_2 || null,
+    task_3:              body.task_3 || null,
     booking_date:        body.booking_date || null,
     booking_date_iso:    body.booking_date_iso || null,
     booking_time:        body.booking_time || null,
