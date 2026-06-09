@@ -3045,6 +3045,15 @@ function initSelectedPillsHandler() {
 // for Básico / Completo / Proyecto.
 const EXTERNAL_BOOKNOW_URL = 'https://domoyourhome.com/booknow';
 
+// PR IVU is 11.5% (10.5% Hacienda + 1% municipal). Customer pays IVU
+// on top of the base + materials gestión fee. We compute in cents to
+// avoid float drift and keep the on-screen total in lock-step with
+// the cents value posted to track-partial and book.js.
+const IVU_RATE         = 0.115;
+const BASE_CENTS       = 17500;
+const MAT_FEE_CENTS    = 2500;
+const HELPER_FEE_CENTS = 20000;
+
 function ivuTotalCents(baseCents) {
   return baseCents + Math.round(baseCents * IVU_RATE);
 }
@@ -3278,15 +3287,6 @@ function toggleHelper() {
   tog.textContent = state.helperRequested ? '✓' : '';
   updatePrice();
 }
-
-// PR IVU is 11.5% (10.5% Hacienda + 1% municipal). Customer pays IVU
-// on top of the base + materials gestión fee. We compute in cents to
-// avoid float drift and keep the on-screen total in lock-step with
-// the cents value posted to track-partial and book.js.
-const IVU_RATE         = 0.115;
-const BASE_CENTS       = 17500;
-const MAT_FEE_CENTS    = 2500;
-const HELPER_FEE_CENTS = 20000;
 
 function computeAmounts() {
   const subtotalCents = BASE_CENTS
