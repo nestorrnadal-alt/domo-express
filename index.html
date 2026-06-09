@@ -758,6 +758,18 @@
       margin-bottom: 18px;
     }
     .task-empty strong { color: var(--navy); }
+    .btn-task-empty {
+      margin-top: 10px;
+      padding: 10px 16px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-task-empty:hover { opacity: 0.92; }
 
     .task-category { margin-bottom: 22px; }
     .task-cat-title {
@@ -1563,7 +1575,7 @@
 
       <div class="task-empty" id="taskEmpty" style="display:none;">
         <p>No encontramos tareas con ese término.</p>
-        <p>Si tu tarea no aparece en la lista, escógela como <strong>"Otra tarea"</strong> y descríbela.</p>
+        <button type="button" id="taskEmptyUseQuery" class="btn-task-empty" onclick="useSearchAsOtherTask()">Usar como tarea personalizada</button>
       </div>
 
       <div class="other-input-wrap" id="otherInputWrap" style="display:none;">
@@ -2349,10 +2361,11 @@ const TASK_CATEGORIES = [
   {
     name: 'Plomería menor',
     items: [
-      'Cambio de pluma (cocina o baño)',
+      'Cambio de pluma o mezcladora (cocina o baño)',
       'Cambio de cabezal de ducha',
       'Reparar válvula de inodoro',
       'Cambio de asiento de inodoro',
+      'Cambio o instalación de lavamanos',
       'Reparar fuga bajo el fregadero',
     ],
   },
@@ -2437,10 +2450,11 @@ const TASK_DURATION_MIN = {
   'Instalar barra de cortinas (1 ventana)':     30,
   'Accesorios de baño: toallero, gancho (hasta 3)': 30,
   // Plomería menor
-  'Cambio de pluma (cocina o baño)':            45,
+  'Cambio de pluma o mezcladora (cocina o baño)': 45,
   'Cambio de cabezal de ducha':                 15,
   'Reparar válvula de inodoro':                 45,
   'Cambio de asiento de inodoro':               20,
+  'Cambio o instalación de lavamanos':          90,
   'Reparar fuga bajo el fregadero':             90,
   // Eléctrico menor (sin panel)
   'Reemplazar toma o interruptor (hasta 3)':    60,
@@ -2732,13 +2746,43 @@ function filterTasks() {
     totalVisible += catVisible;
   });
 
-  empty.style.display = totalVisible === 0 ? 'block' : 'none';
+  if (totalVisible === 0) {
+    const btn = document.getElementById('taskEmptyUseQuery');
+    if (btn) btn.textContent = `Usar "${q}" como tarea personalizada`;
+    empty.dataset.query = q;
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+  }
 }
 
 function clearTaskSearch() {
   const input = document.getElementById('taskSearch');
   if (input) input.value = '';
   filterTasks();
+}
+
+// Empty-state escape hatch: turns the current search query into the
+// "Otra tarea" description and selects an Otro chip so the user can
+// proceed when their typed task isn't in the catalog.
+function useSearchAsOtherTask() {
+  const input = document.getElementById('taskSearch');
+  const q = (input && input.value || '').trim();
+  if (!q) return;
+  const otherInput = document.getElementById('otherInput');
+  const otherWrap = document.getElementById('otherInputWrap');
+  if (!state.selectedTasks.includes(OTHER_TOKEN)) state.selectedTasks.push(OTHER_TOKEN);
+  document.querySelectorAll('.task-other-chip').forEach(c => c.classList.remove('selected'));
+  const firstOther = document.querySelector('.task-other-chip');
+  if (firstOther) firstOther.classList.add('selected');
+  otherInput.value = q;
+  state.otherTask = q;
+  otherWrap.style.display = 'block';
+  if (input) input.value = '';
+  filterTasks();
+  renderSelectedPills();
+  renderRecommendation();
+  otherInput.focus();
 }
 
 const DAY_SHORT  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
@@ -3042,8 +3086,10 @@ function renderRecommendation() {
   }
 
   // Empty cart + no evaluation mode → blank/hint card (no premature
-  // tier commitment).
-  if (tasks.length === 0 && !state.wantsEvaluation) {
+  // tier commitment). "Otro…" with a typed description counts as a task
+  // so users with custom requests can still proceed.
+  const hasOtherWithDesc = state.selectedTasks.includes(OTHER_TOKEN) && (state.otherTask || '').trim();
+  if (tasks.length === 0 && !state.wantsEvaluation && !hasOtherWithDesc) {
     card.className = 'rec-card rec-card-empty';
     card.innerHTML = `
       <div class="rec-empty">
