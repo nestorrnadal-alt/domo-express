@@ -3278,7 +3278,6 @@ function renderRecommendation() {
   const opts = { wantsEvaluation: state.wantsEvaluation };
   const { tier, reason, isMultiDay, daysEstimated } = routeTier(state.selectedTasks, opts);
   const cfg = TIERS[tier];
-  const totalCents = ivuTotalCents(cfg.baseCents);
   const reasonText = recReasonText(tier, reason, state.selectedTasks.length, daysEstimated);
 
   const isExpress = tier === 'express';
@@ -3293,8 +3292,8 @@ function renderRecommendation() {
     ? `<div class="rec-multiday-badge">× ${daysEstimated} días estimados</div>`
     : '';
   const priceDetail = isMultiDay
-    ? `IVU incluido · por día · ${daysEstimated} días`
-    : `IVU incluido · ${cfg.hours}`;
+    ? `+ IVU · por día · ${daysEstimated} días`
+    : `+ IVU · ${cfg.hours}`;
 
   card.className = `rec-card rec-card-${tier}${isMultiDay ? ' rec-card-multiday' : ''}`;
   card.innerHTML = `
@@ -3304,7 +3303,7 @@ function renderRecommendation() {
       ${multiDayBadge}
     </div>
     <div class="rec-price-row">
-      <div class="rec-price">${dollars(totalCents)}</div>
+      <div class="rec-price">${dollars(cfg.baseCents)}</div>
       <div class="rec-price-detail">${priceDetail}</div>
     </div>
     <div class="rec-reason">${reasonText}</div>
