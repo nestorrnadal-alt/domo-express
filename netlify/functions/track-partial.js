@@ -34,19 +34,24 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'email_required' }) };
   }
 
+  const ALLOWED_TIERS = ['express', 'basico', 'completo', 'proyecto'];
+  const tier = ALLOWED_TIERS.includes(body.tier) ? body.tier : 'express';
   const row = {
     customer_email:      email,
     customer_phone:      body.customer_phone || null,
     customer_name:       body.customer_name || null,
     address:             body.address || null,
+    tier:                tier,
     task_1:              body.task_1 || null,
     task_2:              body.task_2 || null,
+    task_3:              body.task_3 || null,
     booking_date:        body.booking_date || null,
     booking_date_iso:    body.booking_date_iso || null,
     booking_time:        body.booking_time || null,
     payment_method:      body.payment_method || null,
     materials_requested: body.materials_requested || false,
     materials_detail:    body.materials_detail || null,
+    helper_requested:    body.helper_requested || false,
     total_amount:        Number.isFinite(body.total_amount) ? Math.round(body.total_amount) : null,
     updated_at:          new Date().toISOString(),
     // Reset notification timestamps on upsert: if they re-enter the

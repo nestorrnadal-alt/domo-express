@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Domo Express — Reserva tu handyman</title>
-  <meta name="description" content="Reserva 2 tareas de handyman en menos de 2 minutos. $175 tarifa fija. Sin sorpresas.">
+  <meta name="description" content="Reserva hasta 3 tareas de handyman en menos de 2 minutos. $175 + IVU. Sin sorpresas.">
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/favicon.svg">
@@ -13,7 +13,7 @@
   <meta property="og:type"        content="website">
   <meta property="og:site_name"   content="Domo">
   <meta property="og:title"       content="Domo Express — Reserva tu handyman en 2 minutos">
-  <meta property="og:description" content="2 tareas, 2.5 horas, $175 tarifa fija. Confirma al instante.">
+  <meta property="og:description" content="Hasta 3 tareas, 2.5 horas, $175 + IVU. Confirma al instante.">
   <meta property="og:url"         content="https://book.domoyourhome.com/">
   <meta property="og:locale"      content="es_PR">
   <meta property="og:image"        content="https://book.domoyourhome.com/og-image.png">
@@ -22,7 +22,7 @@
   <meta property="og:image:alt"    content="Domo Express — Mantener tu casa nunca ha sido tan fácil">
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Domo Express — Reserva tu handyman en 2 minutos">
-  <meta name="twitter:description" content="2 tareas, 2.5 horas, $175 tarifa fija. Confirma al instante.">
+  <meta name="twitter:description" content="Hasta 3 tareas, 2.5 horas, $175 + IVU. Confirma al instante.">
   <meta name="twitter:image"       content="https://book.domoyourhome.com/og-image.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -146,7 +146,6 @@
       background: var(--white);
       border-radius: 16px;
       border: 1px solid var(--border);
-      overflow: hidden;
       box-shadow: 0 4px 24px rgba(20,37,67,.08);
     }
 
@@ -157,6 +156,8 @@
       display: flex;
       align-items: center;
       gap: 14px;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
     }
     .step-back {
       background: transparent;
@@ -221,6 +222,198 @@
       width: 100%;
     }
 
+    /* ── Step 1 scope picker ── */
+    .scope-intro { margin-bottom: 14px; }
+    .scope-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy);
+      margin: 0 0 4px;
+      line-height: 1.2;
+    }
+    .scope-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    /* Selected-task pills above the search bar */
+    .selected-pills {
+      display: none;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 0 0 12px;
+    }
+    .selected-pills.has-pills { display: flex; }
+    .task-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 4px 5px 10px;
+      background: var(--bluelt);
+      border: 1px solid var(--blue);
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--navy);
+      line-height: 1.2;
+    }
+    .task-pill-label { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .task-pill-x {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px; height: 20px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--blue);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background .12s;
+    }
+    .task-pill-x:hover { background: rgba(0, 110, 255, .12); }
+
+    /* Live recommendation card under the chip grid. Updates as the
+       customer toggles chips. Border color shifts per tier so it reads
+       as a result, not as a static promo. */
+    .rec-card {
+      border-radius: 12px;
+      padding: 16px 16px 14px;
+      margin: 18px 0 12px;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      transition: border-color .2s, background .2s;
+    }
+    .rec-card-empty {
+      border-style: dashed;
+      text-align: center;
+    }
+    .rec-card-empty .rec-empty {
+      font-size: 13px;
+      color: var(--muted);
+      padding: 6px 0;
+    }
+    .rec-card-express  { border-color: var(--blue); background: var(--bluelt); }
+    .rec-card-basico   { border-color: #d4a73c; background: #fffaee; }
+    .rec-card-completo { border-color: #c0653a; background: #fef3ed; }
+    .rec-card-proyecto { border-color: #6c63b0; background: #f4f2fb; }
+    .rec-card .rec-header { margin-bottom: 8px; }
+    .rec-card .rec-multiday-badge {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 3px 8px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: .02em;
+    }
+    .rec-card .rec-tier-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .rec-card .rec-tier-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-top: 2px;
+    }
+    .rec-card .rec-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .rec-card .rec-price {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1;
+    }
+    .rec-card .rec-price-detail {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .rec-card .rec-reason {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+    .rec-card .rec-cta { width: 100%; }
+    .rec-card .rec-cta-external {
+      display: inline-block;
+      text-align: center;
+      text-decoration: none;
+    }
+    .rec-card .rec-cta-hint {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+      padding: 10px 0 4px;
+    }
+
+    .rec-alt-paths {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 0 0 22px;
+    }
+    @media (max-width: 480px) {
+      .rec-alt-paths { grid-template-columns: 1fr; }
+    }
+    .rec-alt-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      width: 100%;
+      padding: 10px 14px;
+      background: transparent;
+      border: 1.5px dashed var(--border);
+      border-radius: 10px;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: border-color .15s, color .15s;
+    }
+    .rec-alt-link:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .rec-alt-title { font-size: 13px; font-weight: 700; }
+    .rec-alt-sub   { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .rec-alt-link:hover .rec-alt-sub { color: var(--blue); }
+
+    /* Keep the recommendation card always visible — it's the "I'm
+       done picking, take me to checkout" signal. Sticky-bottom across
+       all viewport widths so the customer never has to scroll past
+       the chip grid to find the Continuar button. */
+    .rec-card {
+      position: sticky;
+      bottom: 8px;
+      box-shadow: 0 6px 18px rgba(20, 37, 67, .12);
+      z-index: 20;
+    }
+    .rec-card .rec-cta {
+      font-size: 15px;
+      padding: 12px 14px;
+    }
+
     /* ── Tier ladder ── */
     .tier-strip {
       display: grid;
@@ -259,6 +452,12 @@
       color: var(--navy);
       line-height: 1.1;
     }
+    .tier-card .tier-iva {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .02em;
+    }
     .tier-card .tier-detail {
       font-size: 11px;
       color: var(--muted);
@@ -279,8 +478,9 @@
       .tier-strip { grid-template-columns: 1fr; gap: 6px; }
     }
 
-    /* Cotizar — separate "alternative path" callout for complex / unsure
-       jobs. Visually distinct from the productized tier strip above. */
+    /* Domo Proyecto — separate "alternative path" callout for complex /
+       unsure jobs. $125 + IVU acreditable al trabajo si contratas.
+       Visually distinct from the productized tier strip above. */
     .tier-cotizar {
       display: flex;
       align-items: center;
@@ -326,6 +526,13 @@
       color: var(--blue);
       line-height: 1.05;
       margin-top: 6px;
+    }
+    .intro-pricing-iva {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .02em;
+      vertical-align: middle;
     }
     .intro-pricing-tagline {
       font-size: 17px; color: var(--navy);
@@ -553,6 +760,43 @@
     }
     .task-empty strong { color: var(--navy); }
 
+    .task-popular { margin-bottom: 8px; }
+    .task-toggle-all {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 12px 14px;
+      margin: 4px 0 18px;
+      background: var(--bluelt);
+      color: var(--navy);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .task-toggle-all:hover { background: #e6edf7; }
+    .task-toggle-all .task-toggle-caret {
+      font-size: 13px;
+      transition: transform .2s;
+    }
+    .task-toggle-all[aria-expanded="true"] .task-toggle-caret { transform: rotate(180deg); }
+
+    .btn-task-empty {
+      margin-top: 10px;
+      padding: 10px 16px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-task-empty:hover { opacity: 0.92; }
+
     .task-category { margin-bottom: 22px; }
     .task-cat-title {
       font-size: 15px;
@@ -675,6 +919,16 @@
 
     /* ── Time grid ── */
     .time-section-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 16px 0 8px; }
+    .day-visit-note {
+      margin: 16px 0 8px;
+      padding: 14px 16px;
+      background: var(--bluelt);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: var(--navy);
+    }
     .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
     .time-chip {
       border: 1.5px solid var(--border);
@@ -1307,7 +1561,6 @@
     <a class="site-logo" href="https://domoyourhome.com" aria-label="Domo">
       <span class="logo-word">domo<span class="logo-dot">.</span></span>
     </a>
-    <span class="badge">Express</span>
     <a class="header-back" href="https://domoyourhome.com">&larr; Home</a>
   </div>
 </header>
@@ -1330,66 +1583,72 @@
         <span class="progress-dot" id="pstep2" onclick="goToStep(2)"></span>
         <span class="progress-dot" id="pstep3" onclick="goToStep(3)"></span>
         <span class="progress-dot" id="pstep4" onclick="goToStep(4)"></span>
-        <span class="progress-dot" id="pstep5" onclick="goToStep(5)"></span>
       </div>
     </div>
 
-    <!-- Step 1: Intro / pricing -->
+    <!-- Step 1: Scope picker — customer picks task chips, system routes
+         to the right tier (Express / Básico / Completo / Proyecto). For
+         non-Express tiers the rec card currently links out to
+         domoyourhome.com pending the per-tier flows in follow-ups. -->
     <div class="step-panel visible" id="step1">
-      <div class="intro-pricing-card">
-        <div class="intro-pricing-eyebrow">DOMO EXPRESS</div>
-        <div class="intro-pricing-amount">$175</div>
-        <div class="intro-pricing-tagline">Dos tareas. Dos horas. Listo.</div>
-        <div class="intro-pricing-tags">
-          <span class="intro-tag">2 tareas</span>
-          <span class="intro-tag">~2 horas</span>
-          <span class="intro-tag">24h anticipo</span>
-          <span class="intro-tag">SJ metro</span>
-        </div>
-        <button class="btn-next btn-pricing-cta" onclick="nextStep(1)">Reservar ahora &rarr;</button>
+      <div class="scope-intro">
+        <h1 class="scope-title">¿Qué tareas necesitas?</h1>
       </div>
 
-      <!-- Tier ladder — Express anchored as the "fast/small" entry point;
-           upsell paths for bigger jobs link out to the WP service pages.
-           Cotizar is the "complex single task / unsure" alternative — pay
-           $125 for an evaluation, fully applied to the project. -->
-      <div class="tier-strip">
-        <div class="tier-card tier-current">
-          <div class="tier-name">Express</div>
-          <div class="tier-price">$175</div>
-          <div class="tier-detail">2 tareas · 2.5 h</div>
-          <div class="tier-flag">✓ Estás aquí</div>
-        </div>
-        <a class="tier-card" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
-          <div class="tier-name">Básico</div>
-          <div class="tier-price">$285</div>
-          <div class="tier-detail">Día completo · tareas básicas</div>
-          <div class="tier-link">Ver más →</div>
-        </a>
-        <a class="tier-card" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
-          <div class="tier-name">Completo</div>
-          <div class="tier-price">$385</div>
-          <div class="tier-detail">Día completo · incluye plomería, eléctrica y empañetar</div>
-          <div class="tier-link">Ver más →</div>
-        </a>
+      <div class="step-error" id="err1">Por favor selecciona al menos una tarea para continuar.</div>
+
+      <!-- Selected-task pills — populated by renderSelectedPills().
+           Sits above the search bar so the customer always sees what's
+           in their cart, with an inline × to remove. -->
+      <div class="selected-pills" id="selectedPills"></div>
+
+      <div class="task-search-wrap">
+        <input type="search" id="taskSearch" class="task-search" placeholder="Buscar tarea (ej: repisa, manilla, pintura…)" oninput="filterTasks()" autocomplete="off">
+        <button type="button" class="task-search-clear" id="taskSearchClear" onclick="clearTaskSearch()" aria-label="Limpiar búsqueda">×</button>
       </div>
 
-      <a class="tier-cotizar" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
-        <div class="cotizar-icon" aria-hidden="true">📋</div>
-        <div class="cotizar-body">
-          <div class="cotizar-title">¿No estás seguro qué necesitas? Pide una cotización</div>
-          <div class="cotizar-sub"><strong>$125</strong> · Aplicado al costo total del trabajo si nos contratas</div>
-        </div>
-        <div class="cotizar-arrow">→</div>
-      </a>
+      <div class="task-popular" id="taskPopular">
+        <h3 class="task-cat-title">Más populares</h3>
+        <div class="task-cat-chips" id="taskPopularChips"><!-- populated by JS --></div>
+      </div>
 
-      <div class="intro-bullets">
-        <ul>
-          <li>Materiales por ti &mdash; o te los buscamos (+$25)</li>
-          <li>Se cobra despu&eacute;s del servicio</li>
-          <li>ATH M&oacute;vil o tarjeta de cr&eacute;dito</li>
-          <li>Cancelaci&oacute;n gratis con 24h de anticipo</li>
-        </ul>
+      <button type="button" class="task-toggle-all" id="taskToggleAll" onclick="toggleAllCategories()" aria-expanded="false">
+        <span class="task-toggle-label">Ver todas las tareas</span>
+        <span class="task-toggle-caret">↓</span>
+      </button>
+
+      <div id="taskGrid" style="display:none;"><!-- populated by JS as categorized chips --></div>
+
+      <div class="task-empty" id="taskEmpty" style="display:none;">
+        <p>No encontramos tareas con ese término.</p>
+        <button type="button" id="taskEmptyUseQuery" class="btn-task-empty" onclick="useSearchAsOtherTask()">Usar como tarea personalizada</button>
+      </div>
+
+      <div class="other-input-wrap" id="otherInputWrap" style="display:none;">
+        <label for="otherInput">Describe la tarea adicional</label>
+        <input type="text" id="otherInput" placeholder="Ej: instalar repisa flotante de 1.5 m">
+      </div>
+
+      <!-- Live recommendation card — renderRecommendation() populates this
+           whenever chips change. Shows the routed tier, IVU-inclusive
+           price, and the next-step CTA. -->
+      <div class="rec-card" id="recCard"><!-- populated by JS --></div>
+
+      <!-- Alternative paths below the rec card. Side-by-side dashed
+           buttons for the two shortcut routes:
+             • "Evaluación" toggles wantsEvaluation → Domo Proyecto.
+             • "Día completo" links out to domoyourhome.com/booknow for
+               customers who already know they need Completo and don't
+               want to walk through the picker. In-flow Completo
+               booking lands in a follow-up commit. -->
+      <div class="rec-alt-paths">
+        <button type="button" class="rec-alt-link" id="recEvalBtn" onclick="toggleEvaluationMode()">
+          No estoy seguro · Quiero una evaluación →
+        </button>
+        <a class="rec-alt-link" href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">
+          <span class="rec-alt-title">Necesito un handyman 8 AM - 3 PM →</span>
+          <span class="rec-alt-sub">Día completo · no importa las tareas</span>
+        </a>
       </div>
 
       <div class="trust-strip">
@@ -1429,58 +1688,15 @@
         <div class="reviews-track" id="reviewsTrack"></div>
         <div class="reviews-dots" id="reviewsDots"></div>
       </div>
-
-      <div class="btn-row">
-        <button class="btn-next" onclick="nextStep(1)">Reservar ahora &rarr;</button>
-      </div>
-
-      <div class="intro-secondary">
-        <a href="https://domoyourhome.com/booknow/handyman-new-flow" class="day-completo-link">&iquest;Tienes m&aacute;s de 2 tareas? Ver d&iacute;a completo &rarr;</a>
-      </div>
     </div>
 
+    <!-- Step 2: Date & Time -->
     <div class="step-panel" id="step2">
-      <div class="step-error" id="err2">Por favor selecciona 2 tareas para continuar.</div>
-
-      <div class="task-count-bar">
-        <span>Tareas seleccionadas</span>
-        <span class="task-count-num"><span id="selCount">0</span> / 2</span>
-        <button class="btn-next btn-next-inline" onclick="nextStep(2)" id="btnNext2Top" disabled>Siguiente &rarr;</button>
-      </div>
-
-      <div class="task-search-wrap">
-        <input type="search" id="taskSearch" class="task-search" placeholder="Buscar tarea (ej: repisa, manilla, pintura…)" oninput="filterTasks()" autocomplete="off">
-        <button type="button" class="task-search-clear" id="taskSearchClear" onclick="clearTaskSearch()" aria-label="Limpiar búsqueda">×</button>
-      </div>
-
-      <div id="taskGrid"><!-- populated by JS as categorized chips --></div>
-
-      <div class="task-empty" id="taskEmpty" style="display:none;">
-        <p>No encontramos tareas con ese término.</p>
-        <p>Si tu tarea no aparece en la lista, escógela como <strong>"Otra tarea"</strong> y descríbela.</p>
-      </div>
-
-      <div class="other-input-wrap" id="otherInputWrap" style="display:none;">
-        <label for="otherInput">Describe la tarea adicional</label>
-        <input type="text" id="otherInput" placeholder="Ej: instalar repisa flotante de 1.5 m">
-        <div class="other-cotizar-hint">
-          ¿Tu tarea es compleja o no estás seguro si entra en Express?
-          <a href="https://domoyourhome.com/booknow" target="_blank" rel="noopener">Pide una cotización por $125 →</a> (aplicado al trabajo).
-        </div>
-      </div>
-
-      <div class="btn-row">
-        <button class="btn-next" onclick="nextStep(2)" id="btnNext2">Siguiente &rarr;</button>
-      </div>
-    </div>
-
-    <!-- Step 3: Date & Time -->
-    <div class="step-panel" id="step3">
       <div class="step-intro">
         <h2>¿Cuándo te viene bien?</h2>
-        <p>Disponibilidad de lunes a viernes para los próximos 14 días. Reserva con al menos 24h de anticipo.</p>
+        <p id="step2Intro">Disponibilidad de lunes a viernes para los próximos 14 días. Reserva con al menos 24h de anticipo.</p>
       </div>
-      <div class="step-error" id="err3">Por favor selecciona fecha y hora.</div>
+      <div class="step-error" id="err2">Por favor selecciona fecha y hora.</div>
 
       <div class="schedule-state" id="scheduleLoading">Cargando disponibilidad…</div>
       <div class="schedule-state schedule-empty" id="scheduleEmpty" style="display:none;">
@@ -1489,22 +1705,26 @@
 
       <div class="date-grid" id="dateGrid"><!-- populated by JS --></div>
 
+      <div class="day-visit-note" id="dayVisitNote" style="display:none;">
+        <strong>Visita de día completo.</strong> El handyman llega a las <strong>8 AM</strong> y se queda hasta las <strong>3 PM</strong> o hasta terminar la lista — lo que ocurra primero.
+      </div>
+
       <div class="time-section-label" id="timeLabel" style="display:none;">Hora disponible</div>
       <div class="time-scarcity" id="timeScarcity" style="display:none;"></div>
       <div class="time-grid" id="timeGrid"><!-- populated by JS per selected date --></div>
 
       <div class="btn-row">
-        <button class="btn-next" onclick="nextStep(3)">Siguiente →</button>
+        <button class="btn-next" onclick="nextStep(2)">Siguiente →</button>
       </div>
     </div>
 
-    <!-- Step 4: Customer info -->
-    <div class="step-panel" id="step4">
+    <!-- Step 3: Customer info -->
+    <div class="step-panel" id="step3">
       <div class="step-intro">
         <h2>Tus datos de contacto</h2>
         <p>Para confirmarte la reservación y coordinar la llegada del handyman.</p>
       </div>
-      <div class="step-error" id="err4"></div>
+      <div class="step-error" id="err3"></div>
 
       <div class="field-row">
         <div class="field-group">
@@ -1580,38 +1800,51 @@
         </div>
       </div>
 
+      <!-- Helper opt-in. Same UX shape as the materials toggle. -->
+      <div class="materials-row" id="helperRow" onclick="toggleHelper()" style="margin-top:10px;">
+        <div class="materials-toggle">
+          <div class="toggle-box" id="helperToggle"></div>
+        </div>
+        <div class="materials-info">
+          <div class="mat-title">Necesito un ayudante (+$200)</div>
+          <div class="mat-sub">Para tareas que requieren dos personas: TVs grandes, levantar muebles, abanicos de techo, etc.</div>
+        </div>
+      </div>
+
       <!-- Price box -->
       <div class="price-box">
-        <div class="price-row"><span class="pr-label">Servicio Express (2 tareas)</span><span class="pr-val" id="prBase">$175</span></div>
-        <div id="prMatRow" class="price-row" style="display:none"><span class="pr-label">Gestión de materiales</span><span class="pr-val">$25</span></div>
+        <div class="price-row"><span class="pr-label" id="prBaseLabel">Servicio Express (hasta 3 tareas)</span><span class="pr-val" id="prBase">$175.00</span></div>
+        <div id="prMatRow"    class="price-row" style="display:none"><span class="pr-label">Gestión de materiales</span><span class="pr-val">$25.00</span></div>
+        <div id="prHelperRow" class="price-row" style="display:none"><span class="pr-label">Ayudante</span><span class="pr-val">$200.00</span></div>
+        <div class="price-row"><span class="pr-label">IVU (11.5%)</span><span class="pr-val" id="prIva">$20.13</span></div>
         <hr class="price-divider">
         <div class="price-total">
           <span class="pt-label">Total</span>
-          <span class="pt-val" id="prTotal">$175</span>
+          <span class="pt-val" id="prTotal">$195.13</span>
         </div>
         <div class="price-note" id="prNote">Más materiales al costo si aplica. Se cobra después del servicio.</div>
       </div>
 
       <div class="btn-row">
-        <button class="btn-next" onclick="nextStep(4)">Revisar reservación →</button>
+        <button class="btn-next" onclick="nextStep(3)">Revisar reservación →</button>
       </div>
     </div>
 
-    <!-- Step 5: Review & confirm -->
-    <div class="step-panel" id="step5">
+    <!-- Step 4: Review & confirm -->
+    <div class="step-panel" id="step4">
       <div class="step-intro">
         <h2>Revisa y confirma</h2>
         <p>Verifica los detalles antes de enviar tu reservación.</p>
       </div>
-      <div class="step-error" id="err5"></div>
+      <div class="step-error" id="err4"></div>
 
       <table class="review-table" id="reviewTable">
         <!-- populated by JS -->
       </table>
 
       <div class="review-price">
-        <span class="rp-label">Total a pagar después del servicio</span>
-        <span class="rp-val" id="reviewTotal">$175</span>
+        <span class="rp-label">Total a pagar después del servicio (IVU incluido)</span>
+        <span class="rp-val" id="reviewTotal">$195.13</span>
       </div>
 
       <div class="review-note">
@@ -2096,7 +2329,7 @@
     <div class="policy-body" id="policyFaq" style="display:none;">
 
       <h3>¿Qué es Domo Express?</h3>
-      <p>Un servicio express de mantenimiento: <strong>2 tareas pequeñas, en una sola visita de hasta 2.5 horas, por una tarifa fija de $175</strong>. Lo hace un handyman de Domo. Reserva en línea y confirma al instante.</p>
+      <p>Un servicio express de mantenimiento: <strong>hasta 3 tareas pequeñas, en una sola visita de hasta 2.5 horas, por una tarifa fija de $175 + IVU</strong>. Lo hace un handyman de Domo. Reserva en línea y confirma al instante.</p>
 
       <h3>¿Qué cuenta como "1 tarea"?</h3>
       <p>Una reparación o instalación específica que se pueda hacer en aproximadamente 60–75 minutos: cambiar una manilla, instalar una repisa, sellar una grieta, montar un TV pequeño, ajustar bisagras, cambiar un grifo. Si tu trabajo es más complejo, considera nuestro <strong>servicio de día completo</strong> en domoyourhome.com.</p>
@@ -2163,35 +2396,65 @@ let stripeInstance = null;
 let cardElement    = null;
 let stripeReady    = false;
 
+// PR IVU is 11.5% (10.5% Hacienda + 1% municipal). Customer pays IVU
+// on top of the base + materials gestión fee. We compute in cents to
+// avoid float drift and keep the on-screen total in lock-step with
+// the cents value posted to track-partial and book.js. Declared up
+// here (above the init IIFE) so pricing helpers below never hit the
+// Temporal Dead Zone if a code path invokes them during init.
+const IVU_RATE         = 0.115;
+const BASE_CENTS       = 17500;
+const MAT_FEE_CENTS    = 2500;
+const HELPER_FEE_CENTS = 20000;
+
 // ── Task menu (per Product Brief, Section 4) ──────────────────
 const TASK_CATEGORIES = [
   {
     name: 'Montaje y colgado',
     items: [
       'Montaje de TV',
+      'Montaje de TV con brazo articulado',
       'Instalar tablillas (hasta 2)',
+      'Instalar tablillas flotantes (hasta 3)',
       'Colgar espejos o cuadros (hasta 3)',
+      'Colgar espejo grande o pesado',
       'Instalar barra de cortinas (1 ventana)',
+      'Instalar barras de cortinas (hasta 3 ventanas)',
       'Accesorios de baño: toallero, gancho (hasta 3)',
+      'Instalar repisa o esquinero de ducha',
+      'Instalar organizador o pizarrón de pared',
     ],
   },
   {
     name: 'Plomería menor',
     items: [
-      'Cambio de pluma (cocina o baño)',
+      'Cambio de pluma o mezcladora (cocina o baño)',
       'Cambio de cabezal de ducha',
-      'Reparar válvula de inodoro',
       'Cambio de asiento de inodoro',
+      'Reparar válvula de inodoro',
+      'Reparar fuga de inodoro (base)',
+      'Cambio o instalación de lavamanos',
+      'Instalar inodoro nuevo',
       'Reparar fuga bajo el fregadero',
+      'Cambiar trampa P bajo el fregadero',
+      'Destapar drenaje (fregadero o ducha)',
+      'Instalar filtro de agua bajo el fregadero',
+      'Instalar bidet eléctrico o manual',
     ],
   },
   {
     name: 'Eléctrico menor (sin panel)',
     items: [
       'Reemplazar toma o interruptor (hasta 3)',
+      'Instalar toma USB o GFCI (hasta 2)',
       'Cambio de luminaria (caja existente)',
-      'Instalar abanico de techo',
+      'Cambiar abanico de techo existente',
+      'Instalar abanico de techo nuevo',
       'Instalar dimmer (hasta 2)',
+      'Instalar luz LED bajo gabinete',
+      'Instalar timbre con cableado existente',
+      'Instalar detectores de humo o CO (hasta 3)',
+      'Diagnosticar toma o interruptor sin corriente',
     ],
   },
   {
@@ -2199,14 +2462,23 @@ const TASK_CATEGORIES = [
     items: [
       'Ajuste de bisagra o alineación de puerta',
       'Cambio de cerradura, pomo o manilla',
-      'Instalar cerrojo',
+      'Instalar cerrojo (deadbolt)',
+      'Instalar mirilla (peephole)',
       'Instalar burlete o door sweep',
+      'Reparar marco de puerta',
+      'Instalar o reparar mosquitero',
+      'Lubricar y ajustar ventanas corredizas',
     ],
   },
   {
     name: 'Ensamblaje de muebles',
     items: [
-      'Armar mueble flat-pack',
+      'Armar mueble flat-pack pequeño',
+      'Armar mueble flat-pack mediano',
+      'Armar cama o litera',
+      'Armar escritorio o vestidor',
+      'Armar estante o librero alto',
+      'Anclar mueble alto a la pared (anti-vuelco)',
       'Desarmar mueble flat-pack',
     ],
   },
@@ -2215,18 +2487,225 @@ const TASK_CATEGORIES = [
     items: [
       'Parchar hoyo en pared (hasta 3)',
       'Caulking / sellado (1 área)',
+      'Resellar bañera o ducha',
       'Ajustar bisagra de gabinete (hasta 4)',
+      'Apretar o nivelar gabinete o tope',
       'Instalar barra de apoyo (1–2)',
+      'Pintura de retoque (hasta 1 m²)',
+      'Reparar mosaico suelto (hasta 2 piezas)',
+      'Reparar zócalo o moldura',
+      'Sellar grieta en pared exterior',
     ],
   },
 ];
 const OTHER_TOKEN = '__other__';
+
+// Curated "popular" shortlist — what we show at the top of step 1
+// before the customer expands the full categorized catalog. Order
+// matters; this is the strip the customer sees first.
+const POPULAR_TASKS = [
+  'Montaje de TV',
+  'Cambio de pluma o mezcladora (cocina o baño)',
+  'Cambio de asiento de inodoro',
+  'Armar mueble flat-pack mediano',
+  'Colgar espejos o cuadros (hasta 3)',
+  'Instalar abanico de techo nuevo',
+  'Accesorios de baño: toallero, gancho (hasta 3)',
+  'Parchar hoyo en pared (hasta 3)',
+];
+
+// ── Tier configuration ─────────────────────────────────────────
+// The 4 Domo products. Express + Básico + Completo are productized
+// fixed-price tiers; Proyecto is an evaluation visit (the $125 credit
+// applies to whatever job results from the evaluation).
+const TIERS = {
+  express:  { label: 'Domo Express',  baseCents: 17500, hours: '2.5 h' },
+  basico:   { label: 'Domo Básico',   baseCents: 28500, hours: '8 AM – 3 PM o al terminar la lista' },
+  completo: { label: 'Domo Completo', baseCents: 38500, hours: '8 AM – 3 PM o al terminar la lista' },
+  proyecto: { label: 'Domo Proyecto', baseCents: 12500, hours: 'visita de evaluación' },
+};
+// Order cheap → expensive. The routing engine returns the cheapest
+// tier that can accommodate the selected scope.
+const TIER_ORDER = ['express', 'basico', 'completo'];
+
+// Default eligibility for any task in TASK_CATEGORIES is all 3 productized
+// tiers. Override here for tasks that should NOT fit in a 2.5 h Express
+// slot or that require specialty-trade time/skills.
+//
+// Draft v1 — review and adjust:
+//   • "Reparar fuga bajo el fregadero" — leak diagnosis is variable in
+//     time (could be a washer change, could be a pipe replacement).
+//     Excluded from Express to set expectations honestly.
+//   • "Instalar abanico de techo" — ceiling fans need joist support,
+//     wiring + balancing. Typically eats most of a half-day and the
+//     handyman has to bring the right blade-locking tool. Excluded
+//     from Express.
+const TASK_TIER_OVERRIDES = {
+  // Complex plumbing — diagnoses on-site, can involve hidden pipe / flange
+  // / fitting work. We don't promise a fixed half-day for these; they go
+  // straight to Completo so we never under-quote a plumbing surprise.
+  'Reparar fuga bajo el fregadero':         ['completo'],
+  'Reparar fuga de inodoro (base)':         ['completo'],
+  'Instalar inodoro nuevo':                 ['completo'],
+  'Cambiar trampa P bajo el fregadero':     ['basico', 'completo'],
+  'Cambio o instalación de lavamanos':      ['basico', 'completo'],
+  // Ceiling-fan and new electrical installs eat most of a half-day.
+  'Instalar abanico de techo nuevo':        ['basico', 'completo'],
+  'Instalar luz LED bajo gabinete':         ['basico', 'completo'],
+  'Diagnosticar toma o interruptor sin corriente': ['basico', 'completo'],
+  // Bigger furniture builds: bed/desk/full bookcase typically run long.
+  'Armar cama o litera':                    ['basico', 'completo'],
+  'Armar escritorio o vestidor':            ['basico', 'completo'],
+  // Repairs that scope on-site (size and substrate vary widely).
+  'Sellar grieta en pared exterior':        ['basico', 'completo'],
+  'Reparar mosaico suelto (hasta 2 piezas)':['basico', 'completo'],
+};
+
+// Estimated handyman minutes per task. Drives the hour-budget routing
+// (Básico = ~7h effective; Completo multi-day above that). Unknown
+// tasks default to 60 min — conservative for Express budget.
+//
+// Draft v1 — review and adjust:
+const TASK_DURATION_MIN = {
+  // Montaje y colgado
+  'Montaje de TV':                                    45,
+  'Montaje de TV con brazo articulado':               60,
+  'Instalar tablillas (hasta 2)':                     45,
+  'Instalar tablillas flotantes (hasta 3)':           60,
+  'Colgar espejos o cuadros (hasta 3)':               30,
+  'Colgar espejo grande o pesado':                    45,
+  'Instalar barra de cortinas (1 ventana)':           30,
+  'Instalar barras de cortinas (hasta 3 ventanas)':   60,
+  'Accesorios de baño: toallero, gancho (hasta 3)':   30,
+  'Instalar repisa o esquinero de ducha':             30,
+  'Instalar organizador o pizarrón de pared':         30,
+  // Plomería menor
+  'Cambio de pluma o mezcladora (cocina o baño)':     45,
+  'Cambio de cabezal de ducha':                       15,
+  'Cambio de asiento de inodoro':                     20,
+  'Reparar válvula de inodoro':                       45,
+  'Reparar fuga de inodoro (base)':                   60,
+  'Cambio o instalación de lavamanos':                90,
+  'Instalar inodoro nuevo':                           120,
+  'Reparar fuga bajo el fregadero':                   90,
+  'Cambiar trampa P bajo el fregadero':               45,
+  'Destapar drenaje (fregadero o ducha)':             30,
+  'Instalar filtro de agua bajo el fregadero':        60,
+  'Instalar bidet eléctrico o manual':                60,
+  // Eléctrico menor (sin panel)
+  'Reemplazar toma o interruptor (hasta 3)':          60,
+  'Instalar toma USB o GFCI (hasta 2)':               45,
+  'Cambio de luminaria (caja existente)':             30,
+  'Cambiar abanico de techo existente':               75,
+  'Instalar abanico de techo nuevo':                  120,
+  'Instalar dimmer (hasta 2)':                        40,
+  'Instalar luz LED bajo gabinete':                   60,
+  'Instalar timbre con cableado existente':           45,
+  'Instalar detectores de humo o CO (hasta 3)':       30,
+  'Diagnosticar toma o interruptor sin corriente':    60,
+  // Puertas y ventanas
+  'Ajuste de bisagra o alineación de puerta':         30,
+  'Cambio de cerradura, pomo o manilla':              30,
+  'Instalar cerrojo (deadbolt)':                      45,
+  'Instalar mirilla (peephole)':                      30,
+  'Instalar burlete o door sweep':                    30,
+  'Reparar marco de puerta':                          60,
+  'Instalar o reparar mosquitero':                    45,
+  'Lubricar y ajustar ventanas corredizas':           30,
+  // Ensamblaje de muebles
+  'Armar mueble flat-pack pequeño':                   60,
+  'Armar mueble flat-pack mediano':                   90,
+  'Armar cama o litera':                              120,
+  'Armar escritorio o vestidor':                      120,
+  'Armar estante o librero alto':                     75,
+  'Anclar mueble alto a la pared (anti-vuelco)':      30,
+  'Desarmar mueble flat-pack':                        45,
+  // Reparaciones menores
+  'Parchar hoyo en pared (hasta 3)':                  45,
+  'Caulking / sellado (1 área)':                      30,
+  'Resellar bañera o ducha':                          60,
+  'Ajustar bisagra de gabinete (hasta 4)':            30,
+  'Apretar o nivelar gabinete o tope':                45,
+  'Instalar barra de apoyo (1–2)':                    45,
+  'Pintura de retoque (hasta 1 m²)':                  60,
+  'Reparar mosaico suelto (hasta 2 piezas)':          60,
+  'Reparar zócalo o moldura':                         45,
+  'Sellar grieta en pared exterior':                  60,
+};
+const DEFAULT_DURATION_MIN = 60;
+// Effective task minutes per Básico day (8 h minus setup/lunch/cleanup).
+// Exceeding this triggers a multi-day Completo recommendation.
+const BASICO_DAY_BUDGET_MIN = 420;
+
+function taskDurationMin(taskLabel) {
+  return TASK_DURATION_MIN[taskLabel] || DEFAULT_DURATION_MIN;
+}
+function totalDurationMin(tasks) {
+  return tasks.reduce((sum, t) => sum + taskDurationMin(t), 0);
+}
+
+function tiersForTask(taskLabel) {
+  return TASK_TIER_OVERRIDES[taskLabel] || TIER_ORDER.slice();
+}
+
+// Express accepts 1–3 tasks per slot (customer-facing change June 2026).
+const EXPRESS_MAX_TASKS = 3;
+
+// routeTier(selectedTasks, opts) → { tier, reason, isMultiDay, totalMin, daysEstimated }
+//
+// Rules, applied in order:
+//   1. opts.wantsEvaluation               → 'proyecto'
+//   2. Intersect tier-eligibility. If any task is Completo-only and
+//      others are universal, the cart routes to Completo.
+//   3. > EXPRESS_MAX_TASKS → exclude Express.
+//   4. Sum of task durations > 1 Básico day → force Completo, set
+//      isMultiDay = true, daysEstimated = ceil(min / day budget).
+//   5. Pick the cheapest remaining eligible tier.
+function routeTier(selectedTasks, opts) {
+  opts = opts || {};
+  if (opts.wantsEvaluation) {
+    return { tier: 'proyecto', reason: 'user_requested_evaluation', isMultiDay: false, totalMin: 0, daysEstimated: 1 };
+  }
+  const tasks = (selectedTasks || []).filter(t => t && t !== OTHER_TOKEN);
+  if (tasks.length === 0) {
+    return { tier: 'express', reason: 'default', isMultiDay: false, totalMin: 0, daysEstimated: 1 };
+  }
+  let eligible = TIER_ORDER.slice();
+  for (const t of tasks) {
+    const allowed = tiersForTask(t);
+    eligible = eligible.filter(x => allowed.indexOf(x) >= 0);
+  }
+  if (eligible.length === 0) {
+    return { tier: 'completo', reason: 'fallback_specialty', isMultiDay: false, totalMin: totalDurationMin(tasks), daysEstimated: 1 };
+  }
+  if (tasks.length > EXPRESS_MAX_TASKS && eligible.indexOf('basico') >= 0) {
+    eligible = eligible.filter(x => x !== 'express');
+  }
+  const totalMin = totalDurationMin(tasks);
+  const isMultiDay = totalMin > BASICO_DAY_BUDGET_MIN;
+  const daysEstimated = isMultiDay ? Math.ceil(totalMin / BASICO_DAY_BUDGET_MIN) : 1;
+  if (isMultiDay && eligible.indexOf('completo') >= 0) {
+    eligible = ['completo'];
+  }
+  for (const tier of TIER_ORDER) {
+    if (eligible.indexOf(tier) >= 0) {
+      let reason;
+      if (isMultiDay)                              reason = 'multi_day';
+      else if (tasks.length > EXPRESS_MAX_TASKS)   reason = 'too_many_for_express';
+      else                                         reason = 'minimum_viable';
+      return { tier, reason, isMultiDay, totalMin, daysEstimated };
+    }
+  }
+  return { tier: 'completo', reason: 'fallback', isMultiDay, totalMin, daysEstimated };
+}
 
 // ── State ─────────────────────────────────────────────────────
 const state = {
   step: 1,
   selectedTasks: [],     // array of task labels
   otherTask: '',
+  wantsEvaluation: false, // true → routeTier forces 'proyecto'
+  tier: 'express',       // routed tier; renderRecommendation keeps this in sync
   selectedDate: null,    // { label, iso }
   selectedTime: null,
   customerName: '',
@@ -2236,10 +2715,11 @@ const state = {
   paymentMethod: null,   // 'ath_movil' | 'credit_card'
   materialsRequested: false,
   materialsDetail: '',
+  helperRequested: false,
 };
 
 // ── Step config ───────────────────────────────────────────────
-const STEP_TITLES = ['', 'Domo Express', 'Escoge 2 tareas', 'Elige fecha y hora', 'Tus datos', 'Revisa y confirma'];
+const STEP_TITLES = ['', '¿Qué tareas necesitas?', 'Elige fecha y hora', 'Tus datos', 'Revisa y confirma'];
 
 // ── Availability cache (filled by /api/availability) ──────────
 let availability = null; // [{iso, slots: [...]}, ...]
@@ -2248,9 +2728,12 @@ let availabilityState = 'idle'; // 'idle' | 'loading' | 'ready' | 'error'
 // ── Init ──────────────────────────────────────────────────────
 (function init() {
   renderTaskGrid();
+  renderSelectedPills();
+  initSelectedPillsHandler();
+  renderRecommendation();
   loadAvailability();
   loadReviews();
-  wireStep4PartialListeners();
+  wireContactPartialListeners();
 })();
 
 // ── Google reviews carousel ───────────────────────────────────
@@ -2349,7 +2832,26 @@ function startReviewsRotation(total) {
   }
 }
 
+function makeTaskChip(label) {
+  const chip = document.createElement('div');
+  chip.className = 'task-chip';
+  chip.dataset.task = label;
+  chip.textContent = label;
+  if (state.selectedTasks.includes(label)) chip.classList.add('selected');
+  chip.onclick = () => toggleTask(chip, label);
+  return chip;
+}
+
 function renderTaskGrid() {
+  // Popular shortlist sits above the full catalog so first-time users
+  // can pick common jobs in one click. Same chips can also appear in
+  // the full grid; toggleTask keeps selection state synced across both.
+  const popular = document.getElementById('taskPopularChips');
+  if (popular) {
+    popular.innerHTML = '';
+    POPULAR_TASKS.forEach(label => popular.appendChild(makeTaskChip(label)));
+  }
+
   const grid = document.getElementById('taskGrid');
   grid.innerHTML = '';
   TASK_CATEGORIES.forEach(cat => {
@@ -2364,14 +2866,7 @@ function renderTaskGrid() {
     const chips = document.createElement('div');
     chips.className = 'task-cat-chips';
 
-    cat.items.forEach(label => {
-      const chip = document.createElement('div');
-      chip.className = 'task-chip';
-      chip.dataset.task = label;
-      chip.textContent = label;
-      chip.onclick = () => toggleTask(chip, label);
-      chips.appendChild(chip);
-    });
+    cat.items.forEach(label => chips.appendChild(makeTaskChip(label)));
 
     // One "Otro..." chip per category, all sharing the same OTHER_TOKEN
     const other = document.createElement('div');
@@ -2386,6 +2881,22 @@ function renderTaskGrid() {
   });
 }
 
+// Expand/collapse the full categorized catalog. The popular strip stays
+// visible either way. Search auto-expands the grid because users
+// searching are explicitly hunting beyond the popular shortlist.
+function toggleAllCategories(forceOpen) {
+  const btn  = document.getElementById('taskToggleAll');
+  const grid = document.getElementById('taskGrid');
+  if (!btn || !grid) return;
+  const wantOpen = forceOpen != null
+    ? !!forceOpen
+    : btn.getAttribute('aria-expanded') !== 'true';
+  btn.setAttribute('aria-expanded', wantOpen ? 'true' : 'false');
+  grid.style.display = wantOpen ? '' : 'none';
+  btn.querySelector('.task-toggle-label').textContent =
+    wantOpen ? 'Ocultar catálogo completo' : 'Ver todas las tareas';
+}
+
 // Live-filter the task chips on step 2 as the user types.
 // Hides chips whose label doesn't contain the query (accent-insensitive),
 // hides empty categories, and surfaces the "Otra tarea" hint when
@@ -2395,13 +2906,21 @@ function filterTasks() {
   const q = (input.value || '').trim().toLowerCase();
   document.getElementById('taskSearchClear').classList.toggle('active', !!q);
 
-  const grid  = document.getElementById('taskGrid');
-  const empty = document.getElementById('taskEmpty');
+  const grid    = document.getElementById('taskGrid');
+  const empty   = document.getElementById('taskEmpty');
+  const popular = document.getElementById('taskPopular');
+
+  // Searching = the customer wants the full catalog. Auto-expand it
+  // and hide the curated popular strip so results don't compete.
+  if (q) toggleAllCategories(true);
+  if (popular) popular.style.display = q ? 'none' : '';
 
   if (!q) {
     grid.querySelectorAll('.task-chip').forEach(c => c.style.display = '');
     grid.querySelectorAll('.task-category').forEach(c => c.style.display = '');
     empty.style.display = 'none';
+    // Collapse the catalog back to its default closed state when search clears.
+    toggleAllCategories(false);
     return;
   }
 
@@ -2421,13 +2940,43 @@ function filterTasks() {
     totalVisible += catVisible;
   });
 
-  empty.style.display = totalVisible === 0 ? 'block' : 'none';
+  if (totalVisible === 0) {
+    const btn = document.getElementById('taskEmptyUseQuery');
+    if (btn) btn.textContent = `Usar "${q}" como tarea personalizada`;
+    empty.dataset.query = q;
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+  }
 }
 
 function clearTaskSearch() {
   const input = document.getElementById('taskSearch');
   if (input) input.value = '';
   filterTasks();
+}
+
+// Empty-state escape hatch: turns the current search query into the
+// "Otra tarea" description and selects an Otro chip so the user can
+// proceed when their typed task isn't in the catalog.
+function useSearchAsOtherTask() {
+  const input = document.getElementById('taskSearch');
+  const q = (input && input.value || '').trim();
+  if (!q) return;
+  const otherInput = document.getElementById('otherInput');
+  const otherWrap = document.getElementById('otherInputWrap');
+  if (!state.selectedTasks.includes(OTHER_TOKEN)) state.selectedTasks.push(OTHER_TOKEN);
+  document.querySelectorAll('.task-other-chip').forEach(c => c.classList.remove('selected'));
+  const firstOther = document.querySelector('.task-other-chip');
+  if (firstOther) firstOther.classList.add('selected');
+  otherInput.value = q;
+  state.otherTask = q;
+  otherWrap.style.display = 'block';
+  if (input) input.value = '';
+  filterTasks();
+  renderSelectedPills();
+  renderRecommendation();
+  otherInput.focus();
 }
 
 const DAY_SHORT  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
@@ -2517,6 +3066,33 @@ async function loadAvailability() {
   renderDateGrid();
 }
 
+// Step 2 adapts to the routed tier. Express keeps the hour-slot picker;
+// día-completo tiers replace it with a fixed-window notice; Proyecto
+// frames the evaluation visit. Called on showStep(2) and whenever the
+// schedule UI repaints so it never falls out of sync.
+function renderStep2ForTier() {
+  const isExpress = state.tier === 'express';
+  const intro = document.getElementById('step2Intro');
+  const note  = document.getElementById('dayVisitNote');
+  const label = document.getElementById('timeLabel');
+  const grid  = document.getElementById('timeGrid');
+  const scarcity = document.getElementById('timeScarcity');
+  if (intro) {
+    intro.textContent = isExpress
+      ? 'Disponibilidad de lunes a viernes para los próximos 14 días. Reserva con al menos 24h de anticipo.'
+      : (state.tier === 'proyecto'
+          ? 'Escoge el día de la visita de evaluación. Te confirmamos la hora exacta el día anterior.'
+          : 'Escoge el día de tu visita de día completo. Te confirmamos la hora de llegada el día anterior.');
+  }
+  if (note) note.style.display = isExpress ? 'none' : 'block';
+  if (!isExpress) {
+    if (label) label.style.display = 'none';
+    if (grid)  { grid.style.display = 'none'; grid.innerHTML = ''; }
+    if (scarcity) scarcity.style.display = 'none';
+    state.selectedTime = null;
+  }
+}
+
 function toggleScheduleUI() {
   const loading = document.getElementById('scheduleLoading');
   const empty   = document.getElementById('scheduleEmpty');
@@ -2559,6 +3135,9 @@ function renderDateGrid() {
 }
 
 function renderTimeGrid(iso) {
+  // Día-completo and Proyecto don't use hour slots — the day-visit
+  // notice on step 2 already explains the 8 AM – 3 PM window.
+  if (state.tier !== 'express') return;
   const grid     = document.getElementById('timeGrid');
   const label    = document.getElementById('timeLabel');
   const scarcity = document.getElementById('timeScarcity');
@@ -2600,6 +3179,14 @@ function renderTimeGrid(iso) {
 // "Otro…" chips appear in each category but all share the OTHER_TOKEN.
 // Selecting any "Otro…" toggles the singleton other-task slot and reveals
 // the shared description input.
+// Update every chip with the given data-task value so the popular
+// strip and the full categorized grid stay in sync when the same task
+// appears in both.
+function setChipsSelected(taskLabel, selected) {
+  document.querySelectorAll(`.task-chip[data-task="${CSS.escape(taskLabel)}"]`)
+    .forEach(c => c.classList.toggle('selected', selected));
+}
+
 function toggleTask(el, taskLabel) {
   const isOther = taskLabel === OTHER_TOKEN;
   const isSelected = el.classList.contains('selected');
@@ -2607,47 +3194,183 @@ function toggleTask(el, taskLabel) {
   const otherInput = document.getElementById('otherInput');
 
   if (isSelected) {
-    el.classList.remove('selected');
     if (isOther) {
-      // Deselect every "Otro…" chip across all categories
       document.querySelectorAll('.task-other-chip').forEach(c => c.classList.remove('selected'));
       state.selectedTasks = state.selectedTasks.filter(t => t !== OTHER_TOKEN);
       otherWrap.style.display = 'none';
     } else {
+      setChipsSelected(taskLabel, false);
       state.selectedTasks = state.selectedTasks.filter(t => t !== taskLabel);
     }
   } else {
-    if (state.selectedTasks.length >= 2) return;
     if (isOther) {
-      // Mark this Otro selected; remove any previously selected Otro chip
       document.querySelectorAll('.task-other-chip.selected').forEach(c => c.classList.remove('selected'));
       el.classList.add('selected');
       if (!state.selectedTasks.includes(OTHER_TOKEN)) state.selectedTasks.push(OTHER_TOKEN);
       otherWrap.style.display = 'block';
       otherInput.focus();
     } else {
-      el.classList.add('selected');
+      setChipsSelected(taskLabel, true);
       state.selectedTasks.push(taskLabel);
     }
   }
 
-  // Disable unchosen chips when 2 are selected
-  const max = state.selectedTasks.length >= 2;
-  document.querySelectorAll('.task-chip').forEach(c => {
-    const isThisOther = c.classList.contains('task-other-chip');
-    const otherSelected = state.selectedTasks.includes(OTHER_TOKEN);
-    const isThisSelected = c.classList.contains('selected');
-    // An "Otro…" chip stays clickable if any Otro is selected (so user can switch which category)
-    const stillEnabled = isThisSelected || (isThisOther && otherSelected) || !max;
-    c.classList.toggle('disabled', !stillEnabled);
-  });
-  updateSelCount();
+  // Picking a chip exits evaluation mode — customer is now signaling
+  // concrete tasks, route based on them rather than the Proyecto path.
+  if (state.wantsEvaluation) state.wantsEvaluation = false;
+
+  renderSelectedPills();
+  renderRecommendation();
 }
 
-function updateSelCount() {
-  const n = state.selectedTasks.length;
-  document.getElementById('selCount').textContent = n;
-  document.getElementById('btnNext2Top').disabled = n < 2;
+// ── Selected-task pills (step 1) ──────────────────────────────
+// Shows the customer's in-cart tasks above the search bar so they
+// always see what they've picked, with an × to remove. OTHER_TOKEN
+// is excluded because the customer already sees the typed text in
+// the textarea below the chip grid.
+function renderSelectedPills() {
+  const wrap = document.getElementById('selectedPills');
+  if (!wrap) return;
+  const pillTasks = state.selectedTasks.filter(t => t && t !== OTHER_TOKEN);
+  wrap.classList.toggle('has-pills', pillTasks.length > 0);
+  wrap.innerHTML = pillTasks.map(label => `
+    <span class="task-pill" data-task="${escapeHtml(label)}">
+      <span class="task-pill-label">${escapeHtml(label)}</span>
+      <button type="button" class="task-pill-x" aria-label="Quitar tarea">×</button>
+    </span>
+  `).join('');
+}
+
+function removeTask(label) {
+  // Toggle the chip element off so the grid stays in sync with state.
+  const chip = document.querySelector(`.task-chip[data-task="${CSS.escape(label)}"]`);
+  if (chip) {
+    toggleTask(chip, label);
+  } else {
+    // Fallback: state-only cleanup if the chip isn't in the DOM
+    // (shouldn't happen, but keeps things safe).
+    state.selectedTasks = state.selectedTasks.filter(t => t !== label);
+    renderSelectedPills();
+    renderRecommendation();
+  }
+}
+
+function initSelectedPillsHandler() {
+  const wrap = document.getElementById('selectedPills');
+  if (!wrap) return;
+  wrap.addEventListener('click', e => {
+    const x = e.target.closest('.task-pill-x');
+    if (!x) return;
+    const pill = x.closest('.task-pill');
+    const label = pill && pill.dataset.task;
+    if (label) removeTask(label);
+  });
+}
+
+// ── Recommendation card (step 1) ──────────────────────────────
+// Reads state.selectedTasks + state.wantsEvaluation, calls routeTier,
+// renders the result. Non-Express tiers are link-out (to WP) for now;
+// follow-up commits will land per-tier slot logic + in-flow booking
+// for Básico / Completo / Proyecto.
+const EXTERNAL_BOOKNOW_URL = 'https://domoyourhome.com/booknow';
+
+function ivuTotalCents(baseCents) {
+  return baseCents + Math.round(baseCents * IVU_RATE);
+}
+function dollars(cents) {
+  return '$' + (cents / 100).toFixed(2);
+}
+
+function recReasonText(tier, reason, taskCount, daysEstimated) {
+  if (tier === 'proyecto') return 'Te visitamos, evaluamos, y el $125 + IVU se acredita al trabajo si nos contratas.';
+  if (reason === 'multi_day') {
+    return `Tu lista estimamos ${daysEstimated} días de trabajo — Domo Completo en días múltiples (ops coordina contigo).`;
+  }
+  if (reason === 'too_many_for_express') {
+    return `Con ${taskCount} tareas no entras en una visita Express — Básico es día completo.`;
+  }
+  if (reason === 'fallback_specialty' || (tier === 'completo' && reason === 'minimum_viable')) {
+    return 'Una de tus tareas requiere herramientas y skills de día completo.';
+  }
+  if (tier === 'express') return 'Tus tareas entran en una sola visita de 2.5 h.';
+  if (tier === 'basico')  return 'Día completo de tareas pequeñas.';
+  return '';
+}
+
+function renderRecommendation() {
+  const card = document.getElementById('recCard');
+  if (!card) return;
+
+  // Keep the evaluation-link label in sync with the toggle state.
+  const evalBtn = document.getElementById('recEvalBtn');
+  if (evalBtn) {
+    evalBtn.textContent = state.wantsEvaluation
+      ? '← Volver a escoger tareas'
+      : 'No estoy seguro · Quiero una evaluación →';
+  }
+
+  // Empty cart + no evaluation mode → blank/hint card (no premature
+  // tier commitment). "Otro…" with a typed description counts as a task
+  // so users with custom requests can still proceed.
+  //
+  // This branch runs FIRST during init so we never invoke the pricing
+  // helpers (which read pricing consts declared further down the file)
+  // before those constants exit the Temporal Dead Zone — the init IIFE
+  // throwing here would leave them uninitialized for the page's life.
+  const tasks = state.selectedTasks.filter(t => t && t !== OTHER_TOKEN);
+  const hasOtherWithDesc = state.selectedTasks.includes(OTHER_TOKEN) && (state.otherTask || '').trim();
+  if (tasks.length === 0 && !state.wantsEvaluation && !hasOtherWithDesc) {
+    state.tier = 'express';
+    card.className = 'rec-card rec-card-empty';
+    card.innerHTML = `
+      <div class="rec-empty">
+        Selecciona al menos una tarea para continuar (hasta 3 en Express).
+      </div>`;
+    return;
+  }
+
+  const opts = { wantsEvaluation: state.wantsEvaluation };
+  const { tier, reason, isMultiDay, daysEstimated } = routeTier(state.selectedTasks, opts);
+  state.tier = tier;
+  const cfg = TIERS[tier];
+  const reasonText = recReasonText(tier, reason, state.selectedTasks.length, daysEstimated);
+
+  // Every tier keeps the customer in-flow so the next-step transition
+  // is transparent (no jump to a separate site). Step 2+ adapt to the
+  // routed tier — Express keeps the 2.5h slot picker, day-long tiers
+  // collect only a date, Proyecto frames itself as an evaluation visit.
+  const ctaLabel = tier === 'proyecto' ? 'Reservar evaluación' : `Continuar con ${cfg.label.replace(/^Domo /, '')}`;
+  const ctaHtml = `<button type="button" class="btn-next rec-cta" onclick="nextStep(1)">${ctaLabel} →</button>`;
+
+  // Single-day price shown even when isMultiDay — multi-day pricing is
+  // coordinated by ops (not yet productized as a self-serve N-day
+  // booking). The reason text discloses the day estimate.
+  const multiDayBadge = isMultiDay
+    ? `<div class="rec-multiday-badge">× ${daysEstimated} días estimados</div>`
+    : '';
+  const priceDetail = isMultiDay
+    ? `+ IVU · por día · ${daysEstimated} días`
+    : `+ IVU · ${cfg.hours}`;
+
+  card.className = `rec-card rec-card-${tier}${isMultiDay ? ' rec-card-multiday' : ''}`;
+  card.innerHTML = `
+    <div class="rec-header">
+      <div class="rec-tier-label">Tu plan recomendado</div>
+      <div class="rec-tier-name">${cfg.label}</div>
+      ${multiDayBadge}
+    </div>
+    <div class="rec-price-row">
+      <div class="rec-price">${dollars(cfg.baseCents)}</div>
+      <div class="rec-price-detail">${priceDetail}</div>
+    </div>
+    <div class="rec-reason">${reasonText}</div>
+    ${ctaHtml}
+  `;
+}
+
+function toggleEvaluationMode() {
+  state.wantsEvaluation = !state.wantsEvaluation;
+  renderRecommendation();
 }
 
 // ── Date / time ───────────────────────────────────────────────
@@ -2785,12 +3508,49 @@ function toggleMaterials() {
   updatePrice();
 }
 
+function toggleHelper() {
+  state.helperRequested = !state.helperRequested;
+  const row = document.getElementById('helperRow');
+  const tog = document.getElementById('helperToggle');
+  row.classList.toggle('selected', state.helperRequested);
+  tog.textContent = state.helperRequested ? '✓' : '';
+  updatePrice();
+}
+
+// Tier-aware base price. Express, Básico, Completo and Proyecto each
+// have their own baseCents in TIERS — we read whatever the rec card
+// last routed to so steps 3 and 4 stay consistent with step 1.
+function currentBaseCents() {
+  const tier = state.tier || 'express';
+  return (TIERS[tier] && TIERS[tier].baseCents) || BASE_CENTS;
+}
+
+function computeAmounts() {
+  const subtotalCents = currentBaseCents()
+    + (state.materialsRequested ? MAT_FEE_CENTS    : 0)
+    + (state.helperRequested    ? HELPER_FEE_CENTS : 0);
+  const ivaCents = Math.round(subtotalCents * IVU_RATE);
+  return { subtotalCents, ivaCents, totalCents: subtotalCents + ivaCents };
+}
+
 function updatePrice() {
-  const base  = 175;
-  const matFee = state.materialsRequested ? 25 : 0;
-  const total = base + matFee;
-  document.getElementById('prTotal').textContent = `$${total}`;
-  document.getElementById('reviewTotal').textContent = `$${total}`;
+  const { ivaCents, totalCents } = computeAmounts();
+  state.totalCents = totalCents;
+  const baseEl   = document.getElementById('prBase');
+  const labelEl  = document.getElementById('prBaseLabel');
+  const baseCents = currentBaseCents();
+  if (baseEl)  baseEl.textContent  = `$${(baseCents / 100).toFixed(2)}`;
+  if (labelEl) {
+    const tierName = (TIERS[state.tier] || TIERS.express).label;
+    labelEl.textContent = state.tier === 'express'
+      ? 'Servicio Express (hasta 3 tareas)'
+      : `Servicio ${tierName}`;
+  }
+  document.getElementById('prIva').textContent       = `$${(ivaCents   / 100).toFixed(2)}`;
+  document.getElementById('prTotal').textContent     = `$${(totalCents / 100).toFixed(2)}`;
+  document.getElementById('reviewTotal').textContent = `$${(totalCents / 100).toFixed(2)}`;
+  const helperRow = document.getElementById('prHelperRow');
+  if (helperRow) helperRow.style.display = state.helperRequested ? 'flex' : 'none';
 }
 
 // ── Navigation ────────────────────────────────────────────────
@@ -2805,16 +3565,19 @@ function nextStep(from) {
   // When the customer crosses 4 -> 5, we've collected enough info
   // (email + phone + name + tasks + slot) to re-engage if they bail
   // on the review step. Fire-and-forget — failure is invisible.
-  if (from === 4) trackPartial('step4_to_5');
+  // Contact step (3) → review (4): we have enough info to re-engage if
+  // they bail on review. Fire-and-forget.
+  if (from === 3) trackPartial('contact_to_review');
 }
 
-// Also fires as the customer is FILLING step 4 (debounced 1.5s after
-// they stop typing) — catches anyone who bails mid-step-4 without
-// clicking Revisar. The track-partial endpoint upserts on email so
-// multiple fires from the same person just overwrite the latest data.
+// Also fires as the customer is FILLING the contact step (3),
+// debounced 1.5s after they stop typing — catches anyone who bails
+// mid-contact without clicking Revisar. The track-partial endpoint
+// upserts on email so multiple fires from the same person just
+// overwrite the latest data.
 let _partialFireTimer = null;
-function maybeFirePartialOnStep4Edit() {
-  if (state.step !== 4) return;
+function maybeFirePartialOnContactEdit() {
+  if (state.step !== 3) return;
   const name  = document.getElementById('fName')?.value.trim()     || '';
   const last  = document.getElementById('fLastName')?.value.trim() || '';
   const phone = document.getElementById('fPhone')?.value.trim()    || '';
@@ -2829,22 +3592,21 @@ function maybeFirePartialOnStep4Edit() {
   state.customerEmail = email;
   if (addr) state.address = addr;
   if (_partialFireTimer) clearTimeout(_partialFireTimer);
-  _partialFireTimer = setTimeout(() => trackPartial('step4_idle'), 1500);
+  _partialFireTimer = setTimeout(() => trackPartial('contact_idle'), 1500);
 }
 
-function wireStep4PartialListeners() {
+function wireContactPartialListeners() {
   ['fName', 'fLastName', 'fPhone', 'fEmail', 'fAddress'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('input', maybeFirePartialOnStep4Edit);
-    el.addEventListener('blur',  maybeFirePartialOnStep4Edit);
+    el.addEventListener('input', maybeFirePartialOnContactEdit);
+    el.addEventListener('blur',  maybeFirePartialOnContactEdit);
   });
 }
 
 function trackPartial(reason) {
   if (!state.customerEmail || !state.customerEmail.includes('@')) return;
-  const base  = 17500;
-  const total = state.materialsRequested ? base + 2500 : base;
+  const { totalCents: total } = computeAmounts();
   const payload = {
     customer_name:       state.customerName,
     customer_phone:      state.customerPhone,
@@ -2852,12 +3614,14 @@ function trackPartial(reason) {
     address:             state.address,
     task_1:              state.selectedTasks[0] || null,
     task_2:              state.selectedTasks[1] || null,
+    task_3:              state.selectedTasks[2] || null,
     booking_date:        state.selectedDate?.label || null,
     booking_date_iso:    state.selectedDate?.iso   || null,
     booking_time:        state.selectedTime,
     payment_method:      state.paymentMethod,
     materials_requested: state.materialsRequested,
     materials_detail:    state.materialsDetail || null,
+    helper_requested:    state.helperRequested,
     total_amount:        total,
   };
   // fetch with keepalive (~64KB max, plenty for our payload) is more
@@ -2888,12 +3652,13 @@ function showStep(n) {
     p.classList.toggle('visible', i + 1 === n);
   });
 
-  // Lazy-load Google Places once the customer reaches the address field.
-  if (n === 4) initPlacesIfNeeded();
+  if (n === 2) renderStep2ForTier();
+  if (n === 3) { initPlacesIfNeeded(); updatePrice(); }
+  if (n === 4) updatePrice();
 
   // Fire GA4 + Meta events per step so we can build a real funnel
   // and see exactly where visitors drop off.
-  const stepNames = { 1: 'intro', 2: 'tasks', 3: 'datetime', 4: 'contact', 5: 'review' };
+  const stepNames = { 1: 'tasks', 2: 'datetime', 3: 'contact', 4: 'review' };
   if (typeof gtag === 'function') {
     gtag('event', 'express_step_' + n, {
       step_number: n,
@@ -2910,13 +3675,13 @@ function showStep(n) {
   document.getElementById('progressTitle').textContent = STEP_TITLES[n];
   document.getElementById('stepBackBtn').classList.toggle('hidden', n === 1);
 
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 4; i++) {
     const el = document.getElementById(`pstep${i}`);
     el.classList.toggle('active', i === n);
     el.classList.toggle('done', i < n);
   }
 
-  if (n === 5) buildReview();
+  if (n === 4) buildReview();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -2925,23 +3690,30 @@ function showStep(n) {
 function validateStep(n) {
   hideErr(n);
   if (n === 1) {
-    return true; // intro / pricing - nothing to validate
-  }
-  if (n === 2) {
-    if (state.selectedTasks.length < 2) { showErr(2, 'Por favor selecciona 2 tareas para continuar.'); return false; }
+    // Proyecto skips the tasks-required check — the evaluation visit
+    // is the product, not a list of pre-declared jobs.
+    if (state.tier !== 'proyecto' && state.selectedTasks.length < 1) {
+      showErr(1, 'Por favor selecciona al menos una tarea para continuar.');
+      return false;
+    }
     if (state.selectedTasks.includes(OTHER_TOKEN) && !document.getElementById('otherInput').value.trim()) {
-      showErr(2, 'Por favor describe la tarea adicional.'); return false;
+      showErr(1, 'Por favor describe la tarea adicional.');
+      return false;
     }
     if (state.selectedTasks.includes(OTHER_TOKEN)) {
       const idx = state.selectedTasks.indexOf(OTHER_TOKEN);
       state.selectedTasks[idx] = document.getElementById('otherInput').value.trim();
     }
   }
-  if (n === 3) {
-    if (!state.selectedDate) { showErr(3, 'Por favor selecciona una fecha.'); return false; }
-    if (!state.selectedTime) { showErr(3, 'Por favor selecciona una hora.'); return false; }
+  if (n === 2) {
+    if (!state.selectedDate) { showErr(2, 'Por favor selecciona una fecha.'); return false; }
+    // Día-completo and evaluación visits don't pick a starting hour —
+    // the handyman arrives at 8 AM. Only Express requires a slot.
+    if (state.tier === 'express' && !state.selectedTime) {
+      showErr(2, 'Por favor selecciona una hora.'); return false;
+    }
   }
-  if (n === 4) {
+  if (n === 3) {
     const name  = document.getElementById('fName').value.trim();
     const last  = document.getElementById('fLastName').value.trim();
     const phone = document.getElementById('fPhone').value.trim();
@@ -2949,11 +3721,11 @@ function validateStep(n) {
     const addr  = document.getElementById('fAddress').value.trim();
     const pay   = state.paymentMethod;
 
-    if (!name)  { showErr(4, 'Por favor ingresa tu nombre.'); return false; }
-    if (!phone) { showErr(4, 'Por favor ingresa tu teléfono.'); return false; }
-    if (!email || !email.includes('@')) { showErr(4, 'Por favor ingresa un correo electrónico válido.'); return false; }
-    if (!addr)  { showErr(4, 'Por favor ingresa la dirección del servicio.'); return false; }
-    if (!pay)   { showErr(4, 'Por favor selecciona un método de pago.'); return false; }
+    if (!name)  { showErr(3, 'Por favor ingresa tu nombre.'); return false; }
+    if (!phone) { showErr(3, 'Por favor ingresa tu teléfono.'); return false; }
+    if (!email || !email.includes('@')) { showErr(3, 'Por favor ingresa un correo electrónico válido.'); return false; }
+    if (!addr)  { showErr(3, 'Por favor ingresa la dirección del servicio.'); return false; }
+    if (!pay)   { showErr(3, 'Por favor selecciona un método de pago.'); return false; }
 
     state.customerName  = `${name} ${last}`.trim();
     state.customerPhone = phone;
@@ -2979,15 +3751,17 @@ function buildReview() {
   const matLabel = state.materialsRequested
     ? `Sí — Domo las consigue${state.materialsDetail ? ': ' + state.materialsDetail : ''}`
     : 'No';
+  const helperLabel = state.helperRequested ? 'Sí (+$200)' : 'No';
 
   const rows = [
-    ['Tareas',     `${state.selectedTasks[0]}<br>${state.selectedTasks[1]}`,         2],
-    ['Fecha',      state.selectedDate?.label || '',                                    3],
-    ['Hora',       slotRangeLabel(state.selectedTime),                                 3],
-    ['Dirección',  state.address,                                                      4],
-    ['Contacto',   `${state.customerName}<br>${state.customerPhone}<br>${state.customerEmail}`, 4],
-    ['Pago',       payLabel + ' — después del servicio',                               4],
-    ['Materiales', matLabel,                                                           4],
+    ['Tareas',     state.selectedTasks.filter(Boolean).join('<br>'),                   1],
+    ['Fecha',      state.selectedDate?.label || '',                                    2],
+    ['Hora',       slotRangeLabel(state.selectedTime),                                 2],
+    ['Dirección',  state.address,                                                      3],
+    ['Contacto',   `${state.customerName}<br>${state.customerPhone}<br>${state.customerEmail}`, 3],
+    ['Pago',       payLabel + ' — después del servicio',                               3],
+    ['Materiales', matLabel,                                                           3],
+    ['Ayudante',   helperLabel,                                                        3],
   ];
 
   const tbody = document.getElementById('reviewTable');
@@ -3005,15 +3779,14 @@ function buildReview() {
 // ── Submit ────────────────────────────────────────────────────
 async function submitBooking() {
   if (!document.getElementById('termsAccept').checked) {
-    showErr(5, 'Por favor acepta los términos y la política de cancelación antes de continuar.');
+    showErr(4, 'Por favor acepta los términos y la política de cancelación antes de continuar.');
     return;
   }
 
   document.getElementById('loadingOverlay').classList.add('visible');
   document.getElementById('btnSubmit').disabled = true;
 
-  const base  = 17500;
-  const total = state.materialsRequested ? base + 2500 : base;
+  const { totalCents: total } = computeAmounts();
 
   const payload = {
     customer_name:       state.customerName,
@@ -3021,13 +3794,15 @@ async function submitBooking() {
     customer_email:      state.customerEmail,
     address:             state.address,
     task_1:              state.selectedTasks[0],
-    task_2:              state.selectedTasks[1],
+    task_2:              state.selectedTasks[1] || null,
+    task_3:              state.selectedTasks[2] || null,
     booking_date:        state.selectedDate?.label,
     booking_date_iso:    state.selectedDate?.iso,
     booking_time:        state.selectedTime,
     payment_method:      state.paymentMethod,
     materials_requested: state.materialsRequested,
     materials_detail:    state.materialsDetail || null,
+    helper_requested:    state.helperRequested,
     total_amount:        total,
   };
 
@@ -3082,8 +3857,8 @@ async function submitBooking() {
       document.getElementById('btnSubmit').disabled = false;
       state.selectedTime = null;
       await loadAvailability();
-      showStep(3);
-      showErr(3, data.error);
+      showStep(2);
+      showErr(2, data.error);
       return;
     }
 
@@ -3177,18 +3952,19 @@ async function submitBooking() {
   } catch (err) {
     document.getElementById('loadingOverlay').classList.remove('visible');
     document.getElementById('btnSubmit').disabled = false;
-    showErr(5, `No pudimos procesar tu reservación: ${err.message}. Por favor intenta de nuevo o llama al (787) 419-0300.`);
+    showErr(4, `No pudimos procesar tu reservación: ${err.message}. Por favor intenta de nuevo o llama al (787) 419-0300.`);
   }
 }
 
 // ── Reset ─────────────────────────────────────────────────────
 function resetForm() {
   Object.assign(state, {
-    step: 1, selectedTasks: [], otherTask: '',
+    step: 1, selectedTasks: [], otherTask: '', wantsEvaluation: false,
     selectedDate: null, selectedTime: null,
     customerName: '', customerPhone: '', customerEmail: '',
     address: '', paymentMethod: null,
     materialsRequested: false, materialsDetail: '',
+    helperRequested: false,
   });
   // Reset the URL fingerprint back to root so a "Hacer otra reservación"
   // session starts clean (and analytics doesn't re-count it).
@@ -3196,6 +3972,7 @@ function resetForm() {
   document.getElementById('confirmCard').style.display = 'none';
   document.getElementById('bookingCard').style.display = 'block';
   renderTaskGrid();
+  renderRecommendation();
   clearTaskSearch();
   // Re-fetch availability in case it changed while the user was on the confirmation screen.
   loadAvailability();
