@@ -759,6 +759,31 @@
       margin-bottom: 18px;
     }
     .task-empty strong { color: var(--navy); }
+
+    .task-popular { margin-bottom: 8px; }
+    .task-toggle-all {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 12px 14px;
+      margin: 4px 0 18px;
+      background: var(--bluelt);
+      color: var(--navy);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .task-toggle-all:hover { background: #e6edf7; }
+    .task-toggle-all .task-toggle-caret {
+      font-size: 13px;
+      transition: transform .2s;
+    }
+    .task-toggle-all[aria-expanded="true"] .task-toggle-caret { transform: rotate(180deg); }
+
     .btn-task-empty {
       margin-top: 10px;
       padding: 10px 16px;
@@ -1572,7 +1597,17 @@
         <button type="button" class="task-search-clear" id="taskSearchClear" onclick="clearTaskSearch()" aria-label="Limpiar búsqueda">×</button>
       </div>
 
-      <div id="taskGrid"><!-- populated by JS as categorized chips --></div>
+      <div class="task-popular" id="taskPopular">
+        <h3 class="task-cat-title">Más populares</h3>
+        <div class="task-cat-chips" id="taskPopularChips"><!-- populated by JS --></div>
+      </div>
+
+      <button type="button" class="task-toggle-all" id="taskToggleAll" onclick="toggleAllCategories()" aria-expanded="false">
+        <span class="task-toggle-label">Ver todas las tareas</span>
+        <span class="task-toggle-caret">↓</span>
+      </button>
+
+      <div id="taskGrid" style="display:none;"><!-- populated by JS as categorized chips --></div>
 
       <div class="task-empty" id="taskEmpty" style="display:none;">
         <p>No encontramos tareas con ese término.</p>
@@ -2353,10 +2388,16 @@ const TASK_CATEGORIES = [
     name: 'Montaje y colgado',
     items: [
       'Montaje de TV',
+      'Montaje de TV con brazo articulado',
       'Instalar tablillas (hasta 2)',
+      'Instalar tablillas flotantes (hasta 3)',
       'Colgar espejos o cuadros (hasta 3)',
+      'Colgar espejo grande o pesado',
       'Instalar barra de cortinas (1 ventana)',
+      'Instalar barras de cortinas (hasta 3 ventanas)',
       'Accesorios de baño: toallero, gancho (hasta 3)',
+      'Instalar repisa o esquinero de ducha',
+      'Instalar organizador o pizarrón de pared',
     ],
   },
   {
@@ -2364,19 +2405,31 @@ const TASK_CATEGORIES = [
     items: [
       'Cambio de pluma o mezcladora (cocina o baño)',
       'Cambio de cabezal de ducha',
-      'Reparar válvula de inodoro',
       'Cambio de asiento de inodoro',
+      'Reparar válvula de inodoro',
+      'Reparar fuga de inodoro (base)',
       'Cambio o instalación de lavamanos',
+      'Instalar inodoro nuevo',
       'Reparar fuga bajo el fregadero',
+      'Cambiar trampa P bajo el fregadero',
+      'Destapar drenaje (fregadero o ducha)',
+      'Instalar filtro de agua bajo el fregadero',
+      'Instalar bidet eléctrico o manual',
     ],
   },
   {
     name: 'Eléctrico menor (sin panel)',
     items: [
       'Reemplazar toma o interruptor (hasta 3)',
+      'Instalar toma USB o GFCI (hasta 2)',
       'Cambio de luminaria (caja existente)',
-      'Instalar abanico de techo',
+      'Cambiar abanico de techo existente',
+      'Instalar abanico de techo nuevo',
       'Instalar dimmer (hasta 2)',
+      'Instalar luz LED bajo gabinete',
+      'Instalar timbre con cableado existente',
+      'Instalar detectores de humo o CO (hasta 3)',
+      'Diagnosticar toma o interruptor sin corriente',
     ],
   },
   {
@@ -2384,14 +2437,23 @@ const TASK_CATEGORIES = [
     items: [
       'Ajuste de bisagra o alineación de puerta',
       'Cambio de cerradura, pomo o manilla',
-      'Instalar cerrojo',
+      'Instalar cerrojo (deadbolt)',
+      'Instalar mirilla (peephole)',
       'Instalar burlete o door sweep',
+      'Reparar marco de puerta',
+      'Instalar o reparar mosquitero',
+      'Lubricar y ajustar ventanas corredizas',
     ],
   },
   {
     name: 'Ensamblaje de muebles',
     items: [
-      'Armar mueble flat-pack',
+      'Armar mueble flat-pack pequeño',
+      'Armar mueble flat-pack mediano',
+      'Armar cama o litera',
+      'Armar escritorio o vestidor',
+      'Armar estante o librero alto',
+      'Anclar mueble alto a la pared (anti-vuelco)',
       'Desarmar mueble flat-pack',
     ],
   },
@@ -2400,12 +2462,32 @@ const TASK_CATEGORIES = [
     items: [
       'Parchar hoyo en pared (hasta 3)',
       'Caulking / sellado (1 área)',
+      'Resellar bañera o ducha',
       'Ajustar bisagra de gabinete (hasta 4)',
+      'Apretar o nivelar gabinete o tope',
       'Instalar barra de apoyo (1–2)',
+      'Pintura de retoque (hasta 1 m²)',
+      'Reparar mosaico suelto (hasta 2 piezas)',
+      'Reparar zócalo o moldura',
+      'Sellar grieta en pared exterior',
     ],
   },
 ];
 const OTHER_TOKEN = '__other__';
+
+// Curated "popular" shortlist — what we show at the top of step 1
+// before the customer expands the full categorized catalog. Order
+// matters; this is the strip the customer sees first.
+const POPULAR_TASKS = [
+  'Montaje de TV',
+  'Cambio de pluma o mezcladora (cocina o baño)',
+  'Cambio de asiento de inodoro',
+  'Armar mueble flat-pack mediano',
+  'Colgar espejos o cuadros (hasta 3)',
+  'Instalar abanico de techo nuevo',
+  'Accesorios de baño: toallero, gancho (hasta 3)',
+  'Parchar hoyo en pared (hasta 3)',
+];
 
 // ── Tier configuration ─────────────────────────────────────────
 // The 4 Domo products. Express + Básico + Completo are productized
@@ -2434,8 +2516,16 @@ const TIER_ORDER = ['express', 'basico', 'completo'];
 //     handyman has to bring the right blade-locking tool. Excluded
 //     from Express.
 const TASK_TIER_OVERRIDES = {
-  'Reparar fuga bajo el fregadero': ['basico', 'completo'],
-  'Instalar abanico de techo':      ['basico', 'completo'],
+  // Plumbing diagnostics / multi-step jobs that don't fit a 2.5h slot.
+  'Reparar fuga bajo el fregadero':         ['basico', 'completo'],
+  'Instalar inodoro nuevo':                 ['basico', 'completo'],
+  // Ceiling-fan and new electrical installs eat most of a half-day.
+  'Instalar abanico de techo nuevo':        ['basico', 'completo'],
+  // Bigger furniture builds: bed/desk/full bookcase typically run long.
+  'Armar cama o litera':                    ['basico', 'completo'],
+  'Armar escritorio o vestidor':            ['basico', 'completo'],
+  // Repairs that scope on-site (size and substrate vary widely).
+  'Sellar grieta en pared exterior':        ['basico', 'completo'],
 };
 
 // Estimated handyman minutes per task. Drives the hour-budget routing
@@ -2445,36 +2535,69 @@ const TASK_TIER_OVERRIDES = {
 // Draft v1 — review and adjust:
 const TASK_DURATION_MIN = {
   // Montaje y colgado
-  'Montaje de TV':                              45,
-  'Instalar tablillas (hasta 2)':               45,
-  'Colgar espejos o cuadros (hasta 3)':         30,
-  'Instalar barra de cortinas (1 ventana)':     30,
-  'Accesorios de baño: toallero, gancho (hasta 3)': 30,
+  'Montaje de TV':                                    45,
+  'Montaje de TV con brazo articulado':               60,
+  'Instalar tablillas (hasta 2)':                     45,
+  'Instalar tablillas flotantes (hasta 3)':           60,
+  'Colgar espejos o cuadros (hasta 3)':               30,
+  'Colgar espejo grande o pesado':                    45,
+  'Instalar barra de cortinas (1 ventana)':           30,
+  'Instalar barras de cortinas (hasta 3 ventanas)':   60,
+  'Accesorios de baño: toallero, gancho (hasta 3)':   30,
+  'Instalar repisa o esquinero de ducha':             30,
+  'Instalar organizador o pizarrón de pared':         30,
   // Plomería menor
-  'Cambio de pluma o mezcladora (cocina o baño)': 45,
-  'Cambio de cabezal de ducha':                 15,
-  'Reparar válvula de inodoro':                 45,
-  'Cambio de asiento de inodoro':               20,
-  'Cambio o instalación de lavamanos':          90,
-  'Reparar fuga bajo el fregadero':             90,
+  'Cambio de pluma o mezcladora (cocina o baño)':     45,
+  'Cambio de cabezal de ducha':                       15,
+  'Cambio de asiento de inodoro':                     20,
+  'Reparar válvula de inodoro':                       45,
+  'Reparar fuga de inodoro (base)':                   60,
+  'Cambio o instalación de lavamanos':                90,
+  'Instalar inodoro nuevo':                           120,
+  'Reparar fuga bajo el fregadero':                   90,
+  'Cambiar trampa P bajo el fregadero':               45,
+  'Destapar drenaje (fregadero o ducha)':             30,
+  'Instalar filtro de agua bajo el fregadero':        60,
+  'Instalar bidet eléctrico o manual':                60,
   // Eléctrico menor (sin panel)
-  'Reemplazar toma o interruptor (hasta 3)':    60,
-  'Cambio de luminaria (caja existente)':       30,
-  'Instalar abanico de techo':                  120,
-  'Instalar dimmer (hasta 2)':                  40,
+  'Reemplazar toma o interruptor (hasta 3)':          60,
+  'Instalar toma USB o GFCI (hasta 2)':               45,
+  'Cambio de luminaria (caja existente)':             30,
+  'Cambiar abanico de techo existente':               75,
+  'Instalar abanico de techo nuevo':                  120,
+  'Instalar dimmer (hasta 2)':                        40,
+  'Instalar luz LED bajo gabinete':                   60,
+  'Instalar timbre con cableado existente':           45,
+  'Instalar detectores de humo o CO (hasta 3)':       30,
+  'Diagnosticar toma o interruptor sin corriente':    60,
   // Puertas y ventanas
-  'Ajuste de bisagra o alineación de puerta':   30,
-  'Cambio de cerradura, pomo o manilla':        30,
-  'Instalar cerrojo':                           45,
-  'Instalar burlete o door sweep':              30,
+  'Ajuste de bisagra o alineación de puerta':         30,
+  'Cambio de cerradura, pomo o manilla':              30,
+  'Instalar cerrojo (deadbolt)':                      45,
+  'Instalar mirilla (peephole)':                      30,
+  'Instalar burlete o door sweep':                    30,
+  'Reparar marco de puerta':                          60,
+  'Instalar o reparar mosquitero':                    45,
+  'Lubricar y ajustar ventanas corredizas':           30,
   // Ensamblaje de muebles
-  'Armar mueble flat-pack':                     90,
-  'Desarmar mueble flat-pack':                  45,
+  'Armar mueble flat-pack pequeño':                   60,
+  'Armar mueble flat-pack mediano':                   90,
+  'Armar cama o litera':                              120,
+  'Armar escritorio o vestidor':                      120,
+  'Armar estante o librero alto':                     75,
+  'Anclar mueble alto a la pared (anti-vuelco)':      30,
+  'Desarmar mueble flat-pack':                        45,
   // Reparaciones menores
-  'Parchar hoyo en pared (hasta 3)':            45,
-  'Caulking / sellado (1 área)':                30,
-  'Ajustar bisagra de gabinete (hasta 4)':      30,
-  'Instalar barra de apoyo (1–2)':              45,
+  'Parchar hoyo en pared (hasta 3)':                  45,
+  'Caulking / sellado (1 área)':                      30,
+  'Resellar bañera o ducha':                          60,
+  'Ajustar bisagra de gabinete (hasta 4)':            30,
+  'Apretar o nivelar gabinete o tope':                45,
+  'Instalar barra de apoyo (1–2)':                    45,
+  'Pintura de retoque (hasta 1 m²)':                  60,
+  'Reparar mosaico suelto (hasta 2 piezas)':          60,
+  'Reparar zócalo o moldura':                         45,
+  'Sellar grieta en pared exterior':                  60,
 };
 const DEFAULT_DURATION_MIN = 60;
 // Effective task minutes per Básico day (8 h minus setup/lunch/cleanup).
@@ -2675,7 +2798,26 @@ function startReviewsRotation(total) {
   }
 }
 
+function makeTaskChip(label) {
+  const chip = document.createElement('div');
+  chip.className = 'task-chip';
+  chip.dataset.task = label;
+  chip.textContent = label;
+  if (state.selectedTasks.includes(label)) chip.classList.add('selected');
+  chip.onclick = () => toggleTask(chip, label);
+  return chip;
+}
+
 function renderTaskGrid() {
+  // Popular shortlist sits above the full catalog so first-time users
+  // can pick common jobs in one click. Same chips can also appear in
+  // the full grid; toggleTask keeps selection state synced across both.
+  const popular = document.getElementById('taskPopularChips');
+  if (popular) {
+    popular.innerHTML = '';
+    POPULAR_TASKS.forEach(label => popular.appendChild(makeTaskChip(label)));
+  }
+
   const grid = document.getElementById('taskGrid');
   grid.innerHTML = '';
   TASK_CATEGORIES.forEach(cat => {
@@ -2690,14 +2832,7 @@ function renderTaskGrid() {
     const chips = document.createElement('div');
     chips.className = 'task-cat-chips';
 
-    cat.items.forEach(label => {
-      const chip = document.createElement('div');
-      chip.className = 'task-chip';
-      chip.dataset.task = label;
-      chip.textContent = label;
-      chip.onclick = () => toggleTask(chip, label);
-      chips.appendChild(chip);
-    });
+    cat.items.forEach(label => chips.appendChild(makeTaskChip(label)));
 
     // One "Otro..." chip per category, all sharing the same OTHER_TOKEN
     const other = document.createElement('div');
@@ -2712,6 +2847,22 @@ function renderTaskGrid() {
   });
 }
 
+// Expand/collapse the full categorized catalog. The popular strip stays
+// visible either way. Search auto-expands the grid because users
+// searching are explicitly hunting beyond the popular shortlist.
+function toggleAllCategories(forceOpen) {
+  const btn  = document.getElementById('taskToggleAll');
+  const grid = document.getElementById('taskGrid');
+  if (!btn || !grid) return;
+  const wantOpen = forceOpen != null
+    ? !!forceOpen
+    : btn.getAttribute('aria-expanded') !== 'true';
+  btn.setAttribute('aria-expanded', wantOpen ? 'true' : 'false');
+  grid.style.display = wantOpen ? '' : 'none';
+  btn.querySelector('.task-toggle-label').textContent =
+    wantOpen ? 'Ocultar catálogo completo' : 'Ver todas las tareas';
+}
+
 // Live-filter the task chips on step 2 as the user types.
 // Hides chips whose label doesn't contain the query (accent-insensitive),
 // hides empty categories, and surfaces the "Otra tarea" hint when
@@ -2721,13 +2872,21 @@ function filterTasks() {
   const q = (input.value || '').trim().toLowerCase();
   document.getElementById('taskSearchClear').classList.toggle('active', !!q);
 
-  const grid  = document.getElementById('taskGrid');
-  const empty = document.getElementById('taskEmpty');
+  const grid    = document.getElementById('taskGrid');
+  const empty   = document.getElementById('taskEmpty');
+  const popular = document.getElementById('taskPopular');
+
+  // Searching = the customer wants the full catalog. Auto-expand it
+  // and hide the curated popular strip so results don't compete.
+  if (q) toggleAllCategories(true);
+  if (popular) popular.style.display = q ? 'none' : '';
 
   if (!q) {
     grid.querySelectorAll('.task-chip').forEach(c => c.style.display = '');
     grid.querySelectorAll('.task-category').forEach(c => c.style.display = '');
     empty.style.display = 'none';
+    // Collapse the catalog back to its default closed state when search clears.
+    toggleAllCategories(false);
     return;
   }
 
@@ -2956,6 +3115,14 @@ function renderTimeGrid(iso) {
 // "Otro…" chips appear in each category but all share the OTHER_TOKEN.
 // Selecting any "Otro…" toggles the singleton other-task slot and reveals
 // the shared description input.
+// Update every chip with the given data-task value so the popular
+// strip and the full categorized grid stay in sync when the same task
+// appears in both.
+function setChipsSelected(taskLabel, selected) {
+  document.querySelectorAll(`.task-chip[data-task="${CSS.escape(taskLabel)}"]`)
+    .forEach(c => c.classList.toggle('selected', selected));
+}
+
 function toggleTask(el, taskLabel) {
   const isOther = taskLabel === OTHER_TOKEN;
   const isSelected = el.classList.contains('selected');
@@ -2963,25 +3130,23 @@ function toggleTask(el, taskLabel) {
   const otherInput = document.getElementById('otherInput');
 
   if (isSelected) {
-    el.classList.remove('selected');
     if (isOther) {
-      // Deselect every "Otro…" chip across all categories
       document.querySelectorAll('.task-other-chip').forEach(c => c.classList.remove('selected'));
       state.selectedTasks = state.selectedTasks.filter(t => t !== OTHER_TOKEN);
       otherWrap.style.display = 'none';
     } else {
+      setChipsSelected(taskLabel, false);
       state.selectedTasks = state.selectedTasks.filter(t => t !== taskLabel);
     }
   } else {
     if (isOther) {
-      // Mark this Otro selected; remove any previously selected Otro chip
       document.querySelectorAll('.task-other-chip.selected').forEach(c => c.classList.remove('selected'));
       el.classList.add('selected');
       if (!state.selectedTasks.includes(OTHER_TOKEN)) state.selectedTasks.push(OTHER_TOKEN);
       otherWrap.style.display = 'block';
       otherInput.focus();
     } else {
-      el.classList.add('selected');
+      setChipsSelected(taskLabel, true);
       state.selectedTasks.push(taskLabel);
     }
   }
