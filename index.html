@@ -2382,6 +2382,17 @@ let stripeInstance = null;
 let cardElement    = null;
 let stripeReady    = false;
 
+// PR IVU is 11.5% (10.5% Hacienda + 1% municipal). Customer pays IVU
+// on top of the base + materials gestión fee. We compute in cents to
+// avoid float drift and keep the on-screen total in lock-step with
+// the cents value posted to track-partial and book.js. Declared up
+// here (above the init IIFE) so pricing helpers below never hit the
+// Temporal Dead Zone if a code path invokes them during init.
+const IVU_RATE         = 0.115;
+const BASE_CENTS       = 17500;
+const MAT_FEE_CENTS    = 2500;
+const HELPER_FEE_CENTS = 20000;
+
 // ── Task menu (per Product Brief, Section 4) ──────────────────
 const TASK_CATEGORIES = [
   {
@@ -3210,15 +3221,6 @@ function initSelectedPillsHandler() {
 // for Básico / Completo / Proyecto.
 const EXTERNAL_BOOKNOW_URL = 'https://domoyourhome.com/booknow';
 
-// PR IVU is 11.5% (10.5% Hacienda + 1% municipal). Customer pays IVU
-// on top of the base + materials gestión fee. We compute in cents to
-// avoid float drift and keep the on-screen total in lock-step with
-// the cents value posted to track-partial and book.js.
-const IVU_RATE         = 0.115;
-const BASE_CENTS       = 17500;
-const MAT_FEE_CENTS    = 2500;
-const HELPER_FEE_CENTS = 20000;
-
 function ivuTotalCents(baseCents) {
   return baseCents + Math.round(baseCents * IVU_RATE);
 }
@@ -3245,12 +3247,6 @@ function recReasonText(tier, reason, taskCount, daysEstimated) {
 function renderRecommendation() {
   const card = document.getElementById('recCard');
   if (!card) return;
-  const tasks = state.selectedTasks.filter(t => t && t !== OTHER_TOKEN);
-  const opts = { wantsEvaluation: state.wantsEvaluation };
-  const { tier, reason, isMultiDay, daysEstimated } = routeTier(state.selectedTasks, opts);
-  const cfg = TIERS[tier];
-  const totalCents = ivuTotalCents(cfg.baseCents);
-  const reasonText = recReasonText(tier, reason, state.selectedTasks.length, daysEstimated);
 
   // Keep the evaluation-link label in sync with the toggle state.
   const evalBtn = document.getElementById('recEvalBtn');
@@ -3263,6 +3259,12 @@ function renderRecommendation() {
   // Empty cart + no evaluation mode → blank/hint card (no premature
   // tier commitment). "Otro…" with a typed description counts as a task
   // so users with custom requests can still proceed.
+  //
+  // This branch runs FIRST during init so we never invoke the pricing
+  // helpers (which read pricing consts declared further down the file)
+  // before those constants exit the Temporal Dead Zone — the init IIFE
+  // throwing here would leave them uninitialized for the page's life.
+  const tasks = state.selectedTasks.filter(t => t && t !== OTHER_TOKEN);
   const hasOtherWithDesc = state.selectedTasks.includes(OTHER_TOKEN) && (state.otherTask || '').trim();
   if (tasks.length === 0 && !state.wantsEvaluation && !hasOtherWithDesc) {
     card.className = 'rec-card rec-card-empty';
@@ -3272,6 +3274,12 @@ function renderRecommendation() {
       </div>`;
     return;
   }
+
+  const opts = { wantsEvaluation: state.wantsEvaluation };
+  const { tier, reason, isMultiDay, daysEstimated } = routeTier(state.selectedTasks, opts);
+  const cfg = TIERS[tier];
+  const totalCents = ivuTotalCents(cfg.baseCents);
+  const reasonText = recReasonText(tier, reason, state.selectedTasks.length, daysEstimated);
 
   const isExpress = tier === 'express';
   const ctaHtml = isExpress
